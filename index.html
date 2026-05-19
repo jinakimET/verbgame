@@ -145,7 +145,12 @@
         {r: "let", p: "let", pp: "let", opts: ["letted", "let / let", "let / letten", "lat / let"], answer: "let / let"}
     ];
 
-    const emojiPool = ["🐻", "🐱", "🐹", "🦝", "🐰", "🦫", "🐯", "🦁", "🐶", "⚡", "😈", "🦉", "🍳", "🔥", "TURTLE", "🐧"];
+    // 🚨 수정한 스펙 반영: 깨진 이미지 수정한 최종 16종 올스타 이모지 구성 풀
+    const emojiPool = [
+        "🐻", "🐱", "🐹", "🦝", "🐰", "🦫", "🐯", "🦁", // 1층 8명
+        "🐶", "⚡", "😈", "🦉", "🍳", "🔥", "🐢", "🐧"  // 2층 8명 (거북이 포함 수정 완료)
+    ];
+
     let curIdx = 0, score = 0, lives = 16, targetDeleteId = null, wrongVerbsList = [];
     let audioCtx = null;
 
@@ -327,7 +332,6 @@
         document.getElementById('feedback-overlay').style.display = 'flex';
     }
 
-    /* 하단 동일 통계 함수부 생략 최소 마크업 유지 */
     function closeFeedback() { document.getElementById('feedback-overlay').style.display = 'none'; curIdx++; renderQuiz(); }
     function generateWrongAnswersHTML() { if(wrongVerbsList.length === 0) return `<p style="color:#10b981; font-weight:bold; font-size:20px; margin:20px 0;">🎉 대박! 단 한 문제도 틀리지 않은 퍼펙트 마스터입니다!</p>`; let rows = ''; wrongVerbsList.forEach(v => rows += `<tr><td>${v.r}</td><td>${v.p}</td><td>${v.pp}</td></tr>`); return `<p style="color:#e11d48; font-weight:bold; margin-top:15px; font-size:18px;"><i class="fa-solid fa-book-open"></i> 오답 리포트 (${wrongVerbsList.length}개)</p><div class="summary-container"><table class="summary-table"><thead><tr><th>원형</th><th>과거형</th><th>과거분사형</th></tr></thead><tbody>${rows}</tbody></table></div>`; }
     function downloadVerbsList() { let text = "==================================================\n   [Verb Quest] 필수 불규칙 동사 25선 (객관식 편)\n==================================================\n\n원형(Base) \t 과거형(Past) \t 과거분사형(P.P)\n--------------------------------------------------\n"; verbs.forEach((v, idx) => text += `${idx + 1}. ${v.r} \t\t ${v.p} \t\t ${v.pp}\n`); const blob = new Blob([text], { type: "text/plain;charset=utf-8;" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "verbs_list_multiple_choice.txt"; link.click(); }
