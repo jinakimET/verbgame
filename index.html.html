@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>불규칙 동사 에볼루션 퀘스트 (Verb Evolution Quest)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* UI/UX 총괄 디자인 시스템 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background-color: #fef08a; 
+            font-family: 'Nanum Gothic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-board {
+            width: 100%;
+            max-width: 950px;
+            background: #ffffff;
+            border: 6px solid #1e293b;
+            border-radius: 40px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            position: relative;
+            text-align: center;
+        }
+
+        /* 프로그레스 바 */
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 2px solid #1e293b;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #fbbf24;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Jua', sans-serif;
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        /* 👥 🚨 [완벽 정정] 8개씩 2줄(총 16개)이 완전하게 꽉 차는 격자 그리드 스테이지 */
+        .squad-stage {
+            min-height: 260px;
+            background: #f8fafc;
+            border-radius: 30px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr); /* 무조건 가로 8열 격자 고정 */
+            gap: 12px;
+            margin: 0 auto 30px auto;
+            position: relative;
+            border: 4px dashed #1e293b;
+            padding: 25px 20px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        /* 이름표가 없이 깔끔한 캐릭터 그래픽 카드 UI */
+        .char-card {
+            width: 90px;
+            height: 95px;
+            background: #ffffff;
+            border: 3px solid #1e293b;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 0 #1e293b;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .char-avatar {
+            font-size: 54px;
+            line-height: 1;
+            user-select: none;
+            display: inline-block;
+        }
+
+        /* 정답 시 작동하는 좌우 쉐이크 댄스 애니메이션 */
+        .dance-active {
+            animation: shakeDance 0.6s ease-in-out infinite alternate;
+        }
+        .dance-active .char-avatar {
+            animation: handWave 0.3s ease-in-out infinite alternate;
+        }
+
+        @keyframes shakeDance {
+            0% { transform: translateY(0) rotate(-6deg); }
+            100% { transform: translateY(-15px) rotate(6deg); }
+        }
+        @keyframes handWave {
+            0% { transform: scale(1) skewX(-5deg); }
+            100% { transform: scale(1.1) skewX(5deg); }
+        }
+
+        /* 오답 시 캐릭터가 화면 전체로 거대하게 확대되며 페이드아웃 소멸하는 애니메이션 */
+        .destroy-active {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            width: 320px !important;
+            height: 340px !important;
+            margin-top: -170px !important;
+            margin-left: -160px !important;
+            z-index: 9999 !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            border: 8px solid #ef4444 !important;
+            border-radius: 32px !important;
+            animation: giantExplode 1.2s cubic-bezier(0.15, 0.85, 0.35, 1) forwards !important;
+            grid-column: span 1 !important;
+        }
+        .destroy-active .char-avatar {
+            font-size: 180px !important;
+        }
+
+        @keyframes giantExplode {
+            0% { transform: scale(0.2); opacity: 0; }
+            40% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 40px #ef4444); }
+            70% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(3.2); opacity: 0; visibility: hidden; }
+        }
+
+        /* 하단 라벨 정보 구역 */
+        .evo-tag-wrapper {
+            grid-column: span 8;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .evo-tag {
+            background: #1e293b;
+            color: white;
+            padding: 5px 25px;
+            border-radius: 20px;
+            font-family: 'Jua', sans-serif;
+            font-size: 18px;
+        }
+
+        /* 퀴즈 판넬 제어 */
+        .quiz-content-panel { display: none; }
+        .quiz-verb {
+            font-family: 'Comfortaa', cursive;
+            font-size: 64px;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        .quiz-instr {
+            color: #64748b;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        /* 객관식 레이아웃 */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .btn-opt {
+            background: #ffffff;
+            border: 3px solid #1e293b;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 #1e293b;
+        }
+        .btn-opt:hover {
+            background: #fef3c7;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #1e293b;
+        }
+        .btn-opt:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* 주관식 입력창 */
+        .typing-box {
+            width: 80%;
+            padding: 20px;
+            border: 4px solid #1e293b;
+            border-radius: 20px;
+            font-size: 26px;
+            text-align: center;
+            font-family: 'Comfortaa', cursive;
+            outline: none;
+        }
+
+        /* 오답 피드백 오버레이 창 */
+        .feedback-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 34px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border: 8px solid #ef4444;
+            padding: 40px;
+        }
+        .feedback-overlay h2 {
+            font-family: 'Jua', sans-serif;
+            font-size: 42px;
+            color: #ef4444;
+            margin-bottom: 10px;
+        }
+        .feedback-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: #fef2f2;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid #1e293b;
+        }
+        .feedback-table th {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            font-family: 'Jua', sans-serif;
+            font-size: 20px;
+            border-bottom: 3px solid #1e293b;
+        }
+        .feedback-table td {
+            padding: 25px;
+            font-size: 34px;
+            font-family: 'Comfortaa', cursive;
+            font-weight: bold;
+            text-align: center;
+            color: #ef4444;
+        }
+
+        .btn-next {
+            background: #ef4444;
+            color: white;
+            border: 3px solid #1e293b;
+            padding: 15px 50px;
+            font-size: 22px;
+            font-family: 'Jua', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #1e293b;
+        }
+
+        .btn-action {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 26px;
+            font-family: 'Jua', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+
+        .msg-pop {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 22px;
+            color: #10b981;
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-board">
+    <div class="progress-container"><div class="progress-fill" id="p-fill"></div></div>
+    <div class="stats-bar">
+        <span id="stat-q">QUEST: 1/50</span>
+        <div>
+            <span id="stat-s">SCORE: 0</span>
+        </div>
+    </div>
+
+    <div class="squad-stage" id="squad-stage">
+        <div class="evo-tag-wrapper">
+            <div class="evo-tag" id="evo-name">올스타 디펜스 스쿼드 (대기 중)</div>
+        </div>
+    </div>
+
+    <div id="quiz-content" class="quiz-content-panel">
+        <h2 class="quiz-verb" id="quiz-verb">GO</h2>
+        <p class="quiz-instr" id="quiz-instr">알맞은 과거형과 과거분사형 조합을 고르세요!</p>
+        
+        <div id="choice-ui" class="options-grid"></div>
+
+        <div id="typing-ui" style="display:none; margin-top: 25px;">
+            <input type="text" id="user-input" class="typing-box" placeholder="과거형  과거분사형 (예: saw seen)" autocomplete="off">
+            <p style="color:#94a3b8; font-size:14px; margin-top:10px;">단어 사이는 한 칸 띄어쓰기 해주세요!</p>
+        </div>
+        
+        <div class="msg-pop" id="msg-pop"></div>
+    </div>
+
+    <div class="feedback-overlay" id="feedback-overlay">
+        <h2><i class="fa-solid fa-heart-crack"></i> 멤버 한 명이 소멸했습니다!</h2>
+        <p style="font-size: 20px; color: #475569;">불규칙 동사 패턴을 확실하게 익히고 다음 방어전으로!</p>
+        <table class="feedback-table">
+            <thead>
+                <tr>
+                    <th>원형 (Base)</th>
+                    <th>과거형 (Past)</th>
+                    <th>과거분사형 (P.P)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="f-r" style="color: #64748b; font-family: 'Comfortaa';">go</td>
+                    <td id="f-p">went</td>
+                    <td id="f-pp">gone</td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn-next" onclick="closeFeedback()">확인했습니다! 다음 퀴즈 도전 <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+
+    <button id="start-btn" class="btn-action" onclick="startQuest()">QUEST START!</button>
+</div>
+
+<script>
+    // 중3 필수 불규칙 동사 무작위 혼합 배열형 50문항 전수 조사 데이터
+    const verbs = [
+        // [Stage 1] 객관식 25문항
+        {r: "say", p: "said", pp: "said", opts: ["sayed / sayed", "said / said", "said / sayen", "say / said"], answer: "said / said"},
+        {r: "make", p: "made", pp: "made", opts: ["made / made", "maked / maked", "make / made", "made / maken"], answer: "made / made"},
+        {r: "go", p: "went", pp: "gone", opts: ["went / went", "goed / gone", "went / gone", "gone / went"], answer: "went / gone"},
+        {r: "take", p: "took", pp: "taken", opts: ["took / took", "taked / taked", "take / taken", "took / taken"], answer: "took / taken"},
+        {r: "come", p: "came", pp: "come", opts: ["came / come", "come / came", "came / came", "comed / comed"], answer: "came / come"},
+        {r: "see", p: "saw", pp: "seen", opts: ["saw / seen", "seed / seed", "saw / saw", "seen / saw"], answer: "saw / seen"},
+        {r: "know", p: "knew", pp: "known", opts: ["knowed", "knew / knew", "known / knew", "knew / known"], answer: "knew / known"},
+        {r: "get", p: "got", pp: "got", opts: ["getted", "got / got", "got / gotten", "gat / got"], answer: "got / got"},
+        {r: "give", p: "gave", pp: "given", opts: ["gived", "gave / gave", "given / gave", "gave / given"], answer: "gave / given"},
+        {r: "find", p: "found", pp: "found", opts: ["found / found", "finded", "found / find", "find / found"], answer: "found / found"},
+        {r: "think", p: "thought", pp: "thought", opts: ["thinked", "thought / think", "thought / thought", "thoughted"], answer: "thought / thought"},
+        {r: "tell", p: "told", pp: "told", opts: ["telled", "tell / told", "tolden", "told / told"], answer: "told / told"},
+        {r: "become", p: "became", pp: "become", opts: ["becomed", "became / become", "became / became", "become / became"], answer: "became / become"},
+        {r: "show", p: "showed", pp: "shown", opts: ["showed / shown", "showed / showed", "shown / showed", "showed / showen"], answer: "showed / shown"},
+        {r: "leave", p: "left", pp: "left", opts: ["leaved", "left / leaved", "leave / left", "left / left"], answer: "left / left"},
+        {r: "feel", p: "felt", pp: "felt", opts: ["felt / felt", "feeled", "feel / felt", "felt / feelen"], answer: "felt / felt"},
+        {r: "put", p: "put", pp: "put", opts: ["put / put", "putted", "put / putten", "pat / put"], answer: "put / put"},
+        {r: "bring", p: "brought", pp: "brought", opts: ["bringed", "brought / brought", "broughten", "brang / brung"], answer: "brought / brought"},
+        {r: "begin", p: "began", pp: "begun", opts: ["began / began", "begun / began", "began / begun", "begined"], answer: "began / begun"},
+        {r: "keep", p: "kept", pp: "kept", opts: ["kept / kept", "keeped", "kept / keepen", "keep / kept"], answer: "kept / kept"},
+        {r: "hold", p: "held", pp: "held", opts: ["holded", "held / held", "held / holden", "hald / hold"], answer: "held / held"},
+        {r: "write", p: "wrote", pp: "written", opts: ["writed", "wrote / wrote", "wrote / written", "written / wrote"], answer: "wrote / written"},
+        {r: "stand", p: "stood", pp: "stood", opts: ["standed", "stood / stood", "stood / standen", "stand / stood"], answer: "stood / stood"},
+        {r: "hear", p: "heard", pp: "heard", opts: ["heared", "heard / heard", "heard / hearden", "hear / heard"], answer: "heard / heard"},
+        {r: "let", p: "let", pp: "let", opts: ["letted", "let / let", "let / letten", "lat / let"], answer: "let / let"},
+        
+        // [Stage 2] 주관식 서술형 25문항
+        {r: "mean", p: "meant", pp: "meant"}, {r: "set", p: "set", pp: "set"}, {r: "meet", p: "met", pp: "met"}, 
+        {r: "run", p: "ran", pp: "run"}, {r: "pay", p: "paid", pp: "paid"}, {r: "sit", p: "sat", pp: "sat"}, 
+        {r: "speak", p: "spoke", pp: "spoken"}, {r: "lie", p: "lay", pp: "lain"}, {r: "lead", p: "led", pp: "led"}, 
+        {r: "read", p: "read", pp: "read"}, {r: "grow", p: "grew", pp: "grown"}, {r: "lose", p: "lost", pp: "lost"}, 
+        {r: "fall", p: "fell", pp: "fallen"}, {r: "send", p: "sent", pp: "sent"}, {r: "build", p: "built", pp: "built"}, 
+        {r: "understand", p: "understood", pp: "understood"}, {r: "draw", p: "drew", pp: "drawn"}, 
+        {r: "break", p: "broke", pp: "broken"}, {r: "spend", p: "spent", pp: "spent"}, {r: "cut", p: "cut", pp: "cut"}, 
+        {r: "rise", p: "rose", pp: "risen"}, {r: "drive", p: "drove", pp: "driven"}, {r: "buy", p: "bought", pp: "bought"}, 
+        {r: "wear", p: "wore", pp: "worn"}, {r: "choose", p: "chose", pp: "chosen"}
+    ];
+
+    // 🚨 [풀이 보강] 8개씩 2줄을 완벽하게 꽉 채우기 위해 16종의 핵심 올스타 이모지 풀 확보
+    const emojiPool = [
+        "🐻", "🐱", "🐹", "🦝", "🐰", "🦫", "🐯", "🦁", // 1층 8명 (망곰, 최고심, 치이카와, 하치와레, 우사기, 루피, 춘식, 라이언)
+        "🐶", "⚡", "😈", "🦉", "🍳", "🔥", "🐢", "🐧"  // 2층 8명 (농담곰, 피카츄, 쿠로미, 듀가나디, 구데타마, 파이리, 꼬부기, 다마고치)
+    ];
+
+    let curIdx = 0; 
+    let score = 0;
+    let lives = 16; // 🚨 생명력을 16개로 전면 전격 확장!
+    let targetDeleteId = null;
+
+    function startQuest() {
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('quiz-content').style.display = 'block';
+        curIdx = 0; score = 0; lives = 16;
+        
+        // 동적 주입 엔진 가동 (처음부터 16개를 바둑판 정렬로 가득 채웁니다.)
+        drawSquadStage();
+        renderQuiz();
+    }
+
+    // 16개 한도 내에서 실시간 변동 스쿼드를 매끄럽게 새로 그리는 그래픽 엔진
+    function drawSquadStage() {
+        const stage = document.getElementById('squad-stage');
+        stage.innerHTML = ""; // 아레나 세정
+
+        // 8개씩 2줄, 현재 남아있는 생명력(lives) 수만큼 그리드 내부에 카드 노드 동적 생성
+        for(let i = 0; i < lives; i++) {
+            const card = document.createElement('div');
+            card.className = "char-card";
+            card.id = `card-${i}`;
+            card.innerHTML = `<div class="char-avatar">${emojiPool[i]}</div>`;
+            stage.appendChild(card);
+        }
+
+        // 라벨 태그 가공 마감 주입
+        const tagWrapper = document.createElement('div');
+        tagWrapper.className = "evo-tag-wrapper";
+        tagWrapper.innerHTML = `<div class="evo-tag" id="evo-name">올스타 디펜스 스쿼드 (남은 생명: ${lives})</div>`;
+        stage.appendChild(tagWrapper);
+    }
+
+    function renderQuiz() {
+        if(lives <= 0) { showGameOverScreen(); return; }
+        if(curIdx >= verbs.length) { showFinishScreen(); return; }
+        
+        const v = verbs[curIdx];
+        document.getElementById('stat-q').innerText = `QUEST: ${curIdx + 1}/50`;
+        document.getElementById('quiz-verb').innerText = v.r.toUpperCase();
+        document.getElementById('p-fill').style.width = `${(curIdx / 50) * 100}%`;
+        document.getElementById('msg-pop').innerText = "";
+
+        // 기존 댄스 클래스 초기화 리셋
+        document.querySelectorAll('.char-card').forEach(c => {
+            c.classList.remove('dance-active');
+        });
+
+        if(curIdx < 25) {
+            loadChoiceQuiz(v);
+        } else {
+            loadTypingQuiz(v);
+        }
+    }
+
+    function loadChoiceQuiz(v) {
+        document.getElementById('choice-ui').style.display = 'grid';
+        document.getElementById('typing-ui').style.display = 'none';
+        document.getElementById('quiz-instr').innerText = "알맞은 과거형과 과거분사형 조합을 고르세요!";
+        
+        const grid = document.getElementById('choice-ui');
+        grid.innerHTML = "";
+        v.opts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "btn-opt";
+            btn.innerText = opt;
+            btn.onclick = () => verifyAnswer(opt, v.answer);
+            grid.appendChild(btn);
+        });
+    }
+
+    function loadTypingQuiz(v) {
+        document.getElementById('choice-ui').style.display = 'none';
+        document.getElementById('typing-ui').style.display = 'block';
+        document.getElementById('quiz-instr').innerText = "과거형과 과거분사형을 차례대로 직접 입력하세요!";
+        
+        const input = document.getElementById('user-input');
+        input.value = ""; input.focus();
+        
+        input.onkeydown = (e) => { 
+            if(e.key === 'Enter') {
+                verifyAnswer(input.value.trim().toLowerCase(), `${v.p} ${v.pp}`);
+            } 
+        };
+    }
+
+    function verifyAnswer(userAns, realAns) {
+        if(userAns === realAns) {
+            score += 100;
+            document.getElementById('stat-s').innerText = `SCORE: ${score}`;
+            document.getElementById('msg-pop').innerText = "🎯 PERFECT! 16인 풀스쿼드가 축제 댄스를 춥니다! 🎉";
+            document.getElementById('msg-pop').style.color = "#10b981";
+            
+            // 정답 적중 시 16명 전원이 연쇄 좌우 쉐이크 댄스 가동 피드백
+            document.querySelectorAll('.char-card').forEach(c => {
+                c.classList.add('dance-active');
+            });
+            
+            curIdx++;
+            setTimeout(() => {
+                renderQuiz();
+            }, 1200);
+        } else {
+            triggerCharacterExplosion();
+        }
+    }
+
+    function triggerCharacterExplosion() {
+        lives--; // 하트 소멸 차감
+        document.getElementById('evo-name').innerText = `올스타 디펜스 스쿼드 (남은 생명: ${lives})`;
+
+        // 가장 뒤에 배치되어 있던 실제 끝자리 카드를 타겟 노드로 고정 추적
+        const targetCard = document.getElementById(`card-${lives}`);
+        
+        if (targetCard) {
+            // 화면 전체로 튀어나와 폭발 소멸하는 시네마틱 애니메이션 트리거 활성화
+            targetCard.classList.add('destroy-active');
+        }
+
+        setTimeout(() => {
+            openFeedbackOverlay();
+        }, 1200);
+    }
+
+    function openFeedbackOverlay() {
+        const v = verbs[curIdx];
+        
+        // 거대 폭발이 확실히 끝나면 동적 렌더러를 재가동하여 1개가 "진짜 완전히 제거된" 8열 보드를 실시간 리뉴얼 재배치
+        drawSquadStage();
+
+        document.getElementById('f-r').innerText = v.r;
+        document.getElementById('f-p').innerText = v.p;
+        document.getElementById('f-pp').innerText = v.pp;
+        
+        document.getElementById('feedback-overlay').style.display = 'flex';
+    }
+
+    function closeFeedback() {
+        document.getElementById('feedback-overlay').style.display = 'none';
+        curIdx++;
+        renderQuiz();
+    }
+
+    function showGameOverScreen() {
+        document.getElementById('quiz-content').innerHTML = `
+            <h1 style="font-family:'Jua'; font-size:64px; color:#ef4444; margin-bottom:20px;">❌ GAME OVER</h1>
+            <p style="font-size:24px; font-weight:bold; color:#475569;">16인의 대가족 스쿼드가 모두 소멸했습니다...</p>
+            <p style="font-size:32px; font-weight:bold; color:#b45309; margin-top:15px;">최종 획득 스코어: ${score} 점</p>
+            <button class="btn-action" style="margin-top:40px; background:#ef4444;" onclick="location.reload()">드림팀 전원 부활 후 다시 하기</button>
+        `;
+    }
+
+    function showFinishScreen() {
+        document.getElementById('p-fill').style.width = "100%";
+        document.getElementById('quiz-content').innerHTML = `
+            <h1 style="font-family:'Jua'; font-size:64px; color:#fbbf24; margin-bottom:20px;">🏆 퍼펙트 디펜스 완료!</h1>
+            <p style="font-size:24px; font-weight:bold; color:#475569;">무려 ${lives}마리의 영웅들과 함께 50문항 퀘스트를 완전히 지배했습니다!</p>
+            <p style="font-size:32px; font-weight:bold; color:#b45309; margin-top:15px;">최종 획득 마스터 스코어: ${score} 점</p>
+            <button class="btn-action" style="margin-top:40px;" onclick="location.reload()">스쿼드 수호 기록 재경신하기</button>
+        `;
+    }
+</script>
+
+</body>
+</html>
