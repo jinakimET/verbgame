@@ -1,0 +1,175 @@
+{
+ "note": "ig-reel 방식. 훅 점수는 직접 채점한 값(도구 점수 아님). 사실은 articles.md 요약 범위만 사용. '2009년 이후 첫 대형 결렬'은 검색 요약에 있던 CNN의 평가, 22건·100회·풍선은 검색 요약 기준.",
+ "reels": [
+  {
+   "id": "01",
+   "term": "fail to agree on",
+   "formula": "Specific Stake (concrete event + date)",
+   "hooks": [
+    {
+     "score": 74,
+     "spoken": "합의 없이 끝난 세계 기후회의.",
+     "on_screen": "합의 없이 끝났다"
+    },
+    {
+     "score": 66,
+     "spoken": "뉴스 제목의 '합의 실패', 영어로 뭘까요?",
+     "on_screen": "합의 실패 영어로?"
+    },
+    {
+     "score": 52,
+     "spoken": "이 표현 하나면 헤드라인이 읽혀요.",
+     "on_screen": "헤드라인 읽는 법"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "합의 없이 끝난 세계 기후회의.",
+     "on_screen": "합의 없이 끝났다",
+     "role": "hook"
+    },
+    {
+     "spoken": "CNN은 2009년 이후 첫 대형 결렬로 봤어요.",
+     "on_screen": "2009년 이후 첫 결렬",
+     "role": "stake"
+    },
+    {
+     "spoken": "이 뉴스의 핵심 표현은 fail to agree on.",
+     "on_screen": "fail to agree on",
+     "role": "term"
+    },
+    {
+     "spoken": "합의하지 못하다.",
+     "on_screen": "~에 합의하지 못하다",
+     "role": "meaning"
+    },
+    {
+     "spoken": "Countries failed to agree on moving away from fossil fuels.",
+     "on_screen": "Countries failed to agree on moving away from fossil fuels.",
+     "role": "example_en",
+     "highlight": "failed to agree on"
+    },
+    {
+     "spoken": "각국은 화석연료에서 벗어나는 데 합의하지 못했어요.",
+     "on_screen": "각국은 화석연료에서 벗어나는 데 합의하지 못했어요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "합의가 안 될 땐, fail to agree on. 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  },
+  {
+   "id": "07",
+   "term": "leverage",
+   "formula": "Number + Contrast",
+   "hooks": [
+    {
+     "score": 78,
+     "spoken": "11월에만 최소 22건의 공격이 있었어요.",
+     "on_screen": "11월 공격 최소 22건"
+    },
+    {
+     "score": 64,
+     "spoken": "공격은 늘었는데 힘은 약해졌대요.",
+     "on_screen": "공격↑ 협상력↓"
+    },
+    {
+     "score": 55,
+     "spoken": "협상력, 영어로 한 단어예요.",
+     "on_screen": "협상력 = ?"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "11월에만 최소 22건의 공격이 있었어요.",
+     "on_screen": "11월 공격 최소 22건",
+     "role": "hook"
+    },
+    {
+     "spoken": "그런데 CNN은 이란의 leverage가 약해지고 있다고 분석했어요.",
+     "on_screen": "이란의 leverage ↓",
+     "role": "stake"
+    },
+    {
+     "spoken": "leverage는 영향력, 협상력이라는 뜻이에요.",
+     "on_screen": "leverage = 협상력",
+     "role": "meaning"
+    },
+    {
+     "spoken": "Low sales weakened our leverage in talks.",
+     "on_screen": "Low sales weakened our leverage in talks.",
+     "role": "example_en",
+     "highlight": "leverage"
+    },
+    {
+     "spoken": "낮은 매출이 협상에서 우리의 힘을 약하게 했어요.",
+     "on_screen": "낮은 매출이 협상에서 우리의 힘을 약하게 했어요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "공격 뉴스 속 leverage, 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  },
+  {
+   "id": "09",
+   "term": "put ~ in jeopardy",
+   "formula": "Specific Stake (concrete event)",
+   "hooks": [
+    {
+     "score": 76,
+     "spoken": "바람 때문에 100회째 퍼레이드 풍선이 위태로워요.",
+     "on_screen": "100회 퍼레이드 위기"
+    },
+    {
+     "score": 63,
+     "spoken": "'위태롭게 하다', 영어로 뭘까요?",
+     "on_screen": "위태롭게 하다 = ?"
+    },
+    {
+     "score": 50,
+     "spoken": "날씨 뉴스에 꼭 나오는 표현이에요.",
+     "on_screen": "날씨 뉴스 표현"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "바람 때문에 100회째 퍼레이드 풍선이 위태로워요.",
+     "on_screen": "100회 퍼레이드 위기",
+     "role": "hook"
+    },
+    {
+     "spoken": "CNN 날씨 기사에 나온 표현이에요, put in jeopardy.",
+     "on_screen": "put ~ in jeopardy",
+     "role": "term"
+    },
+    {
+     "spoken": "무언가를 위태롭게 하다, 라는 뜻이에요.",
+     "on_screen": "~을 위태롭게 하다",
+     "role": "meaning"
+    },
+    {
+     "spoken": "The heavy rain could put the outdoor concert in jeopardy.",
+     "on_screen": "The heavy rain could put the outdoor concert in jeopardy.",
+     "role": "example_en",
+     "highlight": "put the outdoor concert in jeopardy"
+    },
+    {
+     "spoken": "폭우로 야외 콘서트가 위태로워질 수 있어요.",
+     "on_screen": "폭우로 야외 콘서트가 위태로워질 수 있어요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "일정이 위태로울 땐, put in jeopardy. 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  }
+ ]
+}
