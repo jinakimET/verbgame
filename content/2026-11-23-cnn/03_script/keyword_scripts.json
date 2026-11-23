@@ -1,31 +1,34 @@
 {
- "note": "ig-reel 방식. 훅 점수는 직접 채점한 값(도구 점수 아님). 사실은 articles.md 요약 범위만 사용. '2009년 이후 첫 대형 결렬'은 검색 요약에 있던 CNN의 평가, 22건·100회·풍선은 검색 요약 기준. 05는 11/20~21 유조선 3척 공격(검색 요약), 11은 샌프란시스코 시장의 불필요한 이동 자제 호소(검색 요약) 기준.",
+ "note": "ig-reel 방식. 훅 점수는 직접 채점한 값(도구 점수 아님). 사실은 articles.md 요약 범위만 사용. '2009년 이후 첫 대형 결렬'은 검색 요약에 있던 CNN의 평가, 22건·100회·풍선은 검색 요약 기준. 05는 11/20~21 유조선 3척 공격(검색 요약), 11은 샌프란시스코 시장의 불필요한 이동 자제 호소(검색 요약) 기준. 훅 v2: 반응형·도전형으로 교체(점수는 직접 채점). 새 훅 음성만 생성해 기존 음성 앞에 붙이고 기존 첫 문장은 잘랐다.",
  "reels": [
   {
    "id": "01",
    "term": "fail to agree on",
-   "formula": "Specific Stake (concrete event + date)",
+   "formula": "Reaction",
    "hooks": [
     {
-     "score": 74,
+     "score": 82,
+     "spoken": "세계 기후회의가 합의 없이 끝났다고요?",
+     "on_screen": "합의 없이 끝났다고요?",
+     "formula": "Reaction"
+    },
+    {
+     "score": 68,
+     "spoken": "이 기사 제목, 영어로 읽을 수 있어요?",
+     "on_screen": "영어로 읽을 수 있어요?",
+     "formula": "Challenge"
+    },
+    {
+     "score": 55,
      "spoken": "합의 없이 끝난 세계 기후회의.",
-     "on_screen": "합의 없이 끝났다"
-    },
-    {
-     "score": 66,
-     "spoken": "뉴스 제목의 '합의 실패', 영어로 뭘까요?",
-     "on_screen": "합의 실패 영어로?"
-    },
-    {
-     "score": 52,
-     "spoken": "이 표현 하나면 헤드라인이 읽혀요.",
-     "on_screen": "헤드라인 읽는 법"
+     "on_screen": "합의 없이 끝났다",
+     "formula": "Statement(old)"
     }
    ],
    "beats": [
     {
-     "spoken": "합의 없이 끝난 세계 기후회의.",
-     "on_screen": "합의 없이 끝났다",
+     "spoken": "세계 기후회의가 합의 없이 끝났다고요?",
+     "on_screen": "합의 없이 끝났다고요?",
      "role": "hook"
     },
     {
@@ -64,28 +67,31 @@
   {
    "id": "05",
    "term": "at the highest level since",
-   "formula": "Number + Specific Stake",
+   "formula": "Reaction",
    "hooks": [
     {
-     "score": 77,
-     "spoken": "이틀 사이 유조선 3척이 공격받았어요.",
-     "on_screen": "이틀 사이 유조선 3척"
+     "score": 81,
+     "spoken": "이틀 사이 유조선 3척이 공격받았다고요?",
+     "on_screen": "유조선 3척 공격이라고요?",
+     "formula": "Reaction"
     },
     {
      "score": 65,
-     "spoken": "'~ 이후 최고 수준', 영어로 뭘까요?",
-     "on_screen": "이후 최고 수준 = ?"
+     "spoken": "'~ 이후 최고 수준', 영어로?",
+     "on_screen": "이후 최고 수준 = ?",
+     "formula": "Question"
     },
     {
      "score": 54,
-     "spoken": "뉴스 제목에 자주 나오는 표현이에요.",
-     "on_screen": "뉴스 제목 표현"
+     "spoken": "이틀 사이 유조선 3척이 공격받았어요.",
+     "on_screen": "이틀 사이 유조선 3척",
+     "formula": "Statement(old)"
     }
    ],
    "beats": [
     {
-     "spoken": "이틀 사이 유조선 3척이 공격받았어요.",
-     "on_screen": "이틀 사이 유조선 3척",
+     "spoken": "이틀 사이 유조선 3척이 공격받았다고요?",
+     "on_screen": "유조선 3척 공격이라고요?",
      "role": "hook"
     },
     {
@@ -124,28 +130,31 @@
   {
    "id": "07",
    "term": "leverage",
-   "formula": "Number + Contrast",
+   "formula": "Reaction+Contrast",
    "hooks": [
     {
-     "score": 78,
+     "score": 80,
+     "spoken": "11월에만 최소 22건 공격인데, 힘이 약해졌다고요?",
+     "on_screen": "공격 22건인데 힘이 약해졌다고요?",
+     "formula": "Reaction+Contrast"
+    },
+    {
+     "score": 66,
+     "spoken": "공격이 늘면 힘도 세질까요?",
+     "on_screen": "공격 늘면 힘도 셀까?",
+     "formula": "Question"
+    },
+    {
+     "score": 52,
      "spoken": "11월에만 최소 22건의 공격이 있었어요.",
-     "on_screen": "11월 공격 최소 22건"
-    },
-    {
-     "score": 64,
-     "spoken": "공격은 늘었는데 힘은 약해졌대요.",
-     "on_screen": "공격↑ 협상력↓"
-    },
-    {
-     "score": 55,
-     "spoken": "협상력, 영어로 한 단어예요.",
-     "on_screen": "협상력 = ?"
+     "on_screen": "11월 공격 최소 22건",
+     "formula": "Statement(old)"
     }
    ],
    "beats": [
     {
-     "spoken": "11월에만 최소 22건의 공격이 있었어요.",
-     "on_screen": "11월 공격 최소 22건",
+     "spoken": "11월에만 최소 22건 공격인데, 힘이 약해졌다고요?",
+     "on_screen": "공격 22건인데 힘이 약해졌다고요?",
      "role": "hook"
     },
     {
@@ -179,28 +188,31 @@
   {
    "id": "09",
    "term": "put ~ in jeopardy",
-   "formula": "Specific Stake (concrete event)",
+   "formula": "Challenge",
    "hooks": [
     {
-     "score": 76,
-     "spoken": "바람 때문에 100회째 퍼레이드 풍선이 위태로워요.",
-     "on_screen": "100회 퍼레이드 위기"
+     "score": 79,
+     "spoken": "100회째 퍼레이드 풍선이 위태롭대요. 이 표현 몰라요?",
+     "on_screen": "풍선 위태롭대요, 이 표현 몰라요?",
+     "formula": "Challenge"
     },
     {
-     "score": 63,
+     "score": 64,
      "spoken": "'위태롭게 하다', 영어로 뭘까요?",
-     "on_screen": "위태롭게 하다 = ?"
+     "on_screen": "위태롭게 하다 = ?",
+     "formula": "Question"
     },
     {
      "score": 50,
-     "spoken": "날씨 뉴스에 꼭 나오는 표현이에요.",
-     "on_screen": "날씨 뉴스 표현"
+     "spoken": "바람 때문에 100회째 퍼레이드 풍선이 위태로워요.",
+     "on_screen": "100회 퍼레이드 위기",
+     "formula": "Statement(old)"
     }
    ],
    "beats": [
     {
-     "spoken": "바람 때문에 100회째 퍼레이드 풍선이 위태로워요.",
-     "on_screen": "100회 퍼레이드 위기",
+     "spoken": "100회째 퍼레이드 풍선이 위태롭대요. 이 표현 몰라요?",
+     "on_screen": "풍선 위태롭대요, 이 표현 몰라요?",
      "role": "hook"
     },
     {
@@ -234,28 +246,31 @@
   {
    "id": "11",
    "term": "nonessential",
-   "formula": "Specific Stake (concrete event)",
+   "formula": "Challenge",
    "hooks": [
     {
-     "score": 75,
-     "spoken": "샌프란시스코 시장이 불필요한 이동을 자제하라고 했어요.",
-     "on_screen": "불필요한 이동 자제"
+     "score": 78,
+     "spoken": "샌프란시스코 시장이 이동을 자제하래요. 이 단어 몰라요?",
+     "on_screen": "이동 자제하래요, 이 단어 몰라요?",
+     "formula": "Challenge"
     },
     {
-     "score": 62,
+     "score": 63,
      "spoken": "'꼭 필요하지 않은', 영어 한 단어예요.",
-     "on_screen": "꼭 필요하지 않은 = ?"
+     "on_screen": "꼭 필요하지 않은 = ?",
+     "formula": "Statement"
     },
     {
      "score": 51,
-     "spoken": "폭풍 뉴스에 꼭 나오는 단어예요.",
-     "on_screen": "폭풍 뉴스 단어"
+     "spoken": "샌프란시스코 시장이 불필요한 이동을 자제하라고 했어요.",
+     "on_screen": "불필요한 이동 자제",
+     "formula": "Statement(old)"
     }
    ],
    "beats": [
     {
-     "spoken": "샌프란시스코 시장이 불필요한 이동을 자제하라고 했어요.",
-     "on_screen": "불필요한 이동 자제",
+     "spoken": "샌프란시스코 시장이 이동을 자제하래요. 이 단어 몰라요?",
+     "on_screen": "이동 자제하래요, 이 단어 몰라요?",
      "role": "hook"
     },
     {
