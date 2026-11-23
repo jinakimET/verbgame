@@ -1,0 +1,160 @@
+{
+  "mode": "words",
+  "set": "001",
+  "colors": {
+    "pen": "주황",
+    "accent": "민트"
+  },
+  "episodes": [
+    {
+      "level": 1,
+      "points": [
+        "forget ↔ remember"
+      ],
+      "combo": false,
+      "audience": "중1~2 내신",
+      "lines": [
+        "I {remembered>forgot} my",
+        "umbrella, so I got wet",
+        "on the way home."
+      ],
+      "ko": "우산을 [[깜빡해서]] 집에 오다 비에 젖었다.",
+      "chip": {
+        "title": "forget ↔ remember",
+        "sub": "잊다 ↔ 기억하다",
+        "rows": [
+          [
+            "lose ↔ find",
+            "잃어버리다 ↔ 찾다"
+          ],
+          [
+            "push ↔ pull",
+            "밀다 ↔ 당기다"
+          ]
+        ]
+      },
+      "why_wrong": "우산을 챙겼다면 젖을 이유가 없다. so I got wet 이라는 결과와 맞는 건 forgot",
+      "trap": "remember/forget 을 '우산 관련 동사' 정도로만 읽고 so 뒤 결과와 연결하지 않음"
+    },
+    {
+      "level": 2,
+      "points": [
+        "rude ↔ polite"
+      ],
+      "combo": false,
+      "audience": "중3 내신·고입",
+      "lines": [
+        "It's {polite>rude} to talk loudly",
+        "on the subway, so keep",
+        "your voice down."
+      ],
+      "ko": "지하철에서 떠들면 [[무례하니]] 조용히 해.",
+      "chip": {
+        "title": "rude ↔ polite",
+        "sub": "무례한 ↔ 예의 바른",
+        "rows": [
+          [
+            "honest ↔ dishonest",
+            "정직한 ↔ 부정직한"
+          ],
+          [
+            "careful ↔ careless",
+            "조심성 있는 ↔ 부주의한"
+          ]
+        ]
+      },
+      "why_wrong": "예의 바른 행동이라면 목소리를 낮추라고 할 이유가 없다. so keep your voice down 과 맞는 건 rude",
+      "trap": "It's ~ to 구문의 형용사를 습관처럼 긍정어(polite, good)로 채움"
+    },
+    {
+      "level": 3,
+      "points": [
+        "temporary ↔ permanent"
+      ],
+      "combo": false,
+      "audience": "고1 모의고사",
+      "lines": [
+        "The cafe's closure is",
+        "{permanent>temporary}, so it",
+        "reopens next week."
+      ],
+      "ko": "휴업은 [[일시적이라]] 다음 주에 다시 연다",
+      "chip": {
+        "title": "temporary ↔ permanent",
+        "sub": "일시적인 ↔ 영구적인",
+        "rows": [
+          [
+            "common ↔ rare",
+            "흔한 ↔ 드문"
+          ],
+          [
+            "ancient ↔ modern",
+            "고대의 ↔ 현대의"
+          ]
+        ]
+      },
+      "why_wrong": "다음 주에 다시 연다면 영구 폐업이 아니다. reopens next week 와 맞는 건 temporary",
+      "trap": "closure(폐쇄)를 보고 '영구적 폐업'을 떠올려 permanent 를 그럴듯하게 받아들임"
+    },
+    {
+      "level": 4,
+      "points": [
+        "scarce ↔ abundant"
+      ],
+      "combo": false,
+      "audience": "고2~3 수능 30번",
+      "lines": [
+        "Water was so {abundant>scarce}",
+        "during the drought that",
+        "we saved every drop."
+      ],
+      "ko": "가뭄에 물이 [[부족해서]] 한 방울도 아꼈다.",
+      "chip": {
+        "title": "scarce ↔ abundant",
+        "sub": "부족한 ↔ 풍부한",
+        "rows": [
+          [
+            "sufficient ↔ deficient",
+            "충분한 ↔ 결핍된"
+          ],
+          [
+            "plentiful ↔ sparse",
+            "풍부한 ↔ 드문드문한"
+          ]
+        ]
+      },
+      "why_wrong": "가뭄 중이고 한 방울까지 아꼈다면 물은 부족했다. so ~ that 결과와 맞는 건 scarce",
+      "trap": "so ~ that 구문에서 형용사와 결과절의 인과를 확인하지 않고 문장 앞부분만 읽음"
+    },
+    {
+      "level": 5,
+      "points": [
+        "mandatory ↔ optional"
+      ],
+      "combo": false,
+      "audience": "토익 Part 5",
+      "lines": [
+        "The safety training",
+        "is {optional>mandatory} for all",
+        "staff, no exceptions."
+      ],
+      "ko": "안전 교육은 예외 없이 전 직원 [[의무]]다.",
+      "chip": {
+        "title": "mandatory ↔ optional",
+        "sub": "의무적인 ↔ 선택적인",
+        "rows": [
+          [
+            "tentative ↔ definite",
+            "잠정적인 ↔ 확정된"
+          ],
+          [
+            "lenient ↔ strict",
+            "관대한 ↔ 엄격한"
+          ]
+        ]
+      },
+      "why_wrong": "예외가 없다는 말은 반드시 해야 한다는 뜻. no exceptions 와 맞는 건 mandatory",
+      "trap": "for all staff 만 보고 '누구나 들을 수 있다(optional)'로 읽어 버림"
+    }
+  ]
+}
