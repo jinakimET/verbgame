@@ -4,8 +4,9 @@ import subprocess, re, json, wave, os, sys
 import numpy as np
 ROOT = os.path.dirname(os.path.abspath(__file__)) + "/"
 os.chdir(ROOT)
-src = open("render.py").read()
-DUR = float(re.search(r"W, H, FPS, DUR = \d+, \d+, \d+, ([\d.]+)", src).group(1))
+sys.path.insert(0, ROOT)
+import episode_cfg
+DUR = float(episode_cfg.DUR)
 b = open("bgm.py").read()
 b = re.sub(r"DUR = [\d.]+", f"DUR = {DUR}", b); open("bgm.py", "w").write(b)
 subprocess.run([sys.executable, "bgm.py"], check=True)

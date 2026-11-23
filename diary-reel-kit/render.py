@@ -7,7 +7,8 @@ sys.path.insert(0, _HERE)
 from timing import build
 from mouth import warp, CH as CHAR0
 
-W, H, FPS, DUR = 1080, 1920, 30, 27.1
+W, H, FPS = 1080, 1920, 30
+from episode_cfg import DUR, END_T0, LOOP_T0
 ROOT = _HERE + "/"
 
 # ---------- palette (Color Hunt 1E3B2F 7F8C6A C8B48A F5F0E6) ----------
@@ -256,8 +257,6 @@ def draw_label(img, alpha=1.0):
     img.alpha_composite(lay)
 
 # ---------- ending panel ----------
-END_T0 = 21.54
-LOOP_T0 = 26.35
 END_LINES = [
     ("The sky looks so high and my mood is good, but my body is dragging a little.",
      ["dragging", "a", "little."], "하늘은 높고 기분은 좋은데, 몸은 조금 가라앉는다."),

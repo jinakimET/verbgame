@@ -1,11 +1,11 @@
-# 에피소드 표현 목록 (쇼츠 render2.py 와 롱폼 youtube16.py 가 함께 읽음)
-KO_EMO = {1: " 🤝", 2: " 🎭", 3: " 🚪", 4: " 🔁", 5: " 🪞"}
-CARD_EMO = {"give someone a second chance": "🤝", "bury the old wounds": "🪦", "time heals": "🩹", "true colors": "🎭",
-            "there's no going back": "🚪", "people never change": "🔁", "be no different": "🪞"}
-EXPRS = [("🤝", "give someone a second chance", "다시 기회를 주다"),
-         ("🪦", "bury the old wounds", "오래된 상처를 묻다"),
-         ("🩹", "time heals", "시간이 치유해 주다"),
-         ("🎭", "true colors", "본성, 진짜 모습"),
-         ("🚪", "there's no going back", "돌이킬 수 없다"),
-         ("🔁", "people never change", "사람은 안 변한다"),
-         ("🪞", "be no different", "다르지 않다")]
+# 2편 표현 목록
+KO_EMO = {1: " 🤔", 2: " 😣", 3: " 💍", 4: " 🪞"}
+CARD_EMO = {"doesn't really matter": "🙄", "feel uneasy": "😣", "be myself": "🪞", "put up with": "🫠",
+            "without realizing it": "🌫️", "come to think of it": "💭", "matter more than": "⚖️"}
+EXPRS = [("🙄", "doesn't really matter", "별로 중요하지 않다"),
+         ("😣", "feel uneasy", "찜찜하다, 마음이 불편하다"),
+         ("🪞", "be myself", "나답게 있다"),
+         ("🫠", "put up with", "참고 견디다"),
+         ("🌫️", "without realizing it", "나도 모르게"),
+         ("💭", "come to think of it", "생각해 보니"),
+         ("⚖️", "matter more than", "~보다 더 중요하다")]

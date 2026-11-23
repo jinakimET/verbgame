@@ -27,6 +27,11 @@ def font(path, size):
     kw = {"index": 1} if path in (KRB, KRM) else {}
     return ImageFont.truetype(path, int(round(size * S)), **kw)
 
+def as_list(x): return [] if not x else (list(x) if isinstance(x, (list, tuple)) else [x])
+def scr_cards(s): return as_list(s.get("cards", s.get("card")))
+def scr_hls(s): return as_list(s.get("hl"))
+NS = len(timing.SENTENCES)
+
 def clean(w): return re.sub(r"[^a-z']", "", w.lower())
 def mix(a, b, t): return tuple(int(a[i] * (1 - t) + b[i] * t) for i in range(3))
 
@@ -136,7 +141,8 @@ def draw_sentence(cv, scr):
         sz -= 2
     gap = 1.62 * sz
     y1 = 500 if n == 2 else 610
-    toks = layout_tokens(cv, lines, f); mark_phrase(toks, scr.get("hl", ""))
+    toks = layout_tokens(cv, lines, f)
+    for ph in scr_hls(scr): mark_phrase(toks, ph)
     top = lambda y: y - 0.80 * sz; bot = lambda y: y + 0.22 * sz
     base = [y1 + i * gap for i in range(n)]
     # 형광펜
@@ -199,9 +205,9 @@ def chip_sentence(cv, cx, y, text, hl, maxw, size, fill, ink, mark, h=92):
     cv.text((x0, cyl), text, f, ink, "lm")
 
 # ---------- 표현 카드 ----------
-def card_frame(cfg, k, N, scr, photodir):
+def card_frame(cfg, k, N, scr, photodir, ci=0):
     em, en, ko = exprs.EXPRS[k]
-    cv = Cv(BG); header(cv, k + 1, N, scr["sid"] - 1, 5, photodir, tuple(scr["pkey"]) if len(scr["pkey"]) > 1 else scr["pkey"][0])
+    cv = Cv(BG); header(cv, k + 1, N, scr["sid"] - 1, NS, photodir, tuple(scr["pkey"]) if len(scr["pkey"]) > 1 else scr["pkey"][0])
     box = (210, 380, 1710, 1000)
     cv.shadow(box, 56, blur=26, alpha=95, dy=14)
     cv.rr(box, 56, fill=P.INK)
@@ -213,7 +219,8 @@ def card_frame(cfg, k, N, scr, photodir):
     cv.text((W / 2, box[1] + 285), en, fe, P.WHITE, "mm")
     fk = font(KRB, 60); cv.text((W / 2, box[1] + 392), ko, fk, P.MARK, "mm")
     text = " ".join(scr["lines"])
-    chip_sentence(cv, W / 2, box[1] + 480, text, scr["hl"], 1330, 40, P.BG, P.INK, P.MARK, h=96)
+    hls = scr_hls(scr); hl = hls[ci] if ci < len(hls) else (hls[0] if hls else "")
+    chip_sentence(cv, W / 2, box[1] + 480, text, hl, 1330, 40, P.BG, P.INK, P.MARK, h=96)
     return cv.done()
 
 # ---------- 복습 블록 ----------
@@ -244,19 +251,22 @@ def note_block(cv, box, note, emph):
 
 def recap_frame(cfg, pair, phase, N, photodir):
     cv = Cv(BG)
-    header(cv, N, N, 5, 5, None, None, label=f"오늘의 표현 다시 보기 · {min(pair[0] + 1, N)}-{min(pair[1] + 1, N)}/{N}" if pair[1] != "note" else "오늘의 표현 다시 보기 · 7/7")
+    header(cv, N, N, NS, NS, None, None, label=f"오늘의 표현 다시 보기 · {min(pair[0] + 1, N)}-{min(pair[1] + 1, N)}/{N}" if pair[1] != "note" else f"오늘의 표현 다시 보기 · {N}/{N}")
     boxes = [(80, 340, 930, 990), (990, 340, 1840, 990)]
-    scr_by_card = {s["card"]: s for s in cfg["screens"] if s.get("card")}
+    scr_by_card = {c: (s, i) for s in cfg["screens"] for i, c in enumerate(scr_cards(s))}
     for bi, item in enumerate(pair):
         emph = (bi == phase)
         if item == "note": note_block(cv, boxes[bi], cfg["note"], emph); continue
-        em, en, ko = exprs.EXPRS[item]; s = scr_by_card[en]
-        block(cv, boxes[bi], item + 1, em, en, ko, " ".join(s["lines"]), s["hl"], emph)
+        em, en, ko = exprs.EXPRS[item]; s, ci = scr_by_card[en]; hls = scr_hls(s)
+        chips = as_list(s.get("chips")); chip = chips[ci] if ci < len(chips) else " ".join(s["lines"])
+        block(cv, boxes[bi], item + 1, em, en, ko, chip, hls[ci] if ci < len(hls) else (hls[0] if hls else ""), emph)
     return cv.done()
 
 # ---------- 타임라인 ----------
 def build_timeline(cfg, ep):
     sents = timing.SENTENCES
+    tm = cfg.get("timing", {}); card_sec = tm.get("card", CARD_SEC); step_sec = tm.get("step", STEP_SEC)
+    last_a = tm.get("last_a", LAST_A); last_b = tm.get("last_b", LAST_B)
     scr = cfg["screens"]; N = len(exprs.EXPRS)
     times = []
     for s in scr:
@@ -279,14 +289,14 @@ def build_timeline(cfg, ep):
         st, en = cuts[i]; pad = max(0.0, 0.35 - (vdur - times[i][1])) if i == len(scr) - 1 else 0.0
         frames = int(round((en - st + pad) * FPS))
         items.append(dict(kind="screen", i=i, frames=frames, cut=(st, en), collected=collected, sid=s["sid"]))
-        if s.get("card"):
-            k = [e[1] for e in exprs.EXPRS].index(s["card"]); collected += 1
-            items.append(dict(kind="card", i=i, k=k, frames=int(round(CARD_SEC * FPS)), sid=s["sid"]))
+        for ci, cname in enumerate(scr_cards(s)):
+            k = [e[1] for e in exprs.EXPRS].index(cname); collected += 1
+            items.append(dict(kind="card", i=i, ci=ci, k=k, frames=int(round(card_sec * FPS)), sid=s["sid"]))
     pairs = [(a, a + 1) for a in range(0, N - (N % 2), 2)] + ([(N - 1, "note")] if N % 2 else [])
     for pi, pr in enumerate(pairs):
         last = pi == len(pairs) - 1
         for ph in (0, 1):
-            sec = (LAST_A if ph == 0 else LAST_B) if last else STEP_SEC / 2
+            sec = (last_a if ph == 0 else last_b) if last else step_sec / 2
             items.append(dict(kind="recap", pair=pr, phase=ph, frames=int(round(sec * FPS)), sid=6))
     return items, times, cuts, vdur
 
@@ -296,9 +306,9 @@ def render_frames(cfg, ep, out):
     for n, it in enumerate(items):
         if it["kind"] == "screen":
             s = cfg["screens"][it["i"]]; pk = tuple(s["pkey"]) if len(s["pkey"]) > 1 else s["pkey"][0]
-            cv = Cv(BG); header(cv, it["collected"], N, s["sid"] - 1, 5, photodir, pk); draw_sentence(cv, s); im = cv.done()
+            cv = Cv(BG); header(cv, it["collected"], N, s["sid"] - 1, NS, photodir, pk); draw_sentence(cv, s); im = cv.done()
         elif it["kind"] == "card":
-            im = card_frame(cfg, it["k"], N, cfg["screens"][it["i"]], photodir)
+            im = card_frame(cfg, it["k"], N, cfg["screens"][it["i"]], photodir, it["ci"])
         else:
             im = recap_frame(cfg, it["pair"], it["phase"], N, photodir)
         it["png"] = _os.path.join(out, f"f{n:02d}_{it['kind']}.png"); im.save(it["png"])
@@ -397,39 +407,36 @@ def thumb(cfg, ep, name, lines, hl_idx, pkey, zoom, chips, foot, maxsz=150):
     return out
 
 def make_thumbs(cfg, ep):
-    a = thumb(cfg, ep, "썸네일_A_주제.jpg", ["사람은 안", "변한대"], 1, 5, 1.5,
-              ["give someone a second chance", "true colors", "there's no going back"], "", maxsz=112)
-    b = thumb(cfg, ep, "썸네일_B_질문.jpg", ["‘다시 기회를", "주다’ 영어로?"], 1, 4, 1.0, [], "정답은 영상 안에 있어요")
-    return a, b
+    out = []
+    for t in cfg["thumbs"]:
+        pk = t["pkey"]; pk = tuple(pk) if isinstance(pk, list) and len(pk) > 1 else (pk[0] if isinstance(pk, list) else pk)
+        out.append(thumb(cfg, ep, t["name"], t["lines"], t["hl_idx"], pk, t.get("zoom", 1.0), t.get("chips", []), t.get("foot", ""), t.get("maxsz", 150)))
+    return out
 
 def fmt(t): return f"{int(t // 60)}:{int(t % 60):02d}"
 
 def make_meta(cfg, ep, items):
-    t = 0.0; starts = {}
+    m = cfg["meta"]; t = 0.0; starts = {}
     for it in items:
-        if it["kind"] == "screen":
-            starts.setdefault(it["sid"], t)
+        if it["kind"] == "screen": starts.setdefault(it["sid"], t)
         if it["kind"] == "recap": starts.setdefault("recap", t)
         t += it["frames"] / FPS
     total = t
-    ch = [(0.0, "다시 기회를 준다는 마음 (상처를 묻는다는 것)"), (starts[2], "시간이 지나면 본성이 드러난다"),
-          (starts[4], "사람은 안 변한다, 나도 마찬가지"), (starts["recap"], "오늘의 표현 복습 + 노트에 써 보기")]
+    ch = [(starts[c["at"]] if c["at"] != 0 else 0.0, c["title"]) for c in m["chapters"]]
     ch_lines = "\n".join(f"{fmt(a)} {b}" for a, b in ch)
+    assert len(ch) >= 3, "챕터는 3개 이상"
     for (a, _), (b, _) in zip(ch, ch[1:] + [(total, "")]): assert b - a >= 10, "챕터는 10초 이상"
-    em = {1: "🤝", 2: "🎭", 3: "🚪", 4: "🔁", 5: "🪞"}
+    em = {int(k): v for k, v in m["alt_emoji"].items()}
     alt = []
     for s in timing.SENTENCES:
         en = " ".join(c[2] for c in s["chunks"]); ko = s["ko"].replace("\n", " ")
         alt.append(f"{en}\n{em[s['id']]} {ko}")
     expr = "\n".join(f"{e} {en}: {ko}" for e, en, ko in exprs.EXPRS)
-    titles = ["사람은 안 변한다고들 하잖아요 | 영어일기 | give someone a second chance",
-              "다시 믿어 본다는 건… 영어로 쓰는 마음 일기 (영어 표현 7개)",
-              "‘다시 기회를 주다’ 영어로? 상처, 본성, 그리고 나 | 지나쌤 영어일기"]
-    md = "# 유튜브 메타 — 1편 trust\n\n## 제목 후보\n" + "\n".join(f"{i + 1}. {t}" for i, t in enumerate(titles)) + f"""
+    md = f"# 유튜브 메타 — {cfg['name']}\n\n## 제목 후보\n" + "\n".join(f"{i + 1}. {t}" for i, t in enumerate(m["titles"])) + f"""
 
 ## 설명란 (복사해서 사용)
-다시 믿어 본다는 건, 상처를 묻어 두기로 한 마음이었다. 🌿
-지나쌤의 진짜 영어일기, 오늘의 표현 7개와 함께 읽어요.
+{m["intro"]}
+지나쌤의 진짜 영어일기, 오늘의 표현 {len(exprs.EXPRS)}개와 함께 읽어요.
 
 ⏱ 챕터
 {ch_lines}

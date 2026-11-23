@@ -1,0 +1,351 @@
+{
+ "_note": "롱폼 화면 구성(2편). 시간·사진·팔레트·표현은 kit 데이터에서 읽음. 화면 분할·한글 분할·말풍선은 임의 선택(확인 필요).",
+ "name": "self",
+ "screens": [
+  {
+   "sid": 1,
+   "chunks": [
+    0
+   ],
+   "pkey": [
+    1
+   ],
+   "lines": [
+    "They say it doesn't really matter",
+    "whether the person I meet is good or not."
+   ],
+   "ko": "내가 만나는 사람이 좋은 사람인지 아닌지는 사실 그렇게 중요하지 않다고 한다.",
+   "hl": "doesn't really matter",
+   "cards": [
+    "doesn't really matter"
+   ],
+   "bubbles": [
+    [
+     "say",
+     "~라고들 한다",
+     "top"
+    ],
+    [
+     "whether",
+     "~인지 아닌지",
+     "bottom"
+    ]
+   ],
+   "chips": [
+    "They say it doesn't really matter"
+   ]
+  },
+  {
+   "sid": 2,
+   "chunks": [
+    0,
+    1
+   ],
+   "pkey": [
+    2,
+    0
+   ],
+   "lines": [
+    "Even if they're a good person,",
+    "if I come home feeling uneasy,"
+   ],
+   "ko": "그 사람이 좋은 사람이어도, 만나고 돌아왔을 때 기분이 찜찜하고,",
+   "hl": "feeling uneasy",
+   "cards": [
+    "feel uneasy"
+   ],
+   "bubbles": [
+    [
+     "Even",
+     "~라 해도",
+     "top"
+    ],
+    [
+     "come",
+     "돌아오다 (come home)",
+     "bottom"
+    ]
+   ],
+   "chips": [
+    "if I come home feeling uneasy,"
+   ]
+  },
+  {
+   "sid": 2,
+   "chunks": [
+    2
+   ],
+   "pkey": [
+    2,
+    1
+   ],
+   "lines": [
+    "if I couldn't be myself,"
+   ],
+   "ko": "나다운 모습을 유지하지 못했고,",
+   "hl": "be myself",
+   "cards": [
+    "be myself"
+   ],
+   "bubbles": [
+    [
+     "couldn't",
+     "~할 수 없었다",
+     "top"
+    ],
+    [
+     "if",
+     "만약 ~라면",
+     "bottom"
+    ]
+   ],
+   "chips": [
+    "if I couldn't be myself,"
+   ]
+  },
+  {
+   "sid": 2,
+   "chunks": [
+    3
+   ],
+   "pkey": [
+    2,
+    1
+   ],
+   "lines": [
+    "if I was putting up with discomfort",
+    "without realizing it,"
+   ],
+   "ko": "나도 모르게 불편함을 감수하고 있었다면",
+   "hl": [
+    "putting up with",
+    "without realizing it"
+   ],
+   "cards": [
+    "put up with",
+    "without realizing it"
+   ],
+   "bubbles": [
+    [
+     "if",
+     "만약 ~라면",
+     "top"
+    ],
+    [
+     "discomfort",
+     "불편함",
+     "top"
+    ]
+   ],
+   "chips": [
+    "if I was putting up with discomfort",
+    "discomfort without realizing it,"
+   ]
+  },
+  {
+   "sid": 2,
+   "chunks": [
+    4
+   ],
+   "pkey": [
+    2,
+    2
+   ],
+   "lines": [
+    "then they're not a good person for me."
+   ],
+   "ko": "그 사람은 나에게 좋은 사람이 아니다.",
+   "hl": [],
+   "cards": [],
+   "bubbles": [
+    [
+     "then",
+     "그렇다면",
+     "top"
+    ],
+    [
+     "for",
+     "~에게",
+     "bottom"
+    ]
+   ]
+  },
+  {
+   "sid": 3,
+   "chunks": [
+    0,
+    1
+   ],
+   "pkey": [
+    3
+   ],
+   "lines": [
+    "Come to think of it,",
+    "even after years of marriage,"
+   ],
+   "ko": "생각해 보니 몇 년을 부부로 지내도",
+   "hl": "Come to think of it",
+   "cards": [
+    "come to think of it"
+   ],
+   "bubbles": [
+    [
+     "after",
+     "~ 후에",
+     "bottom"
+    ],
+    [
+     "marriage",
+     "결혼 생활",
+     "bottom"
+    ]
+   ],
+   "chips": [
+    "Come to think of it,"
+   ]
+  },
+  {
+   "sid": 3,
+   "chunks": [
+    2
+   ],
+   "pkey": [
+    3
+   ],
+   "lines": [
+    "it was hard to tell",
+    "if I was truly comfortable around my spouse."
+   ],
+   "ko": "배우자와 있을 때 내가 진정으로 편한지 판단하기 어려웠다.",
+   "hl": [],
+   "cards": [],
+   "bubbles": [
+    [
+     "hard",
+     "어려운",
+     "top"
+    ],
+    [
+     "tell",
+     "판단하다",
+     "top"
+    ],
+    [
+     "comfortable",
+     "편안한",
+     "bottom"
+    ],
+    [
+     "spouse",
+     "배우자",
+     "bottom"
+    ]
+   ]
+  },
+  {
+   "sid": 4,
+   "chunks": [
+    0
+   ],
+   "pkey": [
+    4
+   ],
+   "lines": [
+    "So I think knowing myself",
+    "matters more than knowing the other person."
+   ],
+   "ko": "그래서 상대를 아는 것보다 나 자신을 아는 것이 더 중요하다고 생각한다.",
+   "hl": "matters more than",
+   "cards": [
+    "matter more than"
+   ],
+   "bubbles": [
+    [
+     "knowing",
+     "아는 것",
+     "top"
+    ],
+    [
+     "other",
+     "상대방",
+     "bottom"
+    ]
+   ],
+   "chips": [
+    "knowing myself matters more than"
+   ]
+  }
+ ],
+ "note": {
+  "main": "노트에 직접 써 보면\n훨씬 도움돼요 ✍️",
+  "sub": "오늘 일기 속 표현으로 한 줄씩!"
+ },
+ "thumbs": [
+  {
+   "name": "썸네일_A_주제.jpg",
+   "lines": [
+    "나를 아는 게",
+    "먼저예요"
+   ],
+   "hl_idx": 1,
+   "pkey": [
+    2,
+    2
+   ],
+   "zoom": 1.0,
+   "chips": [
+    "feel uneasy",
+    "be myself",
+    "put up with"
+   ],
+   "foot": "",
+   "maxsz": 112
+  },
+  {
+   "name": "썸네일_B_질문.jpg",
+   "lines": [
+    "‘나도 모르게’",
+    "영어로?"
+   ],
+   "hl_idx": 1,
+   "pkey": [
+    1
+   ],
+   "zoom": 1.0,
+   "chips": [],
+   "foot": "정답은 영상 안에 있어요"
+  }
+ ],
+ "meta": {
+  "intro": "상대를 아는 것보다, 나를 아는 게 먼저였다. 🪞",
+  "titles": [
+   "좋은 사람인데 왜 만나고 오면 찜찜할까? | 영어일기 | feel uneasy, be myself",
+   "나다울 수 없는 관계라면… 영어로 쓰는 마음 일기 (영어 표현 7개)",
+   "‘나도 모르게’ 영어로? 나를 아는 게 먼저인 이유 | 지나쌤 영어일기"
+  ],
+  "chapters": [
+   {
+    "at": 1,
+    "title": "좋은 사람인지보다 중요한 것 (찜찜한 만남)"
+   },
+   {
+    "at": 3,
+    "title": "부부로 지내도 몰랐던 것, 나를 아는 게 먼저"
+   },
+   {
+    "at": "recap",
+    "title": "오늘의 표현 복습 + 노트에 써 보기"
+   }
+  ],
+  "alt_emoji": {
+   "1": "🤔",
+   "2": "😣",
+   "3": "💍",
+   "4": "🪞"
+  }
+ },
+ "timing": {
+  "card": 2.8,
+  "step": 6.0
+ }
+}

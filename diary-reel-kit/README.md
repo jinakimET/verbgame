@@ -33,13 +33,23 @@ python3 covers.py episodes/<주제>/cover.json
 → `표지_<주제>.png` + `cover_prev.jpg`. 형식은 `covers.py` 맨 위 설명 참고.
 키워드·영어 줄이 화면 폭을 넘으면 경고가 뜹니다.
 
+## 에피소드 전환 (여러 편 작업)
+각 편의 설정은 `episodes/<이름>/config/` (timing·episode_cfg·palette·exprs)에 보관한다.
+```
+python3 use_episode.py <이름>          # 그 편 설정을 kit 루트로 복사 + voice.mp3·photos 연결
+python3 use_episode.py <이름> --save   # 지금 kit 루트 설정을 그 편 config 로 보관
+python3 make_audio.py && python3 render3.py sheet "1,5,10" && python3 render3.py video
+```
+쇼츠 길이(DUR/END_T0/LOOP_T0)는 `episode_cfg.py` 에 있다 (DUR = 마지막 발화끝 + 0.25 + 0.23 + 5.55).
+
 ## 유튜브 롱폼 (7번)
 쇼츠 완성 후 같은 에피소드 폴더에서:
 ```
 python3 youtube16.py episodes/<주제> all      # frames | audio | video | thumbs | meta 개별 실행도 가능
 ```
 - 영상에서 뽑지 않고 `timing.py`·`episode_cfg.py`·`palette.py`·`exprs.py`·`voice.mp3`·`photos/` 를 직접 읽음
-- 에피소드마다 `youtube.json` 만 새로 작성: 화면 분할(clause 단위), 한글 분할, 말풍선(임의 선택→확인 필요), 노트 안내 문구
+- 에피소드마다 `youtube.json` 만 새로 작성: 화면 분할(clause 단위), 한글 분할, 말풍선(임의 선택→확인 필요), 노트 안내 문구, 썸네일 문구, 제목·챕터
+  (`cards`/`hl` 은 리스트 가능: 한 화면에 카드 2개, `chips` 는 복습 블록용 짧은 예문, `timing` 으로 카드·복습 시간 조정)
 - 구성: 문장 화면 → 표현 카드(3초) → 복습(표현 2개씩 2블록 강조, 마지막 노트 안내). BGM 없음, 음성은 원본 voice.mp3 조각만
 - 결과: `episodes/<주제>/youtube/` 에 mp4, 썸네일 A/B, youtube_meta.md(제목·설명란·챕터)
 - 쇼츠용 `render*.py` 는 이제 `palette.py`·`exprs.py` 를 읽음 (에피소드마다 이 둘만 교체하면 롱폼도 같이 바뀜)
