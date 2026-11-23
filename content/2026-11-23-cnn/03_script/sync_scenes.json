@@ -1,0 +1,54 @@
+{
+ "audio": "audio/voice_full.mp3",
+ "note": "Each scene = one item read as term -> example_en -> example_ko, no intro/outro. Line texts match the recorded audio exactly. split_at = number of words on the first display line (words[:split_at] / words[split_at:]); omitted when the sentence is 6 words or fewer. Splits never cut the highlight.",
+ "scenes": [
+  {"scene":1,"expr_id":"01","term":"fail to agree on","meaning_ko":"~에 합의하지 못하다","lines":[
+   {"role":"term","text":"fail to agree on"},
+   {"role":"example_en","text":"The two teams failed to agree on a new schedule.","highlight":"failed to agree on","split_at":3},
+   {"role":"example_ko","text":"두 팀은 새 일정에 합의하지 못했다."}]},
+  {"scene":2,"expr_id":"02","term":"consensus","meaning_ko":"합의, 의견 일치","lines":[
+   {"role":"term","text":"consensus"},
+   {"role":"example_en","text":"There is no consensus on the plan yet.","highlight":"consensus","split_at":4},
+   {"role":"example_ko","text":"그 계획에 대한 합의는 아직 없다."}]},
+  {"scene":3,"expr_id":"03","term":"endorse","meaning_ko":"지지하다, 승인하다","lines":[
+   {"role":"term","text":"endorse"},
+   {"role":"example_en","text":"The board refused to endorse the deal.","highlight":"endorse","split_at":3},
+   {"role":"example_ko","text":"이사회는 그 거래 승인을 거부했다."}]},
+  {"scene":4,"expr_id":"04","term":"move away from","meaning_ko":"~에서 벗어나다","lines":[
+   {"role":"term","text":"move away from"},
+   {"role":"example_en","text":"Companies are moving away from plastic.","highlight":"moving away from"},
+   {"role":"example_ko","text":"기업들이 플라스틱에서 벗어나고 있다."}]},
+  {"scene":5,"expr_id":"05","term":"at the highest level since","meaning_ko":"~ 이후 최고 수준인","lines":[
+   {"role":"term","text":"at the highest level since"},
+   {"role":"example_en","text":"Prices are at the highest level since 2008.","highlight":"at the highest level since","split_at":2},
+   {"role":"example_ko","text":"물가가 2008년 이후 최고 수준이다."}]},
+  {"scene":6,"expr_id":"06","term":"undercount","meaning_ko":"실제보다 적게 센 수","lines":[
+   {"role":"term","text":"undercount"},
+   {"role":"example_en","text":"It's likely an undercount.","highlight":"undercount"},
+   {"role":"example_ko","text":"실제보다 적게 센 수일 가능성이 크다."}]},
+  {"scene":7,"expr_id":"07","term":"leverage","meaning_ko":"영향력, 협상력","lines":[
+   {"role":"term","text":"leverage"},
+   {"role":"example_en","text":"Low sales weakened our leverage in talks.","highlight":"leverage","split_at":3},
+   {"role":"example_ko","text":"낮은 매출이 협상에서 우리의 힘을 약하게 했다."}]},
+  {"scene":8,"expr_id":"08","term":"push A toward B","meaning_ko":"A를 B 쪽으로 몰아가다","lines":[
+   {"role":"term","text":"push A toward B"},
+   {"role":"example_en","text":"Rising costs could push the company toward layoffs.","highlight":"push the company toward","split_at":3},
+   {"role":"example_ko","text":"비용 상승이 회사를 감원으로 몰 수 있다."}]},
+  {"scene":9,"expr_id":"09","term":"put ~ in jeopardy","meaning_ko":"~을 위태롭게 하다","lines":[
+   {"role":"term","text":"put ~ in jeopardy"},
+   {"role":"example_en","text":"The heavy rain could put the outdoor concert in jeopardy.","highlight":"put the outdoor concert in jeopardy","split_at":4},
+   {"role":"example_ko","text":"폭우로 야외 콘서트가 위태로워질 수 있다."}]},
+  {"scene":10,"expr_id":"10","term":"disrupt","meaning_ko":"방해하다, 지장을 주다","lines":[
+   {"role":"term","text":"disrupt"},
+   {"role":"example_en","text":"Storms may disrupt flights.","highlight":"disrupt"},
+   {"role":"example_ko","text":"폭풍이 항공편에 지장을 줄 수 있다."}]},
+  {"scene":11,"expr_id":"11","term":"nonessential","meaning_ko":"꼭 필요하지 않은","lines":[
+   {"role":"term","text":"nonessential"},
+   {"role":"example_en","text":"Please avoid nonessential trips this week.","highlight":"nonessential"},
+   {"role":"example_ko","text":"이번 주에는 불필요한 외출을 피해 주세요."}]},
+  {"scene":12,"expr_id":"12","term":"from coast to coast","meaning_ko":"전국 곳곳에서","lines":[
+   {"role":"term","text":"from coast to coast"},
+   {"role":"example_en","text":"The new phone is selling out from coast to coast.","highlight":"from coast to coast","split_at":6},
+   {"role":"example_ko","text":"새 휴대폰이 전국 곳곳에서 품절되고 있다."}]}
+ ]
+}
