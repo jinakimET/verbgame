@@ -1,2 +1,3 @@
 content/**/silent*.mp4
 content/**/*.tmp.mp4
+__pycache__/

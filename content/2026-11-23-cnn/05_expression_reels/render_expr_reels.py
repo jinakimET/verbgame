@@ -199,17 +199,27 @@ def bird_parts():
     ring &= ~mm & (A > 200)
     fur = np.median(a[ring][:, :3], axis=0).astype(np.uint8)
     body = a.copy().astype(np.uint8)
-    body[mm, :3] = fur
-    body_img = Image.fromarray(body).filter(ImageFilter.GaussianBlur(0))
-    # soften the patch slightly so no hard seam
-    patch = Image.fromarray(body).filter(ImageFilter.GaussianBlur(2.0))
+    # fill beak area column by column: blend fur just above and just below (keeps fur texture tone)
+    ya, yb = max(0, y0 - 6), min(a.shape[0] - 1, y1 + 8)
+    for x in range(max(0, x0 - 3), min(a.shape[1], x1 + 4)):
+        top_c = a[max(0, ya - 3):ya + 1, x, :3].mean(0); bot_c = a[yb:yb + 4, x, :3].mean(0)
+        for y in range(ya, yb + 1):
+            if mm[y, x]:
+                t = (y - ya) / max(1, yb - ya)
+                body[y, x, :3] = np.clip((1 - t) * top_c + t * bot_c, 0, 255)
+    body_img = Image.fromarray(body)
+    patch = body_img.filter(ImageFilter.GaussianBlur(1.5))
     pm = Image.fromarray((mm * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.5))
     body_img.paste(patch, (0, 0), pm)
-    beak = np.zeros_like(a, dtype=np.uint8); beak[mm] = a[mm]
-    beak_img = Image.fromarray(beak)
+    # beak pieces with soft alpha
+    soft = np.array(Image.fromarray((mm * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8))).astype(np.float64) / 255
+    beak = a.copy().astype(np.float64); beak[..., 3] = A * soft
+    beak_img = Image.fromarray(beak.astype(np.uint8))
     top = beak_img.copy(); top.paste((0, 0, 0, 0), (0, mid, top.width, top.height))
     bot = beak_img.copy(); bot.paste((0, 0, 0, 0), (0, 0, bot.width, mid))
-    _bird.update(body=body_img, top=top, bot=bot, mid=mid, box=(x0, y0, x1, y1), fur=tuple(int(v) for v in fur))
+    cols = np.nonzero(m[mid - 1:mid + 2].any(0))[0]
+    mouth_x = (int(cols.min()), int(cols.max()))
+    _bird.update(mouth_x=mouth_x, body=body_img, top=top, bot=bot, mid=mid, box=(x0, y0, x1, y1), fur=tuple(int(v) for v in fur))
     return _bird
 
 _bird_cache = {}
@@ -221,9 +231,8 @@ def bird_sprite(a):
     open_px = 12 * q
     im = P["body"].copy()
     if q > 0:
-        e = int(round(open_px + 6)); cx = (x0 + x1) / 2
-        d = ImageDraw.Draw(im)
-        d.ellipse((cx - (x1 - x0) * 0.32, mid - 2, cx + (x1 - x0) * 0.32, mid - 2 + e), fill=(70, 25, 30, 255))
+        e = int(round(open_px + 6)); mx0, mx1 = P["mouth_x"]
+        ImageDraw.Draw(im).rounded_rectangle((mx0 + 3, mid - 3, mx1 - 3, mid - 3 + e), radius=e // 2, fill=(70, 25, 30, 255))
     im.alpha_composite(P["bot"], (0, int(round(open_px))))
     im.alpha_composite(P["top"])
     sc = BIRD_H / im.height
