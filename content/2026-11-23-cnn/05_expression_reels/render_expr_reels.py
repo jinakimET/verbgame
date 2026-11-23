@@ -175,6 +175,86 @@ def make_base(card):
     img = img.convert("RGBA"); img.alpha_composite(ov)
     return img
 
+
+# ---------------- talking bird (reel-voice-glass-sync 말하는 캐릭터) ----------------
+BIRD_PNG = "/home/user/verbgame/content/assets/bird_sprite.png"
+BIRD_CX, BIRD_H = 720, 240           # same in all 12 reels; right edge stays < 850
+BIRD_BOTTOM = PY0 + 6                 # sits on the panel's top edge
+_bird = {}
+def bird_parts():
+    if _bird: return _bird
+    im = Image.open(BIRD_PNG).convert("RGBA"); a = np.array(im).astype(np.int32)
+    R, G, B, A = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
+    m = np.zeros(R.shape, bool)
+    win = (R > 170) & (R - G > 40) & (R - B > 50) & (A > 100)
+    m[80:141, 130:236] = win[80:141, 130:236]          # beak only inside the face window
+    ys, xs = np.nonzero(m)
+    y0, y1, x0, x1 = ys.min(), ys.max(), xs.min(), xs.max()
+    mid = (y0 + y1) // 2
+    # grow the beak mask by 2 px to catch the soft edge
+    mm = Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(5))
+    mm = np.array(mm) > 0
+    # fur colour: median of opaque pixels in a ring just around the beak
+    ring = np.zeros_like(m); ring[max(0, y0 - 14):y1 + 15, max(0, x0 - 14):x1 + 15] = True
+    ring &= ~mm & (A > 200)
+    fur = np.median(a[ring][:, :3], axis=0).astype(np.uint8)
+    body = a.copy().astype(np.uint8)
+    body[mm, :3] = fur
+    body_img = Image.fromarray(body).filter(ImageFilter.GaussianBlur(0))
+    # soften the patch slightly so no hard seam
+    patch = Image.fromarray(body).filter(ImageFilter.GaussianBlur(2.0))
+    pm = Image.fromarray((mm * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.5))
+    body_img.paste(patch, (0, 0), pm)
+    beak = np.zeros_like(a, dtype=np.uint8); beak[mm] = a[mm]
+    beak_img = Image.fromarray(beak)
+    top = beak_img.copy(); top.paste((0, 0, 0, 0), (0, mid, top.width, top.height))
+    bot = beak_img.copy(); bot.paste((0, 0, 0, 0), (0, 0, bot.width, mid))
+    _bird.update(body=body_img, top=top, bot=bot, mid=mid, box=(x0, y0, x1, y1), fur=tuple(int(v) for v in fur))
+    return _bird
+
+_bird_cache = {}
+def bird_sprite(a):
+    """a: mouth openness 0..1 (quantised). Returns (sprite, x, y) on the 1080x1920 canvas."""
+    q = round(a * 20) / 20
+    if q in _bird_cache: return _bird_cache[q]
+    P = bird_parts(); x0, y0, x1, y1 = P["box"]; mid = P["mid"]
+    open_px = 12 * q
+    im = P["body"].copy()
+    if q > 0:
+        e = int(round(open_px + 6)); cx = (x0 + x1) / 2
+        d = ImageDraw.Draw(im)
+        d.ellipse((cx - (x1 - x0) * 0.32, mid - 2, cx + (x1 - x0) * 0.32, mid - 2 + e), fill=(70, 25, 30, 255))
+    im.alpha_composite(P["bot"], (0, int(round(open_px))))
+    im.alpha_composite(P["top"])
+    sc = BIRD_H / im.height
+    sx, sy = sc * (1 + 0.015 * q), sc * (1 - 0.025 * q)
+    w, h = int(round(im.width * sx)), int(round(im.height * sy))
+    spr = im.resize((w, h), Image.LANCZOS)
+    res = (spr, int(BIRD_CX - w / 2), BIRD_BOTTOM - h)        # bottom-anchored squash
+    _bird_cache[q] = res
+    return res
+
+def mouth_env(clip0, dur, total):
+    """per-frame mouth openness from this clip's own audio RMS; 0 outside the audio window."""
+    raw = subprocess.run(["ffmpeg", "-loglevel", "error", "-ss", f"{clip0:.3f}", "-t", f"{dur:.3f}",
+                          "-i", f"{ROOT}/audio/voice_full.mp3", "-ac", "1", "-ar", "8000", "-f", "s16le", "-"],
+                         capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, np.int16).astype(np.float64)
+    spf = 8000 / FPS; n = int(len(x) / spf)
+    rms = np.array([np.sqrt(np.mean(x[int(i * spf):int((i + 1) * spf)] ** 2)) for i in range(n)])
+    ref = np.percentile(rms, 90) or 1.0
+    v = np.clip(rms / ref, 0, 1) ** 0.8
+    v[v < 0.08] = 0
+    env = np.zeros(int(round(total * FPS)) + 2)
+    off = int(round(HOOK_PAD * FPS)); prev = 0.0
+    for i in range(len(env)):
+        j = i - off
+        tgt = v[j] if 0 <= j < n else 0.0
+        prev = tgt if tgt >= prev else prev * 0.6
+        if prev < 0.02: prev = 0.0
+        env[i] = prev
+    return env
+
 # ---------------- beats ----------------
 def chip(label, col, fg):
     f = font(FBOLD, 30); tw, tb = text_size(f, label)
@@ -328,8 +408,10 @@ def alpha_mul(img, a):
     if a >= 0.999: return img
     r = img.copy(); r.putalpha(r.getchannel("A").point(lambda v: int(v * a))); return r
 
-def frame(base, R, now):
+def frame(base, R, now, mouth=0.0):
     img = base.copy()
+    bs, bx_, by_ = bird_sprite(mouth)
+    img.alpha_composite(bs, (bx_, by_))
     cur = [b for b in R["beats"] if b[0] <= now + 1e-6][-1]
     _, els, boxes = cur
     def put(spr, x, y, t0):
@@ -364,8 +446,9 @@ def render(eid):
            "-pix_fmt", "yuv420p", "-threads", "2", "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
            "-t", f"{R['total']:.3f}", "-movflags", "+faststart", out]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+    env = mouth_env(tm["clip0"], R["audio_len"], R["total"])
     for i in range(nfr):
-        p.stdin.write(frame(base, R, i / FPS).convert("RGB").tobytes())
+        p.stdin.write(frame(base, R, i / FPS, env[i]).convert("RGB").tobytes())
     p.stdin.close(); p.wait()
     if p.returncode: raise RuntimeError(f"ffmpeg failed {eid}")
     os.makedirs(FR, exist_ok=True)
