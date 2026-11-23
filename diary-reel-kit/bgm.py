@@ -1,6 +1,6 @@
 import numpy as np, wave
 SR = 44100
-DUR = 37.0
+DUR = 27.1
 t = np.arange(int(SR * DUR)) / SR
 def hz(n): return 440 * 2 ** ((n - 69) / 12)
 # Fmaj7  Em7  Dm7  Cmaj7  (midi notes), 2 bars each at 80bpm -> 3s per chord

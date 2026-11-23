@@ -1,3 +1,12 @@
 episodes/*/out*.mp4
 episodes/*/*.wav
 __pycache__/
+voice.mp3
+photos
+*.wav
+out*.mp4
+sheet*.jpg
+v5_*.jpg
+still_*.jpg
+bgm.wav
+episodes/*/*.mp4

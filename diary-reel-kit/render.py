@@ -7,19 +7,19 @@ sys.path.insert(0, _HERE)
 from timing import build
 from mouth import warp, CH as CHAR0
 
-W, H, FPS, DUR = 1080, 1920, 30, 37.0
+W, H, FPS, DUR = 1080, 1920, 30, 27.1
 ROOT = _HERE + "/"
 
-# ---------- palette (autumn) ----------
-BG = (251, 249, 236)
-INK = (24, 96, 73)
-INK_SOFT = (92, 132, 116)
-LAV = (74, 148, 62)
-ROSE = (217, 131, 39)
-MARK = (236, 226, 150)
+# ---------- palette (Color Hunt 1E3B2F 7F8C6A C8B48A F5F0E6) ----------
+BG = (245, 240, 230)
+INK = (30, 59, 47)
+INK_SOFT = (96, 112, 102)
+LAV = (127, 140, 106)
+ROSE = (127, 140, 106)
+MARK = (200, 180, 138)
 CARD = MARK
-SUN = (236, 232, 175)
-LEAVES = [(217, 98, 43), (227, 167, 47), (164, 74, 63), (196, 120, 50)]
+SUN = (232, 222, 200)
+LEAVES = [(127, 140, 106), (200, 180, 138), (30, 59, 47), (160, 150, 110)]
 WHITE = (255, 252, 246)
 
 F = "/usr/share/fonts/opentype/inter/"
@@ -265,8 +265,8 @@ def draw_label(img, alpha=1.0):
     img.alpha_composite(lay)
 
 # ---------- ending panel ----------
-END_T0 = 31.45
-LOOP_T0 = 36.25
+END_T0 = 21.54
+LOOP_T0 = 26.35
 END_LINES = [
     ("The sky looks so high and my mood is good, but my body is dragging a little.",
      ["dragging", "a", "little."], "하늘은 높고 기분은 좋은데, 몸은 조금 가라앉는다."),

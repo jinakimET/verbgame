@@ -46,9 +46,9 @@ def mixed_w(text, font, esize=None): return draw_mixed(None, (0, 0), text, font,
 # ---------------- per-scene emoji ----------------
 # one sticker pair per display unit (sentence id, unit index)
 STICKERS = {}
-KO_EMO = {1: " 📱", 2: " 🥲", 3: " 🤖", 4: " 💻", 5: " ✍️", 6: " 🎁"}
-CARD_EMO = {"scroll through": "📱", "come up with": "💡", "make someone feel small": "🥲", "come down to ~": "🎯",
-            "handle ~": "🎬", "pay for nicer packaging": "🎁", "cultivate one's value": "🌱"}
+KO_EMO = {1: " 🤝", 2: " 🎭", 3: " 🚪", 4: " 🔁", 5: " 🪞"}
+CARD_EMO = {"give someone a second chance": "🤝", "bury the old wounds": "🪦", "time heals": "🩹", "true colors": "🎭",
+            "there's no going back": "🚪", "people never change": "🔁", "be no different": "🪞"}
 
 def split_emo(s): return [p for p in EMO_RE.split(s) if p and EMO_RE.fullmatch(p)]
 
@@ -65,8 +65,8 @@ def make_bg():
     return im.convert("RGBA")
 BGIMG = make_bg()
 
-FALL = [("✨", 44, 110, 0.00, 2), ("💡", 50, 930, 0.30, 3), ("📱", 44, 300, 0.55, 2), ("❤️", 46, 800, 0.75, 4),
-        ("✨", 38, 60, 0.42, 3), ("💡", 44, 1010, 0.12, 2), ("❤️", 36, 560, 0.88, 3), ("📱", 38, 690, 0.20, 2)]
+FALL = [("🩹", 44, 110, 0.00, 2), ("💭", 50, 930, 0.30, 3), ("🍃", 44, 300, 0.55, 2), ("✨", 46, 800, 0.75, 4),
+        ("💭", 38, 60, 0.42, 3), ("🩹", 44, 1010, 0.12, 2), ("🍃", 36, 560, 0.88, 3), ("✨", 38, 690, 0.20, 2)]
 def draw_falling(img, t, alpha=0.6):
     span = H + 240
     for ch, sz, x0, ph, m in FALL:
@@ -361,13 +361,13 @@ def draw_top(img, t, alpha=1.0):
         elif k == cur: d.rounded_rectangle((x - 13, y - 7, x + 13, y + 7), radius=7, fill=INK + (a,))
         else: d.ellipse((x - 7, y - 7, x + 7, y + 7), outline=INK_SOFT + (a,), width=2)
 
-EXPRS = [("📱", "scroll through", "훑어보다, 스크롤하다"),
-         ("💡", "come up with", "(아이디어를) 떠올리다"),
-         ("🥲", "make someone feel small", "작아지게 만들다"),
-         ("🎯", "come down to ~", "결국 ~의 문제로 귀결되다"),
-         ("🎬", "handle ~", "~을 맡아서 처리하다"),
-         ("🎁", "pay for nicer packaging", "포장에 돈을 쓰다"),
-         ("🌱", "cultivate one's value", "자신의 가치를 가꾸다")]
+EXPRS = [("🤝", "give someone a second chance", "다시 기회를 주다"),
+         ("🪦", "bury the old wounds", "오래된 상처를 묻다"),
+         ("🩹", "time heals", "시간이 치유해 주다"),
+         ("🎭", "true colors", "본성, 진짜 모습"),
+         ("🚪", "there's no going back", "돌이킬 수 없다"),
+         ("🔁", "people never change", "사람은 안 변한다"),
+         ("🪞", "be no different", "다르지 않다")]
 FX_EN = inter(46, "Bold"); FX_KO = kr(32, True); FX_T = kr(54); FX_N = inter(26, "Bold"); FX_F = kr(28, True)
 PX, PY, PW, PH = 60, 250, 960, 1360
 ROW0, ROWH = 450, 150
