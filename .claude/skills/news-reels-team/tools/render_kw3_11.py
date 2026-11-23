@@ -334,7 +334,7 @@ def beat_meaning(img, now):
     chip_y = 470
     slide(img, now, t0, tsprite(term, s, "chrome", stroke=7), SAFE_CX, chip_y, 0, 0.01)
     wn = f.getlength("non")
-    pline(img, ellipse_pts(x0 + wn / 2, chip_y + 4, wn / 2 + 12, 62, -90), 9, SCARLET, e_io((now - WT(18)) / 0.5), outline=4)
+    pline(img, ellipse_pts(x0 + wn / 2 - 6, chip_y + 4, wn / 2 + 4, 62, -90), 9, SCARLET, e_io((now - WT(18)) / 0.5), outline=4)
     pline(img, [(x0 + wn + 6, chip_y + 66), (x0 + tot, chip_y + 66)], 7, CYAN, e_io((now - WT(18) - 0.45) / 0.45))
     # yellow block
     pp = e_out(clamp((now - t0) / 0.3)); bx1 = 62 + int(788 * pp)

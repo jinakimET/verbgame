@@ -243,7 +243,7 @@ def scene_hook(canvas, t):
     pulse = 1.0 + 0.04 * math.sin(t * 5.0) + 0.10 * bump
     s = 1.0 + 0.05 * bump
     sl = eback(t / 0.30) if t < 0.30 else 1.0
-    sc = (1.0 + 0.30 * (1 - sl)) * s
+    sc = (1.0 + 0.10 * (1 - sl)) * s
     gb = cv2.GaussianBlur(np.asarray(G3.resize((max(1, int(GW * sc)), max(1, int(GH * sc))), Image.BILINEAR)).astype(np.float32) / 255, (0, 0), 9)
     gh, gw = gb.shape; pad_img = np.zeros((GH, GW), np.float32); oy, ox = (GH - gh) // 2, (GW - gw) // 2
     if oy >= 0 and ox >= 0: pad_img[oy:oy + gh, ox:ox + gw] = gb
@@ -252,14 +252,20 @@ def scene_hook(canvas, t):
     # "척": solid counter word beside the dots (slides in at frame 0, visible from the first frame)
     f = font(FB, 230); ch = txt_layer("\ucc99", f, LAV); pc = eout(t / 0.25)
     paste(canvas, ch, 618 + 40 * (1 - pc), G3Y + GH - 60 - ch.height, alpha=1.0)
-    # sub label
-    sf = font(FB, 58); lab = txt_layer("\uc774\ud2c0 \uc0ac\uc774 \uacf5\uaca9\ubc1b\uc740 \uc720\uc870\uc120", sf, WHITE)
-    la = ease(t / 0.35); paste(canvas, lab, 62 + 14 * (1 - la), G3Y + GH + 6, alpha=1.0)
+    # sub label: whole sentence visible at frame 0 as ghost, each word lights up at its spoken start
+    sf = fit_font(FB, "\uc774\ud2c0 \uc0ac\uc774 \uacf5\uaca9\ubc1b\uc740 \uc720\uc870\uc120\uc774\uc5d0\uc694.", 788, 54, 44)
+    parts = [("\uc774\ud2c0", 1), ("\uc0ac\uc774", 2), ("\uacf5\uaca9\ubc1b\uc740", 3), ("\uc720\uc870\uc120\uc774\uc5d0\uc694.", 4)]
+    spc = int(sf.size * 0.28); x = 62
+    for w_, idx in parts:
+        p = ease((t - words[idx]["s"]) / 0.15); tl = txt_layer(w_, sf, mix(mix(DEEP, LAV, .42), WHITE, p))
+        paste(canvas, tl, x, G3Y + GH + 6 - 5 * p, alpha=1.0, scale=1.0); x += tl.width + spc
     # tankers
     lay = IsoLayer(720, 330)
     for i, (tx, ty) in enumerate(TK_POS):
         p = (t - TK_T[i]) / 0.30
-        if p < 0: continue
+        if p < 0:
+            gl = IsoLayer(720, 330); draw_tanker(gl, tx, ty + 70, mix(DEEP, LAV, .35)); gi = gl.out(); gi.putalpha(gi.getchannel("A").point(lambda v: int(v * .28)))
+            lay.im.alpha_composite(gi.resize(lay.im.size)); continue
         yoff = (1 - eback(p)) * -140 if p < 1 else 0
         yb = yoff + math.sin(t * 2.2 + i * 1.7) * 5
         draw_tanker(lay, tx, ty + 70 + yb, TK_COL[i])
@@ -304,10 +310,11 @@ def bars_layer(t, tstart):
     for i in range(6):
         p = ease((t - tstart - i * 0.17) / 0.65)
         h = BAR_H[i] * UNIT * p
-        if h < 1: continue
+        if h < 1: h = UNIT * 0.5 * (0.6 + 0.4 * math.sin(t * 6 + i)); cc = mix(DEEP, LAV, .3)
+        else: cc = None
         ox, oy = iso_pt2(i * 72, 0, 0, OX, OY)  # base corner
         n = int(h // UNIT); rem = h - n * UNIT
-        c = cols[i]
+        c = cc or cols[i]
         for j in range(n):
             lay.box(ox, oy, 62, 62, UNIT - 3, j * UNIT, shades(c), iso_pt)
         if rem > 4: lay.box(ox, oy, 62, 62, rem - 3 if rem > 6 else rem, n * UNIT, shades(c), iso_pt)
@@ -340,6 +347,8 @@ def scene_term(canvas, t):
             for (w_, idx), wd in zip(row, ws_):
                 p = (t - words[idx]["s"]) / 0.18
                 col = MANGO if w_ == "highest" else WHITE
+                if p <= 0:
+                    gt = txt_layer(w_, pf, mix(DEEP, LAV, .4)); im.alpha_composite(gt, (x, 34 + r * 114 + (gt.height - gt.height) // 2))
                 if p > 0:
                     tl = txt_layer(w_, pf, col); sc = 1 + 0.35 * (1 - eout(p)) if p < 1 else 1
                     tl2 = tl.resize((int(tl.width * sc), int(tl.height * sc)), Image.BILINEAR)
@@ -418,6 +427,8 @@ def scene_en(canvas, t):
                 bim = lay2.out().crop((0, 0, max(1, bw), 128)); im.alpha_composite(bim, (x - 22, y + r * lh - 8 - 6))
         for (w_, idx), wd in zip(row, ws_):
             p = (t - words[idx]["s"]) / 0.16
+            if p <= 0:
+                gt = txt_layer(w_, pf, mix(GRAPE, LAV, .4)); im.alpha_composite(gt, (x, y + r * lh + (92 - gt.height) // 2 + 6))
             if p > 0:
                 col = DEEP if r in hl_rows else WHITE
                 tl = txt_layer(w_, pf, col); dy = int(18 * (1 - eout(p)))
@@ -427,10 +438,10 @@ def scene_en(canvas, t):
     paste(canvas, im, SX0, 306 + 24 * (1 - pa), alpha=pa)
     # big halftone 2008
     tp = t - ws(30)
-    if tp > -0.02:
+    if True:
         grow = eback(tp / 0.45) if tp < 0.45 else 1.0
         pulse = 1.0 + 0.05 * math.sin(t * 5.5)
-        halftone_glyph(canvas, G2HT, _g20, _g20col, G2X, G2Y, t, pulse * max(grow, 0.01), rmax=0.66)
+        halftone_glyph(canvas, G2HT, _g20, _g20col, G2X, G2Y, t, pulse * (max(grow, 0.01) if tp > -0.02 else 0.35), rmax=0.66)
         pass
     else:
         lbl = None
@@ -455,6 +466,7 @@ def scene_ko(canvas, t):
                 paste(canvas, lay.out().crop((0, 0, max(1, int(bwid * bp)), lh - 8)), x - 20, y0 + r * lh - 8, alpha=1)
         for (w_, idx), wd in zip(row, ws_):
             p = (t - words[idx]["s"]) / 0.16
+            if p <= 0: paste(canvas, txt_layer(w_, pf, mix(LAV, GRAPE, .35)), x, y0 + r * lh + 4)
             if p > 0:
                 tl = txt_layer(w_, pf, DEEP); paste(canvas, tl, x, y0 + r * lh + 18 * (1 - eout(p)) + (pf.size - tl.height) // 2 + 4, alpha=min(1, p))
             x += wd + sp

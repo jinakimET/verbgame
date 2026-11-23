@@ -204,7 +204,7 @@ def bird_scene(frame, t, env, cx, bottom, scale=1.0):
 # ---------------------------------------------------------------- scene content
 F_HOOK = font("Black", 98)
 F_TERM_ANS = font("Black", 84)
-F_EN = font("Bold", 64); F_EN_S = font("Bold", 54); F_KO = font("Bold", 54)
+F_EN = font("Bold", 58); F_EN_S = font("Bold", 54); F_KO = font("Bold", 54)
 F_MEAN = font("Black", 128)
 F_SMALL = font("Black", 52)
 F_HANDLE = font("Bold", 38); F_PILL = font("Bold", 36)

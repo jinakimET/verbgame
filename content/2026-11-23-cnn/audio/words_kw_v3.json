@@ -1057,7 +1057,7 @@
     "end": 3.84,
     "first_word_idx": 0,
     "n_words": 9,
-    "on_screen": "이 단어 모르면 절대 안 돼요!"
+    "on_screen": "이 단어 모르면 절대 안 됩니다!"
    },
    {
     "role": "term",

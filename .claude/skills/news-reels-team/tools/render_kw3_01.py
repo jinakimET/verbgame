@@ -78,8 +78,14 @@ def words_sprite(text, size, fg):  # transparent text only
 class El:
     def __init__(s, spr, cx, cy, t0, s0=2.0, rot0=10, idle=1.0, kind="slam", ph=0.0):
         s.spr, s.cx, s.cy, s.t0, s.s0, s.rot0, s.idle, s.kind, s.ph = spr, cx, cy, t0, s0, rot0, idle, kind, ph
+        s.ghost = None
 def draw_el(img, e, t, events):
-    if t < e.t0: return
+    if t < e.t0:
+        if e.ghost is not None:
+            ex = round(3 * math.sin(t * 17 + e.ph), 1)
+            g = e.ghost.get(1.0, ex)
+            img.paste(g, (int(e.cx + 5 * math.sin(t * 23 + e.ph) - g.width / 2), int(e.cy + 4 * math.sin(t * 19 + e.ph * 2) - g.height / 2)), g)
+        return
     p = (t - e.t0) / 0.3
     if p >= 1: sc, ex, a = 1.0, 0.0, 1.0
     else:
@@ -92,6 +98,9 @@ def draw_el(img, e, t, events):
 
 # ---------- beat layouts ----------
 ELS = [[] for _ in range(6)]
+def ghost(txt, size, ang, **kw):
+    g = block(txt, size, (40, 60, 85), OFF, ang, **kw)
+    g.src.putalpha(g.src.getchannel("A").point(lambda v: int(v * 0.5))); return g
 def hook():
     E = ELS[0]; size = 124
     def row_w(items): return sum(measure(t, size) + 68 for t, *_ in items) + 22 * (len(items) - 1)
@@ -105,7 +114,7 @@ def hook():
         x = xs0[ri]
         for (txt, bg, t0, ang) in r:
             spr = block(txt, size, INK, bg, ang); wbox = measure(txt, size) + 68
-            E.append(El(spr, x + wbox / 2, y, t0, 2.1, ang * 3, ph=ri + x)); x += wbox + 22
+            e = El(spr, x + wbox / 2, y, t0, 2.1, ang * 3, ph=ri + x); e.ghost = ghost(txt, size, ang); E.append(e); x += wbox + 22
         y += int(size * 1.18) + 36 + 12
     q = Sticker(250, 250, YEL, ["?"], 230, INK, angle=9, ol=10, sh=14, circle=True)
     E.append(El(q, 230, y + 70, -0.12, 2.6, -25, idle=2.0))
@@ -118,7 +127,7 @@ def term():
         while measure(txt, size) + 80 > 770 - xo - 14: size -= 4
         spr = block(txt, size, fg, bg, ang, padx=40, pady=26, ol=10, sh=16); w = measure(txt, size) + 80
         h = size * 1.18 + 52; cx = 62 + 14 + xo + w / 2
-        cy = y + h / 2; GH.append((cx, cy, w, h)); E.append(El(spr, cx, cy, t, 2.2, ang * -4, ph=y)); y += int(h) + 34
+        cy = y + h / 2; GH.append((cx, cy, w, h)); e = El(spr, cx, cy, t, 2.2, ang * -4, ph=y); e.ghost = ghost(txt, size, ang, padx=40, pady=26, ol=10, sh=16); E.append(e); y += int(h) + 34
     ELS[1] = E; ELS_GHOST[1] = GH
 def meaning():
     E = ELS[2]; t0 = BT[2]
@@ -306,6 +315,17 @@ def draw_ghosts(img, t):
                 for xa in range(int(x0), int(x1), 40): d.line((xa, y0, min(xa + 22, x1), y0), fill=OFF, width=6); d.line((xa, y1, min(xa + 22, x1), y1), fill=OFF, width=6)
                 for ya in range(int(y0), int(y1), 40): d.line((x0, ya, x0, min(ya + 22, y1)), fill=OFF, width=6); d.line((x1, ya, x1, min(ya + 22, y1)), fill=OFF, width=6)
 
+def make_icon():
+    k = 2; S = 700 * k; im = Image.new("RGBA", (S, S), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    for w, col in ((120, BLK), (70, VERM)):
+        for a, b in (((110, 110), (590, 590)), ((590, 110), (110, 590))):
+            d.line([(a[0] * k, a[1] * k), (b[0] * k, b[1] * k)], fill=col, width=w * k)
+    im.putalpha(im.getchannel('A').point(lambda v: int(v * 0.4))); return im
+ICON = make_icon()
+def draw_icon(img, t):
+    sc = (1 + 0.07 * math.sin(t * 6.5)) * 0.5; r = ICON.rotate(-8 + 5 * math.sin(t * 3.3), resample=Image.BICUBIC)
+    r = r.resize((int(r.width * sc), int(r.height * sc)), Image.LANCZOS)
+    img.paste(r, (int(500 - r.width / 2), int(720 - r.height / 2)), r)
 def wipe(img, t):
     for i, b in enumerate(BT[1:], 1):
         dt = t - b
@@ -318,7 +338,8 @@ def wipe(img, t):
 def frame(t, fi):
     bi = beat_idx(t); img = bg_frame(t); confetti(img, t)
     sl = shape_layer(t, SHAPE_COL[bi]); img.paste(sl, (SHAPE_CX - LS // 2, SHAPE_CY - LS // 2), sl)
-    wipe(img, t); draw_ghosts(img, t)
+    wipe(img, t)
+    if bi == 0: draw_icon(img, t)
     for e in ELS[bi]: draw_el(img, e, t, EVENTS)
     if bi == 5:
         t0 = BT[5]
@@ -329,7 +350,7 @@ def frame(t, fi):
     draw_bird(img, t, fi); draw_chrome(img)
     return img
 
-MARKS = {"hook_0.0": 0.0, "hook_0.3": 0.3, "hook_1.0": 1.0, "hook_end": 3.5, "term": 7.6, "meaning": 9.2, "example_en": 13.5,
+MARKS = {"hook_0.0": 0.0, "hook_0.3": 0.3, "hook_1.0": 1.0, "hook_end": 3.5, "term_wait": 5.0, "term": 7.6, "meaning": 9.2, "example_en": 13.5,
          "example_ko": 17.4, "payoff": 18.9}
 def render():
     os.makedirs(FR, exist_ok=True); nfr = int(round(TOTAL * FPS)); out = f"{OUT}/kw3_{RID}.mp4"

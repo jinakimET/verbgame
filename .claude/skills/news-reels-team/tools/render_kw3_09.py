@@ -166,7 +166,7 @@ HOOKL = [txt_clay("나 put in", 120), txt_clay("jeopardy야", 120)]
 def blob_sprite(a, t, mood="talk", with_text=False, look=(1, 0)):
     bs = BLOB.copy(); bs.alpha_composite(face(a, t, mood, look), (PAD + (BLOBW - 700) // 2, PAD + 22))
     if with_text:
-        for i, hs in enumerate(HOOKL): bs.alpha_composite(hs, (PAD + (BLOBW - hs.width) // 2 - 0 + 0, PAD + 222 + i * 122))
+        for i, hs in enumerate(HOOKL): bs.alpha_composite(hs, (PAD + (BLOBW - hs.width) // 2 - 0 + 0, PAD + 196 + i * 120))
     return bs
 def build_balloon():
     BWc, BHc = 560, 600
@@ -321,7 +321,7 @@ def card_layout(lines, sz, bg, plain, hl_bg, hl_fg, inner_w, line_h, padv=62, pa
         for (idx, t), wd in zip(wl, wds):
             items.append((txt_flat(t, sz, hl_fg if hl else plain), x - 6, y + (line_h - sz * 1.6) / 2 - 2, idx)); x += wd + sp
     return panel, items, pills
-def draw_card(img, now, t0, x, y, lay, bobamp=3, t=0):
+def draw_card(img, now, t0, x, y, lay, bobamp=3, t=0, ghost=False):
     panel, items, pills = lay; p = (now - t0) / .3; s = .88 + .12 * back(p); by = bobamp * math.sin(t * 2 + x)
     ps = scaled(panel, s) if p < 1 else panel
     put(img, ps, x - PAD + (panel.width - ps.width) / 2 + 0, y - PAD + (panel.height - ps.height) / 2 + by)
@@ -331,7 +331,9 @@ def draw_card(img, now, t0, x, y, lay, bobamp=3, t=0):
         sc = back(q); r = scaled(pl, max(.2, sc)); put(img, r, x - PAD + px + (pl.width - r.width) / 2, y - PAD + py + (pl.height - r.height) / 2 + by - 0)
     for spr, px, py, idx in items:
         q = (now - wstart(idx)) / .16
-        if q <= 0: continue
+        if q <= 0:
+            if ghost: put(img, fade(spr, .3), x - PAD + px, y - PAD + py + by)
+            continue
         put(img, fade(spr, q), x - PAD + px, y - PAD + py + by + 14 * (1 - min(1, q)))
 # example EN: fit font
 def fit_en():
@@ -348,6 +350,8 @@ def fit_en():
         if need <= 700: break
     return lines, sz
 EN_LINES, EN_SZ = fit_en()
+HK = [(i, w["t"]) for i, w in enumerate(words[4:10], 4)]
+HOOK2 = card_layout([(HK[:2], False), (HK[2:4], False), (HK[4:], False)], 50, CLOUD, NAVY, RED, CLOUD, 400, 76, padv=34, padh=50, align="center")
 EN_CARD = card_layout(EN_LINES, EN_SZ, CLOUD, NAVY, RED, CLOUD, 700, int(EN_SZ * 1.72))
 KO_TOK = spec["beats"][3]["on_screen"].split(); KO0 = 25
 KO_WORDS = [(KO0 + i, t) for i, t in enumerate(KO_TOK)]
@@ -397,10 +401,11 @@ def render(i):
     if role == "hook":
         draw_rain(ov, t, 0)
         pop = .82 + .18 * back(t / .3)
-        by = 1160; look = (math.cos(t * 2), math.sin(t * 1.3) * .5)
-        top = by - BLOBH * pop
-        draw_balloon(img, 640 + 6 * math.sin(t * 2.3), top + 14, .7 * pop, t, 1.0 + .5 * math.sin(t * 1.7))
-        draw_blob(img, 456, by, 1.0, a, t, with_text=True, pop=pop, look=look, dx=8 * math.sin(t * 4.1) * (1 if t < 5 else .4))
+        by = 1000; look = (math.cos(t * 2), math.sin(t * 1.3) * .5)
+        top = by - BLOBH * .85 * pop
+        draw_balloon(img, 640 + 6 * math.sin(t * 2.3), top + 14,   .6 * pop, t, 1.0 + .5 * math.sin(t * 1.7))
+        draw_blob(img, 456, by, .85, a, t, with_text=True, pop=pop, look=look, dx=8 * math.sin(t * 4.1) * (1 if t < 5 else .4))
+        draw_card(img, t, -1.0, 62, 1040, HOOK2, t=t, ghost=True)
     elif role == "meaning":
         pop = .8 + .2 * back(pp / .3)
         ybot = 760; draw_balloon(img, 330 + 5 * math.sin(t * 2.3), ybot - BLOBH * .45 * pop + 8, .45 * pop, t, .8)
