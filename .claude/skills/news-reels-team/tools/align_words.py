@@ -1,6 +1,6 @@
 import json, re, subprocess, sys
 from pocketsphinx import Decoder
-W=sys.argv[1] if len(sys.argv)>1 else '.'
+W=__import__('os').environ.get('NEWS_ROOT', sys.argv[1] if len(sys.argv)>1 else '.')
 mp3=W+'/audio/voice_full.mp3'
 ex=json.load(open(W+'/01_news/expressions.json'))
 dur=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',mp3]))

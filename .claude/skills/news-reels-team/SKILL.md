@@ -1,44 +1,37 @@
 ---
 name: news-reels-team
-description: "뉴스 검색 → 벤토 카드 → 음성 스크립트까지는 메인 Claude가 직접 만들고, 음성 mp3가 오면 싱크 릴스·표현별 릴스 렌더와 검수·푸시만 에이전트에게 맡기는 파이프라인. '뉴스로 카드랑 릴스 만들어줘', '뉴스 콘텐츠 팀 돌려줘' 같은 요청에 사용."
+description: "'뉴스 만들어'라고만 해도 뉴스 검색 → 벤토 카드 3장 → 음성 스크립트 → ElevenLabs 음성 생성 → 싱크 릴스 1편 + 표현별 릴스 12편 → 검수·푸시까지 한 번에 끝내는 파이프라인. '뉴스로 카드랑 릴스 만들어줘', '뉴스 콘텐츠 팀 돌려줘' 요청에 사용."
 ---
 
-# 뉴스 콘텐츠 팀 (메인 + 렌더 에이전트)
+# 뉴스 만들어 (원스톱)
 
-## 역할 분담
+지나쌤이 "뉴스 만들어"라고만 하면 아래를 **확인 질문 없이** 끝까지 한다. 기본값: CNN 최신 뉴스, 카드 3장(표현 12개), 싱크 릴스 1편 + 표현별 릴스 12편. 주제·장수를 말하면 그걸 따른다. 지나쌤이 "음성은 내가 할게"라고 하면 3단계 뒤에 멈추고 `audio/voice_full.mp3` 업로드를 기다린다.
+
+## 분담
 | 단계 | 담당 | 내용 |
 |---|---|---|
-| 1 뉴스·표현 선별 | **메인이 직접** | WebSearch로 최신 기사 검색, `news-bento-card` §1 |
-| 2 벤토 카드 | **메인이 직접** | `news-bento-card` §2~5, PNG를 SendUserFile로 전달 |
-| 3 음성 스크립트 | **메인이 직접** | 항목마다 ① 표현 ② 영어 예문 ③ 한글 해석 |
-| — | 지나쌤 | 스크립트로 음성 mp3 생성 후 업로드 (`audio/voice_full.mp3`) |
-| 4 싱크 릴스 | `sync-reel-producer` | 전체 음성 1편 렌더 |
-| 5 표현별 릴스 | `expression-reel-producer` | 표현 1개 = 영상 1개, 4와 **동시에** 렌더 |
-| 6 검수·푸시 | `reel-qa-pusher` | 프레임·ffprobe 확인, 커밋·푸시 |
+| 1 뉴스·표현 | 메인 | WebSearch만 사용. `news-bento-card` §1. cnn.com 같은 막힌 페이지는 열지 않는다. 제목 밖(검색 요약에서만) 확인한 표현은 답변에 한 줄로 알린다 |
+| 2 카드 | 메인 | `tools/build_cards.py`를 템플릿으로 이번 팔레트·내용으로 고쳐 렌더. `content/palettes_used.json`에서 안 쓴 팔레트 3개 선택 후 기록. PNG 5가지 검수 후 SendUserFile |
+| 3 스크립트 | 메인 | `03_script/` 3파일: voice_script.txt, sync_scenes.json(split_at=첫 줄 단어 수), expr_scripts.json(화면 훅 후보 3개 직접 채점, 1위 선택) |
+| 4 음성 | 메인 | 아래 "음성 자동 생성" |
+| 5 단어 시각 | 메인 | `NEWS_ROOT=<폴더> python3 tools/align_words.py` → `audio/words.json` |
+| 6 렌더 | 에이전트 2개 **동시** | `sync-reel-producer`, `expression-reel-producer`. 프롬프트에 폴더, `tools/` 스크립트 재사용(장면 수·팔레트·표현 id만 손보기), 캐릭터 `content/assets/bird_sprite.png`, words.json 사용법을 넣는다 |
+| 7 검수·푸시 | `reel-qa-pusher` | ffprobe·프레임 확인, 통과하면 커밋·푸시 |
+| 8 전달 | 메인 | 카드 PNG, 싱크 릴스, 표현별 mp4 12개, captions.md 요약, 음성 스크립트 코드 블록, 출처 목록 |
 
-에이전트는 4~6단계에서만 쓴다. 1~3단계에 에이전트를 부르지 않는다.
+에이전트는 6~7단계에서만 쓴다. 모든 스크립트는 `NEWS_ROOT=<작업 폴더>` 환경변수로 폴더를 받는다.
+
+## 음성 자동 생성 (4단계)
+- 모델 `eleven_v4`, 음성 Bella (`hpp4J3VqNfWAUOO0d1Us`, 정보·교육용 목록에서 연간 사용량 1위. 사용량 수치는 API에 안 나와 "20만 이상"은 확인하지 못했다). 지나쌤이 다른 음성을 지정하면 그걸 쓴다.
+- **표현마다 한 번씩** `creative_generate_speech`(generations_count=1, 한 flow에 모음). 프롬프트: `<term>. <example_en> <example_ko>` (`~`는 뺀다). 줄 사이 쉼이 약 0.6초 자연스럽게 생긴다(시험 확인). 먼저 `estimate_only`로 총 크레딧을 보고하고, 생성 호출은 **재시도하지 않는다**(재호출 시 이중 과금).
+- `creative_get_flow_run_status`로 완료를 기다려 `content_url`을 `curl`로 `audio/expr_NN.mp3`에 저장(호스트 `elevenlabsusercontent.com`은 `verbgame` 환경에서 허용됨). 12개를 항목 사이 1.2초 무음으로 이어 붙여 `audio/voice_full.mp3`. 표현별 릴스는 `expr_NN.mp3`를 그대로 쓴다.
+- 지나쌤이 음성이 마음에 안 든다고 하면 그 시점부터 지나쌤 mp3로 5~8단계만 다시 한다.
+
+## 폴더
+`content/<날짜>-<slug>/` : 01_news, 02_bento, 03_script, audio, 04_sync_reel, 05_expression_reels. 공용: `content/assets/bird_sprite.png`.
+`expressions.json` 항목: `{id, card, slot, type, term, meaning_ko, example_en, example_ko, highlight, source_url}`. 카드 칸에 맞추려 예문을 고치면 expressions.json도 같이 고친다.
 
 ## 규칙
-- **기사는 검색으로만**: cnn.com 등 막힌 페이지를 열려고 하지 않는다. 제목·검색 요약으로 확인한 표현만 쓰고, 제목에 없고 요약에서만 확인한 표현은 답변에 한 줄로 알린다.
-- **환경**: 한글 폰트 `fonts-noto-cjk`, `fonts-noto-cjk-extra`(Black 두께)가 없으면 apt로 설치. 새 환경 권한 요청은 하지 않는다.
-- 게시는 하지 않는다. 결과물과 푸시까지만.
-
-## 작업 폴더 `content/<YYYY-MM-DD>-<slug>/`
-```
-01_news/ articles.md, expressions.json
-02_bento/ card_NN.html/png, cards.json
-03_script/ voice_script.txt, sync_scenes.json, expr_scripts.json
-audio/ voice_full.mp3, words.json
-04_sync_reel/ reel_sync.mp4, frames/
-05_expression_reels/ expr_NN.mp4, captions.md, frames/
-```
-공용 캐릭터: `content/assets/bird_sprite.png` (배경 제거본, 몸통만).
-`expressions.json` 항목: `{id, card, slot, type, term, meaning_ko, example_en, example_ko, highlight, source_url}`. id는 모든 단계의 연결 키. 카드 칸에 맞추려 예문을 줄이면 expressions.json도 같이 고친다.
-
-## 음성 후 처리 (메인이 먼저, 에이전트 호출 전)
-1. 음성을 `audio/voice_full.mp3`로 복사. `silencedetect=noise=-35dB:d=0.25`로 쉼 구간을 찾고, 1초가 넘는 쉼 11개가 항목 12개를 가르는지 확인.
-2. 단어 시각: `python3 align_words.py <작업폴더>` (pocketsphinx 강제 정렬, `pip install pocketsphinx`). `audio/words.json` 생성. ElevenLabs 연결은 파일 업로드가 안 되고 모델 호스트는 막혀 있어서 이 방법을 쓴다.
-3. 정렬은 항목 첫 단어가 최대 약 1초 일찍 잡힐 수 있다. 에이전트에게 "예문 첫 단어가 첫 발화 구간 안에서 두 번째 단어와 함께 다음 구간에 있으면 그 구간 시작으로 맞춤"을 알려 준다.
-
-## 에이전트 호출
-`sync-reel-producer`와 `expression-reel-producer`를 한 번에 병렬 호출. 프롬프트에 작업 폴더, 단어 시각 사용법, 캐릭터 파일 경로를 넣는다. 둘 다 끝나면 `reel-qa-pusher` 호출 후 mp4를 SendUserFile로 전달하고 출처를 답변 끝에 붙인다.
+- 한글 폰트가 없으면 `apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra`.
+- 싱크는 단어 시각으로만(추정 금지). 정렬은 항목 첫 단어가 최대 약 1초 이르게 잡힐 수 있어, 첫 발화 구간 안인지 확인하고 보정.
+- 게시는 하지 않는다. 결과물과 푸시까지.

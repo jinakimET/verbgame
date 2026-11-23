@@ -166,8 +166,9 @@ def make_base(card):
     # pill label
     pf = font(FBOLD, 32); pt = "NEWS ENGLISH · CNN"; tw, tb = text_size(pf, pt)
     pw = tw + 64
-    od.rounded_rectangle((CX - pw // 2, PILL_Y0, CX + pw // 2, PILL_Y1), 33, fill=hexrgb(c["pill"]["bg"]) + (255,))
-    od.text((CX - tw // 2 - tb[0], (PILL_Y0 + PILL_Y1) // 2 - (tb[1] + tb[3]) // 2), pt, font=pf,
+    PCX = CX - 20   # nudged left so the pill never touches the bird
+    od.rounded_rectangle((PCX - pw // 2, PILL_Y0, PCX + pw // 2, PILL_Y1), 33, fill=hexrgb(c["pill"]["bg"]) + (255,))
+    od.text((PCX - tw // 2 - tb[0], (PILL_Y0 + PILL_Y1) // 2 - (tb[1] + tb[3]) // 2), pt, font=pf,
             fill=hexrgb(c["pill"]["text"]) + (255,))
     # handle (top 1588)
     hf = font(FBOLD, 30); ht = "지나쌤영어  @jina.ssam_english"; hw, hb = text_size(hf, ht)
@@ -310,7 +311,12 @@ def example_sprites(tokens, split, hl_idx, f, fg, hlbg, hlfg, maxw):
     for pi, gidx in wl:
         lt = [tokens[g] for g in gidx]; base = gidx[0]
         ws = [text_size(f, t)[0] for t in lt]
-        width = sum(ws) + space * (len(lt) - 1)
+        inh = [hl_idx[0] <= base + i < hl_idx[1] for i in range(len(lt))]
+        extra = [0] * len(lt)   # extra gap so box padding doesn't swallow the word space
+        for i in range(len(lt)):
+            if inh[i] and i > 0 and not inh[i - 1]: extra[i] += pad
+            if inh[i] and i + 1 < len(lt) and not inh[i + 1]: extra[i] += pad
+        width = sum(ws) + space * (len(lt) - 1) + sum(extra)
         sh = asc + desc + 24
         sw = width + 3 * pad + 8
         mask = Image.new("L", (sw, sh), 0); d = ImageDraw.Draw(mask)
@@ -320,6 +326,7 @@ def example_sprites(tokens, split, hl_idx, f, fg, hlbg, hlfg, maxw):
         for i, t in enumerate(lt):
             gi = base + i
             inhl = hl_idx[0] <= gi < hl_idx[1]
+            if inhl and i > 0 and not inh[i - 1]: x += pad
             # punctuation after the highlighted last word stays outside the box
             core = t
             if inhl and gi == hl_idx[1] - 1 and t[-1] in ".,!?":
@@ -333,6 +340,7 @@ def example_sprites(tokens, split, hl_idx, f, fg, hlbg, hlfg, maxw):
             else:
                 d.text((x - text_size(f, t)[1][0], 10), t, font=f, fill=255)
             x += ws[i] + space
+            if inhl and i + 1 < len(lt) and not inh[i + 1]: x += pad
         has_box = bool(spans)
         if has_box:
             x0, x1 = spans[0][0] - pad, spans[-1][1] + pad
