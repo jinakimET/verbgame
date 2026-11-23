@@ -1,16 +1,14 @@
 # 뉴스 영어 콘텐츠 팀
 
 ```
-메인 Claude (직접): 뉴스 검색 → 벤토 카드 → 음성 스크립트
+메인 Claude: 뉴스 검색 → 벤토 카드 3장 (news-bento-card)
         │
- 지나쌤이 음성 mp3 생성 → audio/
-        │
- 메인: 쉼 구간 + 단어 시각(align_words.py)
-        ├─► sync-reel-producer ───────► 04_sync_reel/reel_sync.mp4
-        └─► expression-reel-producer ─► 05_expression_reels/expr_NN.mp4  (동시)
+메인: 카드별 음성 → 단어 시각
+        └─► sync-reel-producer ───────► 04_zoom_reels/zoom_card_NN.mp4   (ig-reel-sync-zoomin)
+메인: ig-reel 키워드 5개 → 대본 → 음성 → Scribe 단어 시각
+        └─► expression-reel-producer ─► 06_keyword_reels/kw_NN.mp4       (reel-voice-glass-sync + 새)
                      │
               reel-qa-pusher: 검수 → 커밋 → 푸시
 ```
-- 실행: `/news-reels-team CNN 최신 뉴스로 카드 3장`
+- 실행: `/news-reels-team` 또는 "뉴스 만들어"
 - 오케스트레이터: `.claude/skills/news-reels-team/SKILL.md`
-- 에이전트: sync-reel-producer, expression-reel-producer, reel-qa-pusher

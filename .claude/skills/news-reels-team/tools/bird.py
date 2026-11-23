@@ -75,4 +75,4 @@ if __name__=='__main__':
         full=t.resize((int(t.width*0.6),int(t.height*0.6)))
         if i==0: canvas=Image.new('RGB',(2*max(z.width,full.width)+30,z.height+full.height+30),(30,30,60))
         canvas.paste(full.convert('RGB'),(i*(canvas.width//2)+10,10)); canvas.paste(z.convert('RGB'),(i*(canvas.width//2)+10,full.height+20))
-    canvas.save(__import__('os').environ.get('NEWS_ROOT','.')+'/04_sync_reel/frames/check_mouth.png')
+    __import__('os').makedirs(__import__('os').environ.get('NEWS_ROOT','.')+'/06_keyword_reels/frames',exist_ok=True); canvas.save(__import__('os').environ.get('NEWS_ROOT','.')+'/06_keyword_reels/frames/check_mouth.png')
