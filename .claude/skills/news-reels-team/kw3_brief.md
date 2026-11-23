@@ -1,0 +1,29 @@
+# 키워드 영상 v3 공통 지시 (편마다 다른 모션 스타일)
+
+지나쌤이 "너무 평이하다, 최대한 눈길을 끌 수 있게 다양한 모션 이펙트(리퀴드모션, 홀로그래픽, 클레이모피즘, 하프톤, 아이소메트릭, 키네틱 타이포그래피, 페이퍼컷아웃, 인피니트줌, 베이퍼웨이브, 텍스트 스크램블, 바우하우스, 뉴브루탈리즘, 셰이프모프, 파티클, 라인 애니메이션 등)를 써 달라"고 했다. 편마다 **서로 다른 스타일**로 만든다.
+
+## 입력 (모두 확정, 다시 생성·인식하지 않는다)
+- `03_script/keyword_scripts_v3.json`: reels[id].beats[] = {role, spoken, on_screen}. 훅 유형(hook_type)과 style이 적혀 있다. 역할: hook, term(없는 편도 있음), meaning, example_en, example_ko, payoff. `highlight`는 예문에서 강조할 구절.
+- `audio/v3/kw3_NN.mp3`: 해당 편의 전체 음성(16~22초, 0초부터 발화 시작).
+- `audio/words_kw_v3.json`: [id].words = [{t,s,e}] 단어별 시작·끝(초, Scribe 실측), [id].beats = [{role,start,end,first_word_idx,n_words,on_screen}]. 비트 전환은 비트 첫 단어의 start에 맞춘다. 단어 단위 모션(키네틱 타이포 등)은 각 단어의 `s`에 맞춘다.
+- `02_bento/cards.json`: 카드 팔레트(편 01→카드1, 07→카드2... 정확한 매핑: 01·05·07·09·11은 각각 expressions.json의 카드(01→카드1, 05→카드2, 07→카드2, 09→카드3, 11→카드3)). 스타일에 맞게 확장해도 되지만 카드 팔레트 색을 중심에 둔다.
+- 캐릭터: `content/assets/bird_sprite.png`(배경 제거본, 365×412, 몸통만). 말하는 새를 넣는다(입은 음성 RMS 기준, `.claude/skills/news-reels-team/tools/bird.py`와 `render_kw_reels.py`의 구현을 재사용). 스타일에 어울리게 위치·크기·그림자를 바꿔도 된다(예: 클레이 스타일은 클레이 그림자).
+- 참고 렌더러: `.claude/skills/news-reels-team/tools/render_kw_reels.py`(현재 v2 디자인). 구조를 참고하되 디자인은 새로 만든다.
+
+## 출력
+- 영상: `06_keyword_reels/v3/kw3_NN.mp4` (v3 폴더는 새로 만든다. 기존 `06_keyword_reels/kw_NN.mp4`는 건드리지 않는다), 확인용 프레임 `06_keyword_reels/v3/frames/`.
+- 렌더 스크립트: `.claude/skills/news-reels-team/tools/render_kw3_NN.py` (env `NEWS_ROOT=/home/user/verbgame/content/2026-11-23-cnn`, 재사용 가능하게).
+- 캡션은 쓰지 않는다. 커밋·파일 전송은 하지 않는다.
+
+## 화면 규칙
+- 1080×1920, 30fps, h264 yuv420p + AAC(해당 kw3 mp3, 끝에 0.6~0.8초 무음 꼬리).
+- **0프레임부터 훅이 보여야 한다.** 훅은 크게(글자 높이 100px 이상, 화면 폭을 채우는 크기), 첫 0.3초 안에 강한 모션(튀어나옴·슬램·스크램블 등). 정지 화면이 1.5초 넘게 가만히 있지 않게 배경·도형·입자에 계속 움직임을 둔다.
+- 비트마다 구도를 바꾼다(같은 레이아웃 반복 금지). 전환은 하드 컷 또는 스타일에 맞는 와이프·줌.
+- 모든 글자: 대비 4.5:1 이상(큰 글자 3:1 이상)을 코드로 계산해 확인. 예문 글자 52px 이상, 한글 해석 44px 이상. 예문의 `highlight` 구절은 박스/마커로 강조(긴 구절은 두 줄로 감기).
+- 안전 영역: 글자와 핵심 요소는 x 62~850, y 230~1440 안(오른쪽 230px은 인스타 버튼 자리라 비움). 배경 장식은 전체 화면 가능. 하단 핸들 `지나쌤영어  @jina.ssam_english`는 y 1588, 가운데. 알약 `NEWS ENGLISH · CNN`은 y 220~290 안에 넣되 스타일에 맞게 디자인.
+- 웹에서 가져온 사진·로고·외부 폰트 금지. 도형·그라데이션·노이즈는 코드로 그린다. 한글 폰트는 `/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc`(KR=index 1), Bold, Regular.
+- 성능: CPU 4코어를 5개 렌더가 나눠 쓴다. numpy로 벡터화하고(프레임당 픽셀 루프 금지), ffmpeg 인코딩은 `-threads 1 -preset veryfast`. 영상 길이 17~23초.
+
+## 검수 (렌더 후 직접)
+- ffprobe(1080×1920, h264+aac, 길이 ≈ 음성+0.7초). 훅(0.0초·0.3초·1.0초), 용어/뜻, 예문(글자가 다 나타난 상태), 해석, 마무리 프레임을 Read로 열어 글자 잘림·겹침·가독성을 본다. 대비 수치를 보고에 적는다.
+- 보고: 파일·길이 표, 쓴 이펙트 목록, 대비 수치, 남은 문제. 짧게.
