@@ -23,7 +23,7 @@ def _bal_wrap(tokens, split, hl_idx, f, maxw):
         out += [x for x in _orig_wrap(tokens, split, hl_idx, f, hi) if x[0] == k]
     return out
 R.wrap_example = _bal_wrap
-CARD = {"01": 1, "07": 2, "09": 3}
+CARD = {"01": 1, "07": 2, "09": 3, "05": 2, "11": 3}
 scripts = {r["id"]: r for r in J("03_script/keyword_scripts.json")["reels"]}
 WK = J("audio/words_kw.json")
 
@@ -61,10 +61,10 @@ def build_kw(rid):
         elif role == "example_en":
             toks = txt.split(); hl = b["highlight"].split()
             nt = [norm(t) for t in toks]; hi = next(i for i in range(len(nt)) if nt[i:i+len(hl)] == [norm(x) for x in hl])
-            split = {"01": 5, "07": 3, "09": 4}[rid]
+            split = {"01": 5, "07": 3, "09": 4, "05": 2, "11": 2}[rid]
             hl_idx = (hi, hi + len(hl))
             tw = lambda k: bw[k]["s"]
-            size = 72; maxl = {"01": 2, "07": 2, "09": 3}[rid]; floor = 44 if rid != "09" else 52
+            size = 72; maxl = {"01": 2, "07": 2, "09": 3, "05": 3, "11": 2}[rid]; floor = 44 if rid not in ("09", "05") else 52
             while True:
                 fe = font(FBOLD, size)
                 exs = example_sprites(toks, split, hl_idx, fe, white, hlbg, hlfg, TEXT_W - 30)

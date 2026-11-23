@@ -20,3 +20,17 @@ CNN 분석에 따르면 11월 호르무즈 해협 공격은 최소 22건이었�
 예문: The heavy rain could put the outdoor concert in jeopardy.
 저장해 두고, 위태로운 상황 뉴스에서 써 보세요. 댓글로 나만의 문장을 남겨 주세요!
 #뉴스영어 #CNN영어 #영어표현 #추수감사절 #지나쌤영어
+
+## kw_05 — at the highest level since
+CNN은 호르무즈 해협 공격이 전쟁 이후 최고 수준으로 늘었다고 전했어요. 11월 20~21일 이틀 사이 유조선 3척이 공격받았다고 해요(검색 요약 기준).
+핵심 표현은 at the highest level since, "~ 이후 최고 수준"이에요.
+예문: Prices are at the highest level since 2008.
+저장해 두고, 수치가 오르는 뉴스에서 찾아보세요. 댓글로 나만의 예문도 남겨 주세요!
+#뉴스영어 #CNN영어 #영어표현 #호르무즈 #지나쌤영어
+
+## kw_11 — nonessential
+CNN에 따르면 샌프란시스코 시장이 높은 조수 때문에 주민들에게 nonessential 이동을 자제하라고 촉구했어요(검색 요약 기준).
+nonessential은 "꼭 필요하지 않은"이라는 뜻이에요.
+예문: Please avoid nonessential trips this week.
+저장해 두고, 재난·안전 뉴스에서 찾아보세요. 댓글로 "nonessential"을 써 주세요!
+#뉴스영어 #CNN영어 #영어단어 #nonessential #지나쌤영어
