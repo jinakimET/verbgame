@@ -11,16 +11,7 @@ W, H, FPS, DUR = 1080, 1920, 30, 27.1
 ROOT = _HERE + "/"
 
 # ---------- palette (Color Hunt 1E3B2F 7F8C6A C8B48A F5F0E6) ----------
-BG = (245, 240, 230)
-INK = (30, 59, 47)
-INK_SOFT = (96, 112, 102)
-LAV = (127, 140, 106)
-ROSE = (127, 140, 106)
-MARK = (200, 180, 138)
-CARD = MARK
-SUN = (232, 222, 200)
-LEAVES = [(127, 140, 106), (200, 180, 138), (30, 59, 47), (160, 150, 110)]
-WHITE = (255, 252, 246)
+from palette import BG, INK, INK_SOFT, LAV, ROSE, MARK, CARD, SUN, LEAVES, WHITE
 
 F = "/usr/share/fonts/opentype/inter/"
 KR = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"

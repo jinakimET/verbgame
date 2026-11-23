@@ -10,3 +10,6 @@ v5_*.jpg
 still_*.jpg
 bgm.wav
 episodes/*/*.mp4
+episodes/*/youtube/*.png
+episodes/*/youtube/list.txt
+episodes/*/youtube/sheet.jpg

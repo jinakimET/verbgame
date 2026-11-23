@@ -46,9 +46,7 @@ def mixed_w(text, font, esize=None): return draw_mixed(None, (0, 0), text, font,
 # ---------------- per-scene emoji ----------------
 # one sticker pair per display unit (sentence id, unit index)
 STICKERS = {}
-KO_EMO = {1: " 🤝", 2: " 🎭", 3: " 🚪", 4: " 🔁", 5: " 🪞"}
-CARD_EMO = {"give someone a second chance": "🤝", "bury the old wounds": "🪦", "time heals": "🩹", "true colors": "🎭",
-            "there's no going back": "🚪", "people never change": "🔁", "be no different": "🪞"}
+from exprs import KO_EMO, CARD_EMO, EXPRS
 
 def split_emo(s): return [p for p in EMO_RE.split(s) if p and EMO_RE.fullmatch(p)]
 
@@ -361,13 +359,6 @@ def draw_top(img, t, alpha=1.0):
         elif k == cur: d.rounded_rectangle((x - 13, y - 7, x + 13, y + 7), radius=7, fill=INK + (a,))
         else: d.ellipse((x - 7, y - 7, x + 7, y + 7), outline=INK_SOFT + (a,), width=2)
 
-EXPRS = [("🤝", "give someone a second chance", "다시 기회를 주다"),
-         ("🪦", "bury the old wounds", "오래된 상처를 묻다"),
-         ("🩹", "time heals", "시간이 치유해 주다"),
-         ("🎭", "true colors", "본성, 진짜 모습"),
-         ("🚪", "there's no going back", "돌이킬 수 없다"),
-         ("🔁", "people never change", "사람은 안 변한다"),
-         ("🪞", "be no different", "다르지 않다")]
 FX_EN = inter(46, "Bold"); FX_KO = kr(32, True); FX_T = kr(54); FX_N = inter(26, "Bold"); FX_F = kr(28, True)
 PX, PY, PW, PH = 60, 250, 960, 1360
 ROW0, ROWH = 450, 150

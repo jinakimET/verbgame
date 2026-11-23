@@ -17,6 +17,7 @@
 | 4 | 음성·싱크 | 문장/쉼 구간(silencedetect 또는 ElevenLabs 받아쓰기), 카드 타이밍, -14 LUFS 믹스 |
 | 5 | 릴스 렌더 | render/timing/episode_cfg 수정 → 영상 |
 | 6 | QA·카피 | 컨택트 시트·표지 글자 잘림·엔딩=카드 일치 검사, 캡션 |
+| 7 | 롱폼 제작 | 쇼츠와 같은 데이터로 유튜브 16:9(약 1분 10초) + 썸네일 A/B + 제목 3 + 설명란 |
 
 ## 흐름
 1. 일기 메모 → 에디터가 검토·대본·카드·표지 키워드
@@ -31,6 +32,17 @@ python3 covers.py episodes/<주제>/cover.json
 ```
 → `표지_<주제>.png` + `cover_prev.jpg`. 형식은 `covers.py` 맨 위 설명 참고.
 키워드·영어 줄이 화면 폭을 넘으면 경고가 뜹니다.
+
+## 유튜브 롱폼 (7번)
+쇼츠 완성 후 같은 에피소드 폴더에서:
+```
+python3 youtube16.py episodes/<주제> all      # frames | audio | video | thumbs | meta 개별 실행도 가능
+```
+- 영상에서 뽑지 않고 `timing.py`·`episode_cfg.py`·`palette.py`·`exprs.py`·`voice.mp3`·`photos/` 를 직접 읽음
+- 에피소드마다 `youtube.json` 만 새로 작성: 화면 분할(clause 단위), 한글 분할, 말풍선(임의 선택→확인 필요), 노트 안내 문구
+- 구성: 문장 화면 → 표현 카드(3초) → 복습(표현 2개씩 2블록 강조, 마지막 노트 안내). BGM 없음, 음성은 원본 voice.mp3 조각만
+- 결과: `episodes/<주제>/youtube/` 에 mp4, 썸네일 A/B, youtube_meta.md(제목·설명란·챕터)
+- 쇼츠용 `render*.py` 는 이제 `palette.py`·`exprs.py` 를 읽음 (에피소드마다 이 둘만 교체하면 롱폼도 같이 바뀜)
 
 ## 캡션 (확정)
 짧은 도입(일기 한 줄 감성) → 오늘의 표현 목록(영/한) → `오늘 일기, 두 줄만 따라 써 보세요 ✍️` → 해시태그
