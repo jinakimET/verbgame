@@ -29,6 +29,7 @@ WK = J("audio/words_kw.json")
 
 HOOK_HL = {"01": ["합의", "없이"], "05": ["유조선", "3척"], "07": ["힘이", "약해졌다고요"],
            "09": ["위태롭대요,", "몰라요"], "11": ["자제하래요,", "몰라요"]}
+HOOK_ACC = {"09": (255, 217, 102), "11": (255, 217, 102)}  # #FFD966, contrast >=4.5 on card-3 panel
 HOOK_LINES = {"09": ["풍선", "위태롭대요,", "이 표현 몰라요"], "11": ["이동", "자제하래요,", "이 단어 몰라요"],
               "07": ["공격 22건인데", "힘이", "약해졌다고요"]}
 def hook_sprite(txt, hl, white, acc, hlfg, maxw=TEXT_W, maxlines=3, manual=None):
@@ -94,7 +95,7 @@ def build_kw(rid):
         assert wk["beats"][i]["role"] == role
         bw = words[wk["beats"][i]["first_word_idx"]:][:wk["beats"][i]["n_words"]]
         if role == "hook":
-            spr = hook_sprite(txt, HOOK_HL[rid], white, hlbg, hlfg, manual=HOOK_LINES.get(rid))
+            spr = hook_sprite(txt, HOOK_HL[rid], white, HOOK_ACC.get(rid, hlbg), hlfg, manual=HOOK_LINES.get(rid))
             q = chip("오늘의 CNN 표현", hlbg, hlfg); T = -FADE   # fully visible at frame 0
             els = stack([(q, T), (spr, T)], cy, 40)
             els[1].pop = True
