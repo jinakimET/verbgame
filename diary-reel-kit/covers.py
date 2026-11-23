@@ -8,8 +8,10 @@ cover.json 예:
   "keyword": "‘결국 이게 문제야’",
   "eng": [["It all comes"], [210, "to this."]],
   "block": [217, 131, 39], "ink": [236, 232, 175],
-  "out": "표지_주제.png", "bright": 0.7, "vig": [0.4, 0.55, 0.65], "ksize": 120
+  "out": "표지_주제.png", "bright": 0.7, "vig": [0.4, 0.55, 0.65], "ksize": 120,
+  "zoom": 1.0
 }
+zoom>1 이면 사진을 확대해 fx, fy 로 피사체를 글자 위쪽으로 올릴 수 있음.
 경로는 json 이 있는 폴더 기준. eng 의 숫자 = 빈칸 밑줄 폭.
 """
 import os as _os, sys, re, json
@@ -60,9 +62,9 @@ def draw_mixed(img, xy, text, font, fill, esize=None, measure=False):
     return x - xy[0]
 def mixed_w(text, font, esize=None): return draw_mixed(None, (0, 0), text, font, None, esize, True)
 
-def photo(path, fx, fy, bright):
+def photo(path, fx, fy, bright, zoom=1.0):
     im = Image.open(path).convert("RGB")
-    s = max(W / im.width, H / im.height)
+    s = max(W / im.width, H / im.height) * zoom
     im = im.resize((int(im.width * s + .5), int(im.height * s + .5)), Image.LANCZOS)
     x = min(max(fx * im.width - W / 2, 0), im.width - W); y = min(max(fy * im.height - H / 2, 0), im.height - H)
     im = im.crop((int(x), int(y), int(x) + W, int(y) + H))
@@ -80,8 +82,8 @@ def stext(img, xy, text, font, fill, blur=10, alpha=150):
     img.alpha_composite(sh.filter(ImageFilter.GaussianBlur(blur)))
     ImageDraw.Draw(img).text(xy, text, font=font, fill=fill)
 
-def cover(src, fx, fy, keyword, eng, block, ink, out, bright=0.82, vig=(0.35, 0.35, 0.6), ksize=150):
-    img = photo(src, fx, fy, bright); vignette(img, *vig)
+def cover(src, fx, fy, keyword, eng, block, ink, out, bright=0.82, vig=(0.35, 0.35, 0.6), ksize=150, zoom=1.0):
+    img = photo(src, fx, fy, bright, zoom); vignette(img, *vig)
     d = ImageDraw.Draw(img)
     f = F("InstrumentSerif-Italic.ttf", 64); t = "My English Diary"
     stext(img, ((W - tw(f, t)) / 2, 270), t, f, WHITE)
@@ -114,7 +116,7 @@ def from_json(path):
     out = p(c["out"])
     cover(p(c["photo"]), c.get("fx", .5), c.get("fy", .4), c["keyword"], c["eng"],
           tuple(c["block"]), tuple(c["ink"]), out, c.get("bright", .75),
-          tuple(c.get("vig", (.35, .45, .6))), c.get("ksize", 120))
+          tuple(c.get("vig", (.35, .45, .6))), c.get("ksize", 120), c.get("zoom", 1.0))
     Image.open(out).resize((540, 960)).save(p("cover_prev.jpg"), quality=88)
     print("저장:", out, "+ cover_prev.jpg")
 
