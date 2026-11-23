@@ -438,10 +438,10 @@ def render(i):
         draw_rain(ov, t, rl)
         pop = .8 + .2 * back(pp / .3)
         top = 700
-        draw_balloon(img, 775 + 4 * math.sin(t * 2.3), 960 - BLOBH * .72 * pop + 10, .45 * pop, t, .4)
-        draw_blob(img, 456, 960, .72, a * 0.0, t, mood="happy", pop=pop)
+        draw_balloon(img, 775 + 4 * math.sin(t * 2.3), 860 - BLOBH * .62 * pop + 10, .45 * pop, t, .4)
+        draw_blob(img, 456, 860, .62, a * 0.0, t, mood="happy", pop=pop)
         bs = 1 + .04 * math.sin(t * 7); sp = scaled(BTN, (.85 + .15 * back(pp / .3)) * bs)
-        put(img, sp, 456 - sp.width / 2, 1115 - sp.height / 2 + 0)
+        put(img, sp, 456 - sp.width / 2, 1010 - sp.height / 2 + 0)
         draw_confetti(ov, t, t0)
     img.alpha_composite(ov)
     put(img, HEAD, 456 - HEAD.width / 2, 256 - HEAD.height / 2)
