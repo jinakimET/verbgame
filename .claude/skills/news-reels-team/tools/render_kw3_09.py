@@ -141,8 +141,8 @@ def background(t):
     return img
 
 # ---------------------------------------------------------------- characters
-BLOBW, BLOBH, PAD = 790, 640, 70
-BLOB = clay(rrect(BLOBW, BLOBH, 245), RED, d=16, sh_off=(0, 26), sh_blur=26)
+BLOBW, BLOBH, PAD = 790, 700, 70
+BLOB = clay(rrect(BLOBW, BLOBH, 170), RED, d=16, sh_off=(0, 26), sh_blur=26)
 def face(a, t, mood="talk", look=(1, 0)):
     ss = 2; fw, fh = 700, 300; L = Image.new("RGBA", (fw * ss, fh * ss), (0, 0, 0, 0)); d = ImageDraw.Draw(L)
     cx = fw // 2 * ss; blink = 1 - max(0, 1 - abs(((t * 1.0) % 3.1) - 2.8) / .12) if (t % 3.1) > 2.6 else 1
@@ -162,16 +162,16 @@ def face(a, t, mood="talk", look=(1, 0)):
         d.pieslice((cx - 90 * ss, my - 50 * ss, cx + 90 * ss, my + 80 * ss), 0, 180, fill=NAVY + (255,))
         d.pieslice((cx - 50 * ss, my + 10 * ss, cx + 50 * ss, my + 70 * ss), 0, 180, fill=(235, 110, 120, 255))
     else:
-        hgt = (14 + 84 * a) * ss; wd = (66 + 20 * a) * ss
+        hgt = (14 + 62 * a) * ss; wd = (66 + 20 * a) * ss
         d.ellipse((cx - wd, my, cx + wd, my + hgt), fill=NAVY + (255,))
         if a > .25: d.ellipse((cx - wd * .55, my + hgt * .52, cx + wd * .55, my + hgt * .98), fill=(235, 110, 120, 255))
     return L.resize((fw, fh), Image.LANCZOS)
-HOOK_TY = 255
-HOOKL = [txt_clay("나 put in", 120), txt_clay("jeopardy야", 120)]
+HOOK_TY = 244; HOOK_PITCH = 110
+HOOKL = [txt_clay("나 put in", 112), txt_clay("jeopardy야", 112)]
 def blob_sprite(a, t, mood="talk", with_text=False, look=(1, 0)):
     bs = BLOB.copy(); bs.alpha_composite(face(a, t, mood, look), (PAD + (BLOBW - 700) // 2, PAD + 22))
     if with_text:
-        for i, hs in enumerate(HOOKL): bs.alpha_composite(hs, (PAD + (BLOBW - hs.width) // 2 - 0 + 0, PAD + HOOK_TY + i * 120))
+        for i, hs in enumerate(HOOKL): bs.alpha_composite(hs, (PAD + (BLOBW - hs.width) // 2 - 0 + 0, PAD + HOOK_TY + i * HOOK_PITCH))
     return bs
 def build_balloon():
     BWc, BHc = 560, 600
@@ -356,7 +356,7 @@ def fit_en():
     return lines, sz
 EN_LINES, EN_SZ = fit_en()
 HK = [(i, w["t"]) for i, w in enumerate(words[4:10], 4)]
-HOOK2 = card_layout([(HK[:2], False), (HK[2:4], False), (HK[4:], False)], 50, CLOUD, NAVY, RED, CLOUD, 400, 76, padv=34, padh=50, align="center")
+HOOK2 = card_layout([(HK[:2], False), (HK[2:4], False), (HK[4:], False)], 46, CLOUD, NAVY, RED, CLOUD, 350, 64, padv=28, padh=50, align="center")
 EN_CARD = card_layout(EN_LINES, EN_SZ, CLOUD, NAVY, RED, CLOUD, 700, int(EN_SZ * 1.72))
 KO_TOK = spec["beats"][3]["on_screen"].split(); KO0 = 25
 KO_WORDS = [(KO0 + i, t) for i, t in enumerate(KO_TOK)]
@@ -407,11 +407,11 @@ def render(i):
         draw_rain(ov, t, 0)
         pop = .82 + .18 * back(t / .3)
         draw_wind(img, t, 1.0 if t < 5 else max(0, 1 - (t - 5) / 1.2))
-        by = 1060; look = (math.cos(t * 2), math.sin(t * 1.3) * .5)
-        top = by - BLOBH * .85 * pop
+        by = 1150; look = (math.cos(t * 2), math.sin(t * 1.3) * .5)
+        top = by - BLOBH * .9 * pop
         draw_balloon(img, 700 + 6 * math.sin(t * 2.3), top + 14,   .5 * pop, t, 1.0 + .5 * math.sin(t * 1.7))
-        draw_blob(img, 456, by, .85, a, t, with_text=True, pop=pop, look=look, dx=8 * math.sin(t * 4.1) * (1 if t < 5 else .4))
-        draw_card(img, t, -1.0, 62, 1110, HOOK2, t=t, ghost=True)
+        draw_blob(img, 456, by, .9, a, t, with_text=True, pop=pop, look=look, dx=8 * math.sin(t * 4.1) * (1 if t < 5 else .4))
+        draw_card(img, t, -1.0, 40, 1175, HOOK2, t=t, ghost=True)
     elif role == "meaning":
         pop = .8 + .2 * back(pp / .3)
         ybot = 780; draw_balloon(img, 330 + 5 * math.sin(t * 2.3), ybot - BLOBH * .42 * pop + 8, .42 * pop, t, .8)
@@ -438,10 +438,10 @@ def render(i):
         draw_rain(ov, t, rl)
         pop = .8 + .2 * back(pp / .3)
         top = 700
-        draw_balloon(img, 775 + 4 * math.sin(t * 2.3), 900 - BLOBH * .72 * pop + 10, .45 * pop, t, .4)
-        draw_blob(img, 456, 900, .72, a * 0.0, t, mood="happy", pop=pop)
+        draw_balloon(img, 775 + 4 * math.sin(t * 2.3), 960 - BLOBH * .72 * pop + 10, .45 * pop, t, .4)
+        draw_blob(img, 456, 960, .72, a * 0.0, t, mood="happy", pop=pop)
         bs = 1 + .04 * math.sin(t * 7); sp = scaled(BTN, (.85 + .15 * back(pp / .3)) * bs)
-        put(img, sp, 456 - sp.width / 2, 1060 - sp.height / 2 + 0)
+        put(img, sp, 456 - sp.width / 2, 1115 - sp.height / 2 + 0)
         draw_confetti(ov, t, t0)
     img.alpha_composite(ov)
     put(img, HEAD, 456 - HEAD.width / 2, 256 - HEAD.height / 2)
@@ -454,7 +454,7 @@ def text_in_blob_check(margin=30):
     # use blob body mask (alpha of clay incl. shadow is ~mask inside); require alpha==255 over text bbox + margin
     for i, hs in enumerate(HOOKL):
         bb = hs.getchannel("A").point(lambda v: 255 if v > 90 else 0).getbbox()
-        x0 = PAD + (BLOBW - hs.width) // 2 + bb[0]; y0 = PAD + HOOK_TY + i * 120 + bb[1]
+        x0 = PAD + (BLOBW - hs.width) // 2 + bb[0]; y0 = PAD + HOOK_TY + i * HOOK_PITCH + bb[1]
         x1 = x0 + bb[2] - bb[0]; y1 = y0 + bb[3] - bb[1]
         reg = m[y0 - margin:y1 + margin, x0 - margin:x1 + margin]
         inside = bool((reg >= 250).all())

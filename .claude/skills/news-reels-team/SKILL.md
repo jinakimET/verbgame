@@ -31,4 +31,4 @@ description: "'뉴스 만들어'라고만 해도 뉴스 검색 → 벤토 카드
 ## 폴더·규칙
 - `content/<날짜>-<slug>/`: 01_news, 02_bento, 03_script, audio, 04_zoom_reels, 06_keyword_reels. 공용 `content/assets/bird_sprite.png`.
 - QA: 오른쪽 230px 비움은 키워드 영상에만 적용(줌인은 줌인 스킬 규격).
-- 한글 폰트 없으면 `apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra`. 게시는 하지 않고 푸시까지.
+- 한글 폰트 없으면 `apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra`. 홀로그래픽 렌더(`render_kw3_07.py`)는 `pip install opencv-python-headless scipy pocketsphinx`가 필요하다. 게시는 하지 않고 푸시까지.
