@@ -1,0 +1,3 @@
+episodes/*/out*.mp4
+episodes/*/*.wav
+__pycache__/
