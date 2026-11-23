@@ -1,0 +1,7 @@
+{
+  "photo": "photos/p1.jpg", "fx": 0.86, "fy": 0.5, "zoom": 1.0,
+  "keyword": "‘나를 아는 게 먼저’",
+  "eng": [["Knowing myself"], [250, "."]],
+  "block": [242, 118, 94], "ink": [245, 235, 221],
+  "out": "표지_self.png", "bright": 0.92, "vig": [0.28, 0.35, 0.55], "ksize": 108
+}
