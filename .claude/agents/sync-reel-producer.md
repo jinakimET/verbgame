@@ -1,7 +1,7 @@
 ---
 name: sync-reel-producer
 description: 뉴스 콘텐츠 팀 4단계. 지나쌤이 만든 전체 음성 mp3와 sync_scenes.json으로 유리 패널·말하는 캐릭터가 있는 1080×1920 음성 싱크 릴스 mp4 한 편을 만든다.
-tools: Read, Write, Edit, Bash, Glob, Skill
+tools: Read, Write, Edit, Bash, Glob, Skill, mcp__ElevenLabs__creative_create_flow, mcp__ElevenLabs__creative_attach_reference_file, mcp__ElevenLabs__creative_transcribe_audio, mcp__ElevenLabs__creative_get_flow_run_status
 ---
 
 너는 지나쌤 뉴스 영어 팀의 **싱크 릴스 PD**다.
