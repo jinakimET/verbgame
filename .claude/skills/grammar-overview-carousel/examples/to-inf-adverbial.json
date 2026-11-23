@@ -1,0 +1,393 @@
+{
+  "title": "to부정사 부사적 용법 종합편",
+  "angle": "A 지도형",
+  "palette": [
+    "#165823",
+    "#FFDADA",
+    "#FF788D",
+    "#FFF2F2"
+  ],
+  "style": "brutal",
+  "handle": "@jina.ssam_english",
+  "map": [
+    "목적",
+    "감정 원인",
+    "판단 근거",
+    "결과",
+    "형용사 꾸밈"
+  ],
+  "slides": [
+    {
+      "kind": "cover",
+      "badge": "어법 종합편",
+      "sub": "to부정사 · 부사처럼 쓸 때",
+      "keywords": "목적 · 감정 · 판단 · 결과 · ==형용사 꾸밈==",
+      "kwSize": 40,
+      "example": "I woke up ==to find== it snowing.",
+      "title": [
+        "to 하나에",
+        "뜻이 다섯 개"
+      ],
+      "desc": "빼 봐도 문장이 멀쩡하면, 부사처럼!"
+    },
+    {
+      "kind": "concept",
+      "label": "한 장 지도",
+      "h2": [
+        "뒤에 붙은 to,",
+        "뜻은 다섯 갈래"
+      ],
+      "blocks": [
+        {
+          "type": "map",
+          "hub": "문장 + [[to + 동사원형]]",
+          "hubSub": "빼 봐도 문장이 멀쩡하면 → 부사처럼 뜻을 더해 줘요",
+          "items": [
+            {
+              "label": "목적",
+              "ko": "~하려고",
+              "en": "I got up early ==to catch== the bus."
+            },
+            {
+              "label": "감정 원인",
+              "ko": "~해서",
+              "en": "I&#39;m so glad ==to see== you."
+            },
+            {
+              "label": "판단 근거",
+              "ko": "~하다니",
+              "en": "He must be brave ==to say== that."
+            },
+            {
+              "label": "결과",
+              "ko": "결국 ~하다",
+              "en": "She grew up ==to be== a doctor."
+            },
+            {
+              "label": "형용사 꾸밈",
+              "ko": "~하기에",
+              "en": "This question is hard ==to answer==.",
+              "wide": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "concept",
+      "label": "① 목적",
+      "nav": 1,
+      "h2": [
+        "무엇을 하려고?",
+        "목적"
+      ],
+      "blocks": [
+        {
+          "type": "rows",
+          "items": [
+            [
+              "I got up early ==to catch== the bus.",
+              "버스 타려고"
+            ],
+            [
+              "She saved money ==to buy== a bike.",
+              "자전거 사려고"
+            ],
+            [
+              "We went out ==to play== soccer.",
+              "축구 하려고"
+            ]
+          ],
+          "size": 36
+        },
+        {
+          "type": "point",
+          "text": "목적을 또렷하게 → ==in order to== · ==so as to=="
+        },
+        {
+          "type": "dark",
+          "title": "알고 보면",
+          "text": "'~하지 않으려고'는 not을 to 바로 앞에 둬요.<br>I left early ==in order not to== be late.<br>She whispered ==so as not to== wake the baby.<br>not to만 쓰기도 하지만, 목적이라는 게 분명히 보이려면 in order not to가 안전해요.",
+          "size": 29
+        }
+      ]
+    },
+    {
+      "kind": "concept",
+      "label": "② 감정 원인",
+      "nav": 2,
+      "h2": [
+        "왜 그런 기분?",
+        "감정의 원인"
+      ],
+      "blocks": [
+        {
+          "type": "cloud",
+          "title": "이 단어 바로 뒤 to = 그 감정이 생긴 이유",
+          "words": [
+            "glad",
+            "happy",
+            "sad",
+            "sorry",
+            "surprised",
+            "excited",
+            "pleased",
+            "disappointed"
+          ]
+        },
+        {
+          "type": "rows",
+          "items": [
+            [
+              "I&#39;m sorry ==to hear== that.",
+              "그 말을 들으니 유감이야"
+            ],
+            [
+              "We were surprised ==to see== him.",
+              "그를 봐서 놀랐어"
+            ],
+            [
+              "She was happy ==to get== the letter.",
+              "편지를 받아서 기뻤어"
+            ]
+          ],
+          "size": 36
+        },
+        {
+          "type": "point",
+          "text": "감정 단어 + to → ==&quot;~해서&quot;== 로 해석"
+        }
+      ]
+    },
+    {
+      "kind": "concept",
+      "label": "③ 판단 근거",
+      "nav": 3,
+      "h2": [
+        "그걸 보니 알겠다,",
+        "판단의 근거"
+      ],
+      "blocks": [
+        {
+          "type": "rows",
+          "size": 32,
+          "items": [
+            [
+              "He must be brave ==to say== that.",
+              "그런 말을 하다니"
+            ],
+            [
+              "You were kind ==to help== me.",
+              "날 돕다니"
+            ],
+            [
+              "He can&#39;t be smart ==to make== that mistake.",
+              "그런 실수를 하다니"
+            ]
+          ]
+        },
+        {
+          "type": "point",
+          "text": "must be · can&#39;t be + 사람 평가 단어 + to<br>→ ==&quot;~하다니 (그걸 보니)&quot;=="
+        },
+        {
+          "type": "dark",
+          "title": "감정 원인 vs 판단 근거",
+          "text": "앞 단어가 <b>내 기분</b>(glad, sorry)이면 → 감정의 원인<br>앞 단어가 <b>그 사람에 대한 평가</b>(kind, brave, foolish)면 → 판단의 근거<br>++It is kind of you to help me.++ 도 같은 '평가' 표현이에요.",
+          "size": 28
+        }
+      ],
+      "gap": 22
+    },
+    {
+      "kind": "concept",
+      "label": "④ 결과",
+      "nav": 4,
+      "h2": [
+        "그래서 결국…",
+        "결과"
+      ],
+      "blocks": [
+        {
+          "type": "rows",
+          "size": 32,
+          "items": [
+            [
+              "She grew up ==to be== a singer.",
+              "자라서 가수가 됐다"
+            ],
+            [
+              "I woke up ==to find== it snowing.",
+              "깨어 보니 눈이 왔다"
+            ],
+            [
+              "He left home, ==never to return==.",
+              "다시는 안 돌아왔다"
+            ]
+          ]
+        },
+        {
+          "type": "point",
+          "text": "앞에서부터 순서대로 → ==&quot;~해서 (결국) …하다&quot;=="
+        },
+        {
+          "type": "dark",
+          "title": "결과 3종 세트",
+          "text": "grow up to be (자라서 ~가 되다) · wake up to find (깨어 보니 ~)<br>only to ~ (~했지만 결국 …하고 말았다)<br>I ran to the station, ==only to miss== the train.<br>역까지 뛰었지만 결국 기차를 놓쳤다.",
+          "size": 29
+        }
+      ]
+    },
+    {
+      "kind": "concept",
+      "label": "⑤ 형용사 꾸밈",
+      "nav": 5,
+      "h2": [
+        "무엇을 하기에?",
+        "형용사 꾸밈"
+      ],
+      "blocks": [
+        {
+          "type": "rows",
+          "items": [
+            [
+              "This book is easy ==to read==.",
+              "읽기에 쉽다"
+            ],
+            [
+              "The water is safe ==to drink==.",
+              "마시기에 안전하다"
+            ],
+            [
+              "His name is hard ==to remember==.",
+              "기억하기 어렵다"
+            ]
+          ],
+          "size": 36
+        },
+        {
+          "type": "trap",
+          "items": [
+            {
+              "bad": "This book is easy to read ~~it~~.",
+              "good": "This book is easy ==to read==.",
+              "why": "주어 This book이 이미 read의 목적어 자리를 채워요. it을 또 쓰면 ✖ (내신·수능 단골)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "concept",
+      "label": "헷갈림 해결",
+      "h2": [
+        "명사? 형용사? 부사?",
+        "빼 보면 끝"
+      ],
+      "blocks": [
+        {
+          "type": "strip",
+          "size": 31,
+          "items": [
+            {
+              "base": "I want",
+              "chunk": "to sleep",
+              "verdict": "미완성 → 명사적"
+            },
+            {
+              "base": "I have no time",
+              "chunk": "to sleep",
+              "verdict": "앞 명사 꾸밈 → 형용사적"
+            },
+            {
+              "base": "I went to bed early",
+              "chunk": "to sleep well",
+              "verdict": "멀쩡 → 부사적",
+              "ok": true
+            }
+          ]
+        },
+        {
+          "type": "flow",
+          "steps": [
+            "빼 보면 미완성?<br>→ 명사적",
+            "앞 명사를 꾸며?<br>→ 형용사적",
+            "둘 다 아니면<br>→ ==부사적=="
+          ]
+        },
+        {
+          "type": "text",
+          "muted": true,
+          "size": 25,
+          "text": "해석 5종을 자세히 보고 싶다면 → (004-3 해석 5종)"
+        }
+      ]
+    },
+    {
+      "kind": "summary",
+      "label": "한눈에 정리",
+      "h2": [
+        "다섯 갈래",
+        "한 장으로"
+      ],
+      "blocks": [
+        {
+          "type": "rows",
+          "size": 32,
+          "items": [
+            [
+              "{{목적}} got up early ==to catch== the bus",
+              "~하려고"
+            ],
+            [
+              "{{감정}} glad ==to see== you",
+              "~해서"
+            ],
+            [
+              "{{판단}} kind ==to help== me",
+              "~하다니"
+            ],
+            [
+              "{{결과}} grew up ==to be== a singer",
+              "결국 ~하다"
+            ],
+            [
+              "{{형용사}} easy ==to read==",
+              "~하기에"
+            ]
+          ]
+        },
+        {
+          "type": "point",
+          "text": "연결 고리 하나만! ==빼 봐도 멀쩡하면 → 부사처럼=="
+        },
+        {
+          "type": "next",
+          "text": "to부정사 vs 동명사 · 뜻이 바뀌는 동사 (remember to / remember -ing)"
+        }
+      ]
+    },
+    {
+      "kind": "quiz",
+      "label": "확인 퀴즈",
+      "h2": [
+        "풀어 보면",
+        "내 것이 돼요"
+      ],
+      "questions": [
+        "I went to the store ___ some milk. (buying / to buy)",
+        "I&#39;m sorry ___ that. (to hear / hearing)",
+        "[고치기] This song is hard to sing it.",
+        "She grew up ___ a teacher. (to be / being)",
+        "[구분] I have a lot of work [[to do]]. → 명사적? 형용사적? 부사적?"
+      ],
+      "answers": [
+        "==to buy== (목적: 사려고)",
+        "==to hear== (감정 원인: 들으니 유감)",
+        "hard to sing ~~it~~ → it 빼기 (주어가 목적어 자리)",
+        "==to be== (결과: 자라서 ~가 되다)",
+        "==형용사적== (앞 명사 work를 꾸밈)"
+      ]
+    }
+  ]
+}
