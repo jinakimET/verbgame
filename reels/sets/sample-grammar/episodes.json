@@ -1,0 +1,29 @@
+{
+  "mode": "grammar",
+  "set": "000",
+  "colors": { "pen": "빨강", "accent": "코랄" },
+  "episodes": [
+    {
+      "level": 1,
+      "points": ["want + to부정사"],
+      "lines": ["I want {going>to go}", "to the beach this", "weekend."],
+      "ko": "나는 이번 주말에 해변에 가고 싶어.",
+      "chip": {
+        "title": "want + to V",
+        "sub": "want 뒤에는 to부정사",
+        "rows": [["want to eat", "먹고 싶다"], ["hope to see", "보기를 바라다"]]
+      }
+    },
+    {
+      "level": 4,
+      "points": ["wish + 가정법 과거", "분사구문"],
+      "combo": true,
+      "lines": ["I wish I {can>could} fly,", "{watched>watching} the", "city from the sky."],
+      "ko": "하늘에서 도시를 내려다보며 날 수 있으면 좋겠다.",
+      "chip": {
+        "title": "wish + 과거 / 분사구문",
+        "rows": [["I wish I could ~", "~할 수 있으면 좋겠다"], ["V-ing ~ (동시 동작)", "~하면서"]]
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "mode": "words",
+  "set": "000",
+  "colors": {
+    "pen": "빨강",
+    "accent": "코랄"
+  },
+  "episodes": [
+    {
+      "level": 3,
+      "points": [
+        "improve ↔ weaken"
+      ],
+      "lines": [
+        "Regular exercise can",
+        "{weaken>improve} your mood."
+      ],
+      "ko": "규칙적인 운동은 기분을 [[개선할]] 수 있다.",
+      "chip": {
+        "title": "improve ↔ weaken",
+        "sub": "개선하다 ↔ 약화시키다",
+        "rows": [
+          [
+            "increase ↔ decrease",
+            "늘리다 ↔ 줄이다"
+          ],
+          [
+            "enhance ↔ worsen",
+            "향상시키다 ↔ 악화시키다"
+          ]
+        ]
+      }
+    }
+  ]
+}
