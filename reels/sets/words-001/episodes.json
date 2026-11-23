@@ -78,7 +78,7 @@
         "{permanent>temporary}, so it",
         "reopens next week."
       ],
-      "ko": "휴업은 [[일시적이라]] 다음 주에 다시 연다",
+      "ko": "카페는 [[임시]] 휴업, 다음 주에 다시 연다.",
       "chip": {
         "title": "temporary ↔ permanent",
         "sub": "일시적인 ↔ 영구적인",
