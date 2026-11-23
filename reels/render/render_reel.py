@@ -566,17 +566,28 @@ class Episode:
         dark = (24, 18, 20)
         hl_bg = darken(self.acc, 0.18)
         for li, segs in enumerate(self.box_lines):
-            lw = sum(tw(self.fb, s) for s, _ in segs)
+            # 하이라이트 바로 앞/뒤에 공백 없이 붙은 글자(쉼표 등)가 박스에 가려지지 않게 간격을 둔다
+            gaps = []
+            for i, (s, hl) in enumerate(segs):
+                gl = gr = 0
+                if hl:
+                    if i > 0 and segs[i - 1][0] and not segs[i - 1][0][-1].isspace():
+                        gl = 10
+                    if i + 1 < len(segs) and segs[i + 1][0] and not segs[i + 1][0][0].isspace():
+                        gr = 10
+                gaps.append((gl, gr))
+            lw = sum(tw(self.fb, s) + gl + gr for (s, _), (gl, gr) in zip(segs, gaps))
             x = (W - lw) / 2
             y = y1 + pad + li * lh
-            for s, hl in segs:
+            for (s, hl), (gl, gr) in zip(segs, gaps):
                 sw = tw(self.fb, s)
+                x += gl
                 if hl:
                     rrect(d, (x - 7, y - 2, x + sw + 7, y + 70), 14, fill=hl_bg + (255,))
                     d.text((x, y), s, font=self.fb, fill=self.acc + (255,))
                 else:
                     d.text((x, y), s, font=self.fb, fill=dark + (255,))
-                x += sw
+                x += sw + gr
         ky = y1 + pad + len(self.box_lines) * lh + 18
         for kl in self.box_ko:
             d.text((W / 2, ky), kl, font=self.fk, fill=darken(dark, 1.0) + (255,), anchor="mt")

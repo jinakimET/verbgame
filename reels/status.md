@@ -12,3 +12,6 @@
 
 | 세트 | 날짜 | 펜/정리 색 | 1 중하 | 2 중상 | 3 고하 | 4 고상 | 5 어학 |
 |---|---|---|---|---|---|---|---|
+| 001 | 2026-11-23 | 주황/민트 | forget↔remember | rude↔polite | temporary↔permanent | scarce↔abundant | mandatory↔optional |
+
+- words-001 칩 관련쌍: lose↔find, push↔pull / honest↔dishonest, careful↔careless / common↔rare, ancient↔modern / sufficient↔deficient, plentiful↔sparse / tentative↔definite, lenient↔strict
