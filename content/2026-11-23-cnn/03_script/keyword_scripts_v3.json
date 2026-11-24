@@ -1,0 +1,201 @@
+{
+ "version": 3,
+ "note": "v3: 훅은 hook_patterns.md의 서로 다른 유형, 구성은 훅→(표현)→뜻→예문→해석→저장으로 단축, 편마다 다른 모션 스타일. 사실은 articles.md(검색 요약 기준) 범위. '3척·이틀'(05), 시장의 이동 자제(11), 풍선(09)은 검색 요약 기준.",
+ "reels": [
+  {
+   "id": "01",
+   "term": "fail to agree on",
+   "hook_type": "감탄·놀람형",
+   "pattern": "아니 [..]가 나왔다고요?",
+   "style": "neo-brutalism + kinetic typography + shape morph",
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "아니, 세계 기후회의가 합의 없이 끝났다고요?",
+     "on_screen": "합의 없이 끝났다고요?"
+    },
+    {
+     "role": "term",
+     "spoken": "CNN 제목에 나온 표현, fail to agree on.",
+     "on_screen": "fail to agree on"
+    },
+    {
+     "role": "meaning",
+     "spoken": "합의하지 못하다.",
+     "on_screen": "~에 합의하지 못하다"
+    },
+    {
+     "role": "example_en",
+     "spoken": "Countries failed to agree on moving away from fossil fuels.",
+     "on_screen": "Countries failed to agree on moving away from fossil fuels."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "각국은 화석연료에서 벗어나는 데 합의하지 못했어요.",
+     "on_screen": "각국은 화석연료에서 벗어나는 데 합의하지 못했어요."
+    },
+    {
+     "role": "payoff",
+     "spoken": "저장해 두세요.",
+     "on_screen": "저장해 두기"
+    }
+   ],
+   "highlight": "failed to agree on"
+  },
+  {
+   "id": "07",
+   "term": "leverage",
+   "hook_type": "질문형",
+   "pattern": "질문 다음 줄에서 바로 답",
+   "style": "holographic + liquid motion + text scramble",
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "공격은 늘었는데, 이란의 협상력은 왜 약해졌을까요?",
+     "on_screen": "공격은 늘었는데 협상력은 왜 약해졌을까?"
+    },
+    {
+     "role": "term",
+     "spoken": "답은, leverage.",
+     "on_screen": "leverage"
+    },
+    {
+     "role": "meaning",
+     "spoken": "영향력, 협상력이라는 뜻이에요.",
+     "on_screen": "영향력 · 협상력"
+    },
+    {
+     "role": "example_en",
+     "spoken": "Low sales weakened our leverage in talks.",
+     "on_screen": "Low sales weakened our leverage in talks."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "낮은 매출이 협상에서 우리의 힘을 약하게 했어요.",
+     "on_screen": "낮은 매출이 협상에서 우리의 힘을 약하게 했어요."
+    },
+    {
+     "role": "payoff",
+     "spoken": "저장해 두세요.",
+     "on_screen": "저장해 두기"
+    }
+   ],
+   "highlight": "leverage"
+  },
+  {
+   "id": "09",
+   "term": "put ~ in jeopardy",
+   "hook_type": "의인화형",
+   "pattern": "나 [사물]야.",
+   "style": "claymorphism + paper cutout + particles",
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "나 put in jeopardy야. 바람 때문에 퍼레이드 풍선이 나한테 걸렸어.",
+     "on_screen": "나 put in jeopardy야"
+    },
+    {
+     "role": "meaning",
+     "spoken": "무언가를 위태롭게 하다, 라는 뜻이에요.",
+     "on_screen": "~을 위태롭게 하다"
+    },
+    {
+     "role": "example_en",
+     "spoken": "The heavy rain could put the outdoor concert in jeopardy.",
+     "on_screen": "The heavy rain could put the outdoor concert in jeopardy."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "폭우로 야외 콘서트가 위태로워질 수 있어요.",
+     "on_screen": "폭우로 야외 콘서트가 위태로워질 수 있어요."
+    },
+    {
+     "role": "payoff",
+     "spoken": "저장해 두세요.",
+     "on_screen": "저장해 두기"
+    }
+   ],
+   "highlight": "put the outdoor concert in jeopardy"
+  },
+  {
+   "id": "05",
+   "term": "at the highest level since",
+   "hook_type": "숫자형",
+   "pattern": "눈에 띄는 숫자로 시작",
+   "style": "halftone + infinite zoom + isometric",
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "3척. 이틀 사이 공격받은 유조선이에요.",
+     "on_screen": "3척"
+    },
+    {
+     "role": "term",
+     "spoken": "CNN은 호르무즈 공격이 전쟁 이후 최고 수준이라고 했죠. at the highest level since.",
+     "on_screen": "at the highest level since"
+    },
+    {
+     "role": "meaning",
+     "spoken": "이후 최고 수준이다, 라는 뜻이에요.",
+     "on_screen": "~ 이후 최고 수준"
+    },
+    {
+     "role": "example_en",
+     "spoken": "Prices are at the highest level since 2008.",
+     "on_screen": "Prices are at the highest level since 2008."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "물가가 2008년 이후 최고 수준이에요.",
+     "on_screen": "물가가 2008년 이후 최고 수준이에요."
+    },
+    {
+     "role": "payoff",
+     "spoken": "저장해 두세요.",
+     "on_screen": "저장해 두기"
+    }
+   ],
+   "highlight": "at the highest level since"
+  },
+  {
+   "id": "11",
+   "term": "nonessential",
+   "hook_type": "경고·금지형",
+   "pattern": "절대 ~하면 안 됩니다",
+   "style": "bauhaus + vaporwave + line animation",
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "이 단어 모르고 영어 뉴스 보면, 절대 안 됩니다!",
+     "on_screen": "이 단어 모르면 절대 안 됩니다!"
+    },
+    {
+     "role": "term",
+     "spoken": "샌프란시스코 시장이 이동을 자제하래요. 그 단어가 nonessential.",
+     "on_screen": "nonessential"
+    },
+    {
+     "role": "meaning",
+     "spoken": "꼭 필요하지 않은, 이라는 뜻이에요.",
+     "on_screen": "꼭 필요하지 않은"
+    },
+    {
+     "role": "example_en",
+     "spoken": "Please avoid nonessential trips this week.",
+     "on_screen": "Please avoid nonessential trips this week."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "이번 주에는 불필요한 외출을 피해 주세요.",
+     "on_screen": "이번 주에는 불필요한 외출을 피해 주세요."
+    },
+    {
+     "role": "payoff",
+     "spoken": "저장해 두세요.",
+     "on_screen": "저장해 두기"
+    }
+   ],
+   "highlight": "nonessential"
+  }
+ ]
+}

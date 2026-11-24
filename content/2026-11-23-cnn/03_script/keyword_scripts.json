@@ -1,0 +1,310 @@
+{
+ "note": "ig-reel 방식. 훅 점수는 직접 채점한 값(도구 점수 아님). 사실은 articles.md 요약 범위만 사용. '2009년 이후 첫 대형 결렬'은 검색 요약에 있던 CNN의 평가, 22건·100회·풍선은 검색 요약 기준. 05는 11/20~21 유조선 3척 공격(검색 요약), 11은 샌프란시스코 시장의 불필요한 이동 자제 호소(검색 요약) 기준. 훅 v2: 반응형·도전형으로 교체(점수는 직접 채점). 새 훅 음성만 생성해 기존 음성 앞에 붙이고 기존 첫 문장은 잘랐다.",
+ "reels": [
+  {
+   "id": "01",
+   "term": "fail to agree on",
+   "formula": "Reaction",
+   "hooks": [
+    {
+     "score": 82,
+     "spoken": "세계 기후회의가 합의 없이 끝났다고요?",
+     "on_screen": "합의 없이 끝났다고요?",
+     "formula": "Reaction"
+    },
+    {
+     "score": 68,
+     "spoken": "이 기사 제목, 영어로 읽을 수 있어요?",
+     "on_screen": "영어로 읽을 수 있어요?",
+     "formula": "Challenge"
+    },
+    {
+     "score": 55,
+     "spoken": "합의 없이 끝난 세계 기후회의.",
+     "on_screen": "합의 없이 끝났다",
+     "formula": "Statement(old)"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "세계 기후회의가 합의 없이 끝났다고요?",
+     "on_screen": "합의 없이 끝났다고요?",
+     "role": "hook"
+    },
+    {
+     "spoken": "CNN은 2009년 이후 첫 대형 결렬로 봤어요.",
+     "on_screen": "2009년 이후 첫 결렬",
+     "role": "stake"
+    },
+    {
+     "spoken": "이 뉴스의 핵심 표현은 fail to agree on.",
+     "on_screen": "fail to agree on",
+     "role": "term"
+    },
+    {
+     "spoken": "합의하지 못하다.",
+     "on_screen": "~에 합의하지 못하다",
+     "role": "meaning"
+    },
+    {
+     "spoken": "Countries failed to agree on moving away from fossil fuels.",
+     "on_screen": "Countries failed to agree on moving away from fossil fuels.",
+     "role": "example_en",
+     "highlight": "failed to agree on"
+    },
+    {
+     "spoken": "각국은 화석연료에서 벗어나는 데 합의하지 못했어요.",
+     "on_screen": "각국은 화석연료에서 벗어나는 데 합의하지 못했어요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "합의가 안 될 땐, fail to agree on. 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  },
+  {
+   "id": "05",
+   "term": "at the highest level since",
+   "formula": "Reaction",
+   "hooks": [
+    {
+     "score": 81,
+     "spoken": "이틀 사이 유조선 3척이 공격받았다고요?",
+     "on_screen": "유조선 3척 공격이라고요?",
+     "formula": "Reaction"
+    },
+    {
+     "score": 65,
+     "spoken": "'~ 이후 최고 수준', 영어로?",
+     "on_screen": "이후 최고 수준 = ?",
+     "formula": "Question"
+    },
+    {
+     "score": 54,
+     "spoken": "이틀 사이 유조선 3척이 공격받았어요.",
+     "on_screen": "이틀 사이 유조선 3척",
+     "formula": "Statement(old)"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "이틀 사이 유조선 3척이 공격받았다고요?",
+     "on_screen": "유조선 3척 공격이라고요?",
+     "role": "hook"
+    },
+    {
+     "spoken": "CNN은 호르무즈 해협 공격이 전쟁 이후 최고 수준이라고 했어요.",
+     "on_screen": "전쟁 이후 최고 수준",
+     "role": "stake"
+    },
+    {
+     "spoken": "이 뉴스의 핵심 표현은 at the highest level since.",
+     "on_screen": "at the highest level since",
+     "role": "term"
+    },
+    {
+     "spoken": "이후 최고 수준이다, 라는 뜻이에요.",
+     "on_screen": "~ 이후 최고 수준",
+     "role": "meaning"
+    },
+    {
+     "spoken": "Prices are at the highest level since 2008.",
+     "on_screen": "Prices are at the highest level since 2008.",
+     "role": "example_en",
+     "highlight": "at the highest level since"
+    },
+    {
+     "spoken": "물가가 2008년 이후 최고 수준이에요.",
+     "on_screen": "물가가 2008년 이후 최고 수준이에요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "유조선 뉴스 속 표현, at the highest level since. 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  },
+  {
+   "id": "07",
+   "term": "leverage",
+   "formula": "Reaction+Contrast",
+   "hooks": [
+    {
+     "score": 80,
+     "spoken": "11월에만 최소 22건 공격인데, 힘이 약해졌다고요?",
+     "on_screen": "공격 22건인데 힘이 약해졌다고요?",
+     "formula": "Reaction+Contrast"
+    },
+    {
+     "score": 66,
+     "spoken": "공격이 늘면 힘도 세질까요?",
+     "on_screen": "공격 늘면 힘도 셀까?",
+     "formula": "Question"
+    },
+    {
+     "score": 52,
+     "spoken": "11월에만 최소 22건의 공격이 있었어요.",
+     "on_screen": "11월 공격 최소 22건",
+     "formula": "Statement(old)"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "11월에만 최소 22건 공격인데, 힘이 약해졌다고요?",
+     "on_screen": "공격 22건인데 힘이 약해졌다고요?",
+     "role": "hook"
+    },
+    {
+     "spoken": "그런데 CNN은 이란의 leverage가 약해지고 있다고 분석했어요.",
+     "on_screen": "이란의 leverage ↓",
+     "role": "stake"
+    },
+    {
+     "spoken": "leverage는 영향력, 협상력이라는 뜻이에요.",
+     "on_screen": "leverage = 협상력",
+     "role": "meaning"
+    },
+    {
+     "spoken": "Low sales weakened our leverage in talks.",
+     "on_screen": "Low sales weakened our leverage in talks.",
+     "role": "example_en",
+     "highlight": "leverage"
+    },
+    {
+     "spoken": "낮은 매출이 협상에서 우리의 힘을 약하게 했어요.",
+     "on_screen": "낮은 매출이 협상에서 우리의 힘을 약하게 했어요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "공격 뉴스 속 leverage, 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  },
+  {
+   "id": "09",
+   "term": "put ~ in jeopardy",
+   "formula": "Challenge",
+   "hooks": [
+    {
+     "score": 79,
+     "spoken": "100회째 퍼레이드 풍선이 위태롭대요. 이 표현 몰라요?",
+     "on_screen": "풍선 위태롭대요, 이 표현 몰라요?",
+     "formula": "Challenge"
+    },
+    {
+     "score": 64,
+     "spoken": "'위태롭게 하다', 영어로 뭘까요?",
+     "on_screen": "위태롭게 하다 = ?",
+     "formula": "Question"
+    },
+    {
+     "score": 50,
+     "spoken": "바람 때문에 100회째 퍼레이드 풍선이 위태로워요.",
+     "on_screen": "100회 퍼레이드 위기",
+     "formula": "Statement(old)"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "100회째 퍼레이드 풍선이 위태롭대요. 이 표현 몰라요?",
+     "on_screen": "풍선 위태롭대요, 이 표현 몰라요?",
+     "role": "hook"
+    },
+    {
+     "spoken": "CNN 날씨 기사에 나온 표현이에요, put in jeopardy.",
+     "on_screen": "put ~ in jeopardy",
+     "role": "term"
+    },
+    {
+     "spoken": "무언가를 위태롭게 하다, 라는 뜻이에요.",
+     "on_screen": "~을 위태롭게 하다",
+     "role": "meaning"
+    },
+    {
+     "spoken": "The heavy rain could put the outdoor concert in jeopardy.",
+     "on_screen": "The heavy rain could put the outdoor concert in jeopardy.",
+     "role": "example_en",
+     "highlight": "put the outdoor concert in jeopardy"
+    },
+    {
+     "spoken": "폭우로 야외 콘서트가 위태로워질 수 있어요.",
+     "on_screen": "폭우로 야외 콘서트가 위태로워질 수 있어요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "일정이 위태로울 땐, put in jeopardy. 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  },
+  {
+   "id": "11",
+   "term": "nonessential",
+   "formula": "Challenge",
+   "hooks": [
+    {
+     "score": 78,
+     "spoken": "샌프란시스코 시장이 이동을 자제하래요. 이 단어 몰라요?",
+     "on_screen": "이동 자제하래요, 이 단어 몰라요?",
+     "formula": "Challenge"
+    },
+    {
+     "score": 63,
+     "spoken": "'꼭 필요하지 않은', 영어 한 단어예요.",
+     "on_screen": "꼭 필요하지 않은 = ?",
+     "formula": "Statement"
+    },
+    {
+     "score": 51,
+     "spoken": "샌프란시스코 시장이 불필요한 이동을 자제하라고 했어요.",
+     "on_screen": "불필요한 이동 자제",
+     "formula": "Statement(old)"
+    }
+   ],
+   "beats": [
+    {
+     "spoken": "샌프란시스코 시장이 이동을 자제하래요. 이 단어 몰라요?",
+     "on_screen": "이동 자제하래요, 이 단어 몰라요?",
+     "role": "hook"
+    },
+    {
+     "spoken": "높은 조수 때문이라고 CNN이 전했어요.",
+     "on_screen": "높은 조수 때문",
+     "role": "stake"
+    },
+    {
+     "spoken": "여기 나온 단어가 nonessential.",
+     "on_screen": "nonessential",
+     "role": "term"
+    },
+    {
+     "spoken": "꼭 필요하지 않은, 이라는 뜻이에요.",
+     "on_screen": "꼭 필요하지 않은",
+     "role": "meaning"
+    },
+    {
+     "spoken": "Please avoid nonessential trips this week.",
+     "on_screen": "Please avoid nonessential trips this week.",
+     "role": "example_en",
+     "highlight": "nonessential"
+    },
+    {
+     "spoken": "이번 주에는 불필요한 외출을 피해 주세요.",
+     "on_screen": "이번 주에는 불필요한 외출을 피해 주세요.",
+     "role": "example_ko"
+    },
+    {
+     "spoken": "이동을 줄여 달라고 할 땐, nonessential. 저장해 두세요.",
+     "on_screen": "저장해 두기",
+     "role": "payoff_loop"
+    }
+   ]
+  }
+ ]
+}

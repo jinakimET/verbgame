@@ -1,0 +1,5 @@
+content/**/silent*.mp4
+content/**/*.tmp.mp4
+__pycache__/
+content/**/_clip_*.wav
+content/**/*_hi.png
