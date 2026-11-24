@@ -14,7 +14,7 @@ description: "'뉴스 만들어'라고만 해도 뉴스 검색 → 벤토 카드
 | 2 줌인 영상 | 메인(대본·음성) + 에이전트(렌더) | `ig-reel-sync-zoomin` | 카드 1장 = 영상 1편. 칸 A→B→C→D가 항목 1~4 문장에 맞춰 확대됐다 돌아옴. 카드별 음성 1개(항목 4개: 표현 → 영어 예문 → 해석 순) |
 | 3 키워드 선정 | 메인 | `ig-reel` | 위 표현 중 또는 추가 검색에서 키워드 5개. 훅 후보 3개를 서로 다른 방식으로 직접 채점(도구 점수라고 쓰지 않음), 말할 대본·화면 글자 분리. 사실은 기사 범위만. **훅은 사실을 읽어 주는 평서문 금지**("합의 없이 끝난 회의." ✗). 반응형 "~다고요?", 도전형 "이 표현 몰라요?", 대조형 "A인데 B라고요?" 중에서 고르고 4초 안(말), 화면에는 0프레임부터 큰 글자로. 5편이 같은 틀로 반복되지 않게 방식을 섞는다. **마무리 규칙(다음 회차부터, 지나쌤 확정):** 마지막 "저장해 두세요" 앞에 해당 표현을 한 번 더 말한다(예: "fail to agree on. 저장해 두세요."). 화면에도 그 표현을 한 번 더 크게 보여 준다. **훅은 `hook_patterns.md`(지나쌤의 100만 릴스 첫마디 틀 목록)에서 뽑는다.** 한 번에 만드는 5편은 서로 다른 유형을 쓰고(같은 유형 2편 금지), 편마다 쓴 유형·틀을 `keyword_scripts.json`의 `formula`에 적는다. 뉴스에 없는 사실을 틀에 끼워 넣지 않는다(과장 ✗) |
 | 4 키워드 영상 | 메인(음성) + 에이전트(렌더) | `reel-voice-glass-sync` | 키워드 1개 = 영상 1편. 새와 함께 훅에 어울리는 구성. 대본 1편 = 음성 1개 |
-| 5 검수·푸시 | 에이전트(검수) + 메인(커밋·푸시) | | `reel-qa-pusher`가 ffprobe·프레임 확인 후 통과/문제 표만 보고 → 메인이 확인하고 커밋·푸시 |
+| 5 검수·푸시 | 에이전트(검수) + 메인(커밋·푸시) | | `reel-qa`가 ffprobe·프레임 확인 후 통과/문제 표만 보고 → 메인이 확인하고 커밋·푸시 |
 | 6 전달 | 메인 | | 카드 PNG, 영상, 캡션, 음성 스크립트, 출처 |
 
 표현별 릴스 12편(예전 `05_expression_reels`)은 이 흐름에 없다. 만들지 않는다.
@@ -26,7 +26,7 @@ description: "'뉴스 만들어'라고만 해도 뉴스 검색 → 벤토 카드
 - 단어 시각: `creative_add_flow_asset_node(generation_id)` → `creative_transcribe_audio(connect_from)`(무료)로 한글·영어 단어 시각. `words`를 `audio/words_*.json`에 저장. 줌인은 항목의 첫 단어 시작~마지막 단어 끝, 키워드는 비트의 첫 단어 시작을 쓴다. 지나쌤 mp3는 `tools/align_words.py` 또는 1초 넘는 쉼으로 항목을 가른다(싱크 추정 금지).
 
 ## 에이전트 호출
-2단계 렌더: `sync-reel-producer`(줌인 스킬 경로 + 입력 범위 + 새 스프라이트 지정). 4단계 렌더: `expression-reel-producer`(키워드 영상). 두 렌더는 입력이 모이면 동시에 돌린다. 마지막에 `reel-qa-pusher`. 모든 스크립트는 `NEWS_ROOT=<작업 폴더>`를 받는다. 재사용 스크립트는 `tools/`(build_cards, render_zoom, render_kw_reels, bird, align_words).
+2단계 렌더: `sync-reel-producer`(줌인 스킬 경로 + 입력 범위 + 새 스프라이트 지정). 4단계 렌더: `expression-reel-producer`(키워드 영상). 두 렌더는 입력이 모이면 동시에 돌린다. 마지막에 `reel-qa`. 모든 스크립트는 `NEWS_ROOT=<작업 폴더>`를 받는다. 재사용 스크립트는 `tools/`(build_cards, render_zoom, render_kw_reels, bird, align_words).
 
 ## 폴더·규칙
 - `content/<날짜>-<slug>/`: 01_news, 02_bento, 03_script, audio, 04_zoom_reels, 06_keyword_reels. 공용 `content/assets/bird_sprite.png`.
