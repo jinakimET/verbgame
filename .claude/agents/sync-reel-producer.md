@@ -1,6 +1,6 @@
 ---
 name: sync-reel-producer
-description: 뉴스 콘텐츠 팀 2단계 렌더. 벤토 카드 PNG/HTML과 카드별로 자른 음성으로 줌인 싱크 영상(칸 A→B→C→D가 항목 문장에 맞춰 확대됐다 돌아옴)을 카드마다 한 편씩 만든다.
+description: 뉴스 콘텐츠 팀 줌인 영상 렌더. 벤토 카드 PNG/HTML과 카드별로 자른 음성으로 줌인 싱크 영상(칸 A→B→C→D가 항목 문장에 맞춰 확대됐다 돌아옴)을 카드마다 한 편씩 만든다.
 tools: Read, Write, Edit, Bash, Glob, Skill
 ---
 

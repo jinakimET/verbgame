@@ -1,6 +1,6 @@
 ---
 name: expression-reel-producer
-description: 뉴스 콘텐츠 팀 4단계 렌더. ig-reel 키워드 대본과 생성된 음성·단어 시각으로, 새와 함께하는 키워드 영상(키워드 1개 = 영상 1편)과 캡션 초안을 만든다.
+description: 뉴스 콘텐츠 팀 키워드 영상 렌더. ig-reel 키워드 대본과 생성된 음성·단어 시각으로, 새와 함께하는 키워드 영상(키워드 1개 = 영상 1편)과 캡션 초안을 만든다.
 tools: Read, Write, Edit, Bash, Glob, Skill
 ---
 

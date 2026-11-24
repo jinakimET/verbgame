@@ -12,7 +12,7 @@
 자세한 단계·담당·규칙은 `.claude/skills/news-reels-team/SKILL.md`(오케스트레이터)에 있다. 진행 방식은 이 스킬을 따른다.
 
 ## 지나쌤이 정한 규칙 (바꾸지 말 것)
-- **에이전트는 영상 렌더·검수·푸시에만** 쓴다. 뉴스 검색·카드·대본·음성 생성은 메인이 직접 한다. (`.claude/agents/`의 sync-reel-producer=줌인 렌더, expression-reel-producer=키워드 영상 렌더, reel-qa-pusher=검수·푸시)
+- **에이전트는 영상 렌더·검수에만** 쓴다. 뉴스 검색·카드·대본·음성 생성과 **커밋·푸시는 메인이 직접** 한다. (`.claude/agents/`의 sync-reel-producer=줌인 렌더, expression-reel-producer=키워드 영상 렌더, reel-qa-pusher=검수만, 푸시 안 함)
 - 뉴스는 **WebSearch로만** 구한다. cnn.com 등 막힌 페이지는 열려고 하지 않는다(지나쌤이 일부러 열 필요 없다고 함). 검색 요약에서만 확인한 사실은 답변에 알리고 캡션에 "CNN은 ~라고 전했다"로 출처를 붙인다.
 - **훅은 `.claude/skills/news-reels-team/hook_patterns.md`(100만 릴스 첫마디 틀 목록)에서 뽑는다.** 같은 틀로 반복하지 않고, 한 번에 만드는 5편은 서로 다른 유형을 쓴다. 사실을 읽어 주는 평서문 훅 금지. 훅 점수는 직접 채점한 값이며 도구 점수라고 쓰지 않는다. 원본 스크린샷: `content/reference/hook-catalog-100man-reels/`.
 - 훅은 말(4초 안팎)과 화면(0프레임부터 전체 문구가 보이고, 말하는 순간에 단어가 채워짐)을 따로 쓴다. 화면 글자는 음성과 정확히 같게.
