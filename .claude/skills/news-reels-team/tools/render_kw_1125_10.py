@@ -483,12 +483,11 @@ def scene_payoff(fr, t, env):
     tot = sum(w_ for _, w_ in TILES_BIG) * .68 + 8 * 8; x = -tot / 2
     for i, (sp, w_) in enumerate(TILES_BIG):
         u = x + w_ * .68 / 2; x += w_ * .68 + 8
-        tau = t - (EXPR_S + .05 * i)
+        tau = t - (EXPR_S + .03 * i)
         if tau < 0: continue
-        if tau < .25: off = -(420 - 6700 * tau * tau); rr = (1 - tau / .25) * (16 if i % 2 else -16)
-        else: t2 = tau - .25; off = -20 * math.exp(-6 * t2) * abs(math.sin(12 * t2)); rr = 0
+        k = back(pr(tau, 0, .12)); k = max(.05, k)
         wob = 1.4 * math.sin(t * 2.4 + i) * sm(EXPR_S + 1.0, EXPR_S + 1.4, t)
-        place(fr, sp, 456 + u, 365 + off, rr + (2 if i % 2 else -2) + wob, .68)
+        place(fr, sp, 456 + u, 365 + 40 * (1 - pr(tau, 0, .12)), (1 - k) * (16 if i % 2 else -16) + (2 if i % 2 else -2) + wob, .68 * k)
     pay_scale(fr, t)
     # example cards: ex1 -> swap -> ex2 -> exit before save
     CY = 625
@@ -496,10 +495,10 @@ def scene_payoff(fr, t, env):
         k = back(pr(t, E1S, E1S + .38)); ex = pr(t, E2S - .15, E2S + .1)
         cd = draw_words(PC1, E1_TOK, E1_T, F_PE, t, PLH, PCW / 2 + 30, 30 + 25 + PLH / 2, 30, hl_t0=W1[5]["s"])
         place(fr, cd, 456 - 700 * ex * ex, CY - (1 - k) * 600, -1.2 + 2.5 * ex + 2 * (1 - k))
-    if E2S <= t < SAVE_S + .1:
-        k = back(pr(t, E2S, E2S + .38)); ex = pr(t, SAVE_S - .3, SAVE_S)
+    if E2S <= t < SAVE_S:
+        k = back(pr(t, E2S, E2S + .38)); ex = pr(t, E2E + .15, SAVE_S - .05)
         cd = draw_words(PC2, E2_TOK, E2_T, F_PE, t, PLH, PCW / 2 + 30, 30 + 25 + PLH / 2, 30, hl_t0=W2[-1]["s"])
-        place(fr, cd, 456 + 800 * ex * ex, CY + 40 - (1 - k) * 700, 1.2 - 2.5 * ex - 2 * (1 - k))
+        place(fr, cd, 456, CY + 40 - (1 - k) * 700, 1.2 - 2 * (1 - k), 1 - .35 * ex, 1 - ex)
     # save: pill + bookmark appear only at save_start
     if t >= SAVE_S:
         p = pr(t, SAVE_S, SAVE_S + .7); bx, by = 140, CY
