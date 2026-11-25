@@ -123,10 +123,12 @@ def build_layers():
     L.append(("farc", 180, 640, 16, with_shadow(periodic_band(640, cloud_draw((226, 241, 251, 255), 5, 120, 420, .8, 1.15), 3), (0, 14), 12, .25)))
     L.append(("midc", 520, 640, 34, with_shadow(periodic_band(640, cloud_draw(CLOUD + (255,), 4, 150, 420, .9, 1.4), 8), (0, 18), 14, .30)))
     amps_f = [(2, 34, .6), (5, 14, 2.0)]; amps_n = [(3, 20, 1.3), (7, 6, 0.4)]
-    L.append(("farh", 1330, 600, 10, with_shadow(periodic_band(600, hills_draw((31, 86, 130, 255), 110, amps_f), 1), (0, -10), 12, .35)))
-    L.append(("nearh", 1400, 520, 24, None))
-    nb = periodic_band(520, lambda d, rng: (torn_draw(CLOUD + (255,), 100, amps_n, 30)(d, rng), hills_draw(NAVY + (255,), 100, amps_n)(d, rng)), 5)
-    L[-1] = ("nearh", 1400, 520, 24, with_shadow(nb, (0, -8), 10, .35))
+    L.append(("farh", 1300, 600, 10, with_shadow(periodic_band(600, hills_draw((31, 86, 130, 255), 110, amps_f), 1), (0, -10), 12, .35)))
+    L.append(("nearh", 1360, 600, 24, None))
+    nb = periodic_band(600, lambda d, rng: (torn_draw(CLOUD + (255,), 100, amps_n, 30)(d, rng), hills_draw(NAVY + (255,), 100, amps_n)(d, rng)), 5)
+    L[-1] = ("nearh", 1360, 600, 24, with_shadow(nb, (0, -8), 10, .35))
+    L.append(("frontA", 1640, 300, 14, with_shadow(periodic_band(300, hills_draw((28, 72, 110, 255), 60, [(2, 18, .9), (5, 6, 1.7)]), 11), (0, -8), 10, .35)))
+    L.append(("frontB", 1790, 200, 20, with_shadow(periodic_band(200, hills_draw((40, 100, 148, 255), 50, [(3, 12, 2.1), (6, 5, .3)]), 12), (0, -8), 10, .35)))
     return L
 LAYERS = build_layers()
 def sky():
@@ -204,7 +206,7 @@ def make_bird_cloud():
 BIRDCLOUD = make_bird_cloud()
 BENV = bird.envelope(MP3, FPS, NF)
 def draw_bird(img, i, t):
-    cx = 690; bob = 4 * math.sin(t * 2.2); cy0 = 1400 + 6 * math.sin(t * 1.3 + 1)
+    cx = 720; bob = 4 * math.sin(t * 2.2); cy0 = 1400 + 6 * math.sin(t * 1.3 + 1)
     put(img, BIRDCLOUD, cx - BIRDCLOUD.width / 2, cy0 - 78)
     sh = Image.new("RGBA", (300, 80), (0, 0, 0, 0)); ImageDraw.Draw(sh).ellipse((40, 30, 260, 62), fill=NAVY + (110,))
     put(img, sh.filter(ImageFilter.GaussianBlur(9)), cx - 150, cy0 - 40)
@@ -286,13 +288,13 @@ def draw_rain(ov, t, level, local=None):
 def draw_wind(img, t, alpha):
     if alpha <= 0: return
     ov = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(ov)
-    for y0, x0, sp, ln, ph in WIND:
+    for y0, x0, sp, ln, ph in WIND[:6]:
         x = (x0 + sp * t) % (W + 900) - 450
         pts = [(x - ln * k / 6, y0 + 14 * math.sin(k * .9 + ph + t * 3)) for k in range(7)]
-        d.line(pts, fill=(255, 255, 255, int(165 * alpha)), width=5, joint="curve")
-        cx_, cy_ = pts[0]; d.arc((cx_ - 6, cy_ - 22, cx_ + 38, cy_ + 22), 270, 90, fill=(255, 255, 255, int(165 * alpha)), width=4)
+        d.line(pts, fill=(255, 255, 255, int(110 * alpha)), width=5, joint="curve")
+        cx_, cy_ = pts[0]; d.arc((cx_ - 6, cy_ - 22, cx_ + 38, cy_ + 22), 270, 90, fill=(255, 255, 255, int(110 * alpha)), width=4)
     img.alpha_composite(ov)
-    for spr, x0, y0, sp, ph, rot, sc in LEAVES:
+    for spr, x0, y0, sp, ph, rot, sc in LEAVES[:4]:
         if t > 5.5 and sp * t + x0 > W + 200: continue
         x = (x0 + sp * t) % (W + 500) - 250 if t < 5.4 else x0 + sp * t - 250
         if x > W + 100: continue

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""kw3_05  'at the highest level since'  -- HALFTONE + INFINITE ZOOM + ISOMETRIC (card-2 palette).
+"""kw3_05  'at the highest level since'  -- HERO IMAGE: line chart above the 2008 peak; halftone/zoom/iso toned down (card-2 palette).
 Usage: NEWS_ROOT=/home/user/verbgame/content/2026-11-23-cnn python3 render_kw3_05.py [--test t1 t2 ...]
 Everything is numpy-vectorised (halftone cell tables cached, tunnel in rounded-rect log space) + PIL for text/iso polygons."""
 import json, os, subprocess, sys, math
@@ -280,228 +280,241 @@ def scene_hook(canvas, t):
                                                         outline=RED + (int(255 * (1 - ring)),), width=7)
     paste(canvas, lay.out(), 150, G3Y + GH + 90)
 
-# ------------------------------------------------------------------ term : tunnel + phrase + isometric rising bars
-PH_LINES = ["at the", "highest", "level since"]
-PH_F = font(FB, 150)
-def phrase_sprite(col):
-    lw = [tsize(PH_F, l)[0] for l in PH_LINES]; lh = 170
-    im = Image.new("RGBA", (788, lh * 3), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    for i, l in enumerate(PH_LINES):
-        bb = PH_F.getbbox(l); d.text(((788 - lw[i]) // 2 - bb[0], i * lh - bb[1] + 10), l, font=PH_F, fill=col + (255,))
-    return im.crop((0, 0, 788, lh * 3))
-PS_A, PS_B = phrase_sprite(LAV), phrase_sprite(MANGO)
-def zoom_phrases(canvas, phase, alpha_mul):
-    for i in range(-8, 8):
-        n = RR ** (i + phase); s = n * 0.95
-        if s < 0.10 or s > 1.0: continue
-        a = ease((s - 0.10) / 0.12) * ease((1.0 - s) / 0.16) * 0.55 * alpha_mul
-        im = PS_A if i % 2 else PS_B
-        w, h = int(im.width * s), int(im.height * s)
-        if w < 8: continue
-        sp = im.resize((w, h), Image.BILINEAR)
-        paste(canvas, sp, SCX - w // 2, 860 - h // 2, alpha=a)
 
-BAR_H = [1, 2, 3, 4, 6, 8]; UNIT = 46
-BAR_X0, BAR_Y0 = 300, 1390
-def bars_layer(t, tstart):
-    lay = IsoLayer(W, 1500, ss=2) if False else IsoLayer(620, 900, ss=2)
-    OX, OY = 40, 820                           # layer origin
-    cols = [mix(GRAPE, LAV, .55), mix(GRAPE, LAV, .4), mix(GRAPE, LAV, .25), LAV, mix(LAV, MANGO, .35), MANGO]
-    for i in range(6):
-        p = ease((t - tstart - i * 0.17) / 0.65)
-        h = BAR_H[i] * UNIT * p
-        if h < 1: h = UNIT * 0.5 * (0.6 + 0.4 * math.sin(t * 6 + i)); cc = mix(DEEP, LAV, .3)
-        else: cc = None
-        ox, oy = iso_pt2(i * 72, 0, 0, OX, OY)  # base corner
-        n = int(h // UNIT); rem = h - n * UNIT
-        c = cc or cols[i]
-        for j in range(n):
-            lay.box(ox, oy, 62, 62, UNIT - 3, j * UNIT, shades(c), iso_pt)
-        if rem > 4: lay.box(ox, oy, 62, 62, rem - 3 if rem > 6 else rem, n * UNIT, shades(c), iso_pt)
+# ------------------------------------------------------------------ HERO IMAGE : line chart "now is above the 2008 peak"
+PAYB = [b for b in WK["beats"] if b["role"] == "payoff"][0]
+T_EXPR0, T_EXPR1, T_SAVE = PAYB["expr_start"], PAYB["expr_end"], PAYB["save_start"]
+CH_PTS = [(0, .30), (.09, .44), (.18, .60), (.26, .70), (.30, .74), (.36, .60), (.44, .42), (.53, .36), (.62, .46),
+          (.72, .60), (.82, .74), (.91, .86), (1, .96)]
+PK_I = 4; PK_V = CH_PTS[PK_I][1]
+def catmull(pts, n=24):
+    P = [pts[0]] + list(pts) + [pts[-1]]; out = []
+    for i in range(1, len(P) - 2):
+        p0, p1, p2, p3 = [np.array(p, float) for p in P[i - 1:i + 3]]
+        for k in range(n):
+            s = k / n; out.append(0.5 * ((2 * p1) + (-p0 + p2) * s + (2 * p0 - 5 * p1 + 4 * p2 - p3) * s ** 2 + (-p0 + 3 * p1 - 3 * p2 + p3) * s ** 3))
+    out.append(np.array(pts[-1], float)); return np.array(out)
+CURVE = catmull(CH_PTS)
+_seg = np.hypot(np.diff(CURVE[:, 0]) * 788, np.diff(CURVE[:, 1]) * 450)
+CUM = np.concatenate([[0], np.cumsum(_seg)]); CUM /= CUM[-1]
+PK_FRAC = float(CUM[PK_I * 24])
+FIN_T = T_SINCE + 0.85                                   # line reaches the top
+def line_prog(t):
+    """fraction of the stroke drawn: slow draw through the CNN sentence, peak exactly at 'since', climb after it"""
+    if t <= T_TERM + 0.2: return 0.0
+    if t < T_SINCE:
+        a = [(T_TERM + 0.2, 0.0), (T_AT, 0.55 * PK_FRAC), (T_SINCE, PK_FRAC)]
+        for (t0, v0), (t1, v1) in zip(a, a[1:]):
+            if t < t1: return v0 + (v1 - v0) * (t - t0) / (t1 - t0)
+    return PK_FRAC + (1 - PK_FRAC) * ease((t - T_SINCE) / 0.85)
+
+def ctext(lay, s, size, cx, cy, fill):
+    ImageDraw.Draw(lay.im).text((cx * lay.ss, cy * lay.ss), s, font=font(FB, int(size * lay.ss)), fill=fill + (255,), anchor="mm")
+
+def chart_layer(w, h, t, label, fs, chip_hi=False, pulses=()):
+    lay = IsoLayer(w, h); S = lay.ss; d = lay.d
+    d.rounded_rectangle((0, 0, w * S - 1, h * S - 1), 40 * S, fill=DEEP + (255,), outline=LAV + (255,), width=3 * S)
+    pl, pr, pt, pb = 0.07 * w, 0.10 * w, 0.34 * h, 0.13 * h
+    X = lambda u: (pl + u * (w - pl - pr)) * S
+    Y = lambda v: (h - pb - v * (h - pb - pt)) * S
+    # grid + baseline (quiet)
+    for g in (.25, .5, .75, 1.0): d.line([(pl * S, Y(g)), ((w - pr * .4) * S, Y(g))], fill=mix(DEEP, LAV, .14) + (255,), width=S * 2)
+    d.line([(pl * S, Y(0)), ((w - pr * .4) * S, Y(0))], fill=mix(DEEP, LAV, .6) + (255,), width=S * 3)
+    ctext(lay, "시간 →", max(22, fs * 0.55), w - pr * .4 - fs * 1.1, h - pb * 0.45, mix(DEEP, LAV, .85))
+    lp = line_prog(t); m = int(np.searchsorted(CUM, lp))
+    if lp > 0.002:
+        idx = min(m, len(CURVE) - 1); pts = [(X(u), Y(v)) for u, v in CURVE[:idx]]
+        if idx < len(CURVE):
+            a, b = CUM[idx - 1], CUM[idx]; f = (lp - a) / max(1e-9, b - a)
+            q = CURVE[idx - 1] + (CURVE[idx] - CURVE[idx - 1]) * f; pts.append((X(q[0]), Y(q[1])))
+        if len(pts) >= 2:
+            d.polygon(pts + [(pts[-1][0], Y(0)), (pts[0][0], Y(0))], fill=mix(DEEP, GRAPE, .8) + (255,))
+            d.line([(pl * S, Y(0)), ((w - pr * .4) * S, Y(0))], fill=mix(DEEP, LAV, .6) + (255,), width=S * 3)
+            lw = max(6, int(round(w * 0.0125))) * S
+            d.line(pts, fill=MANGO + (255,), width=lw, joint="curve")
+            for (px_, py_) in (pts[0], pts[-1]): d.ellipse([px_ - lw / 2, py_ - lw / 2, px_ + lw / 2, py_ + lw / 2], fill=MANGO + (255,))
+    # dashed previous-peak line "2008"
+    tp = t - T_SINCE
+    ypk = Y(PK_V)
+    if tp >= 0:
+        dp = ease(tp / 0.45); x_end = X(0) + (X(1) + 0.03 * w * S - X(0)) * dp; x = X(0)
+        while x < x_end:
+            d.line([(x, ypk), (min(x + 16 * S, x_end), ypk)], fill=LAV + (255,), width=S * 3); x += 28 * S
+        cf = font(FB, int(fs * 0.85 * S)); tw_ = d.textlength("2008", font=cf) / S
+        cw_, ch_ = tw_ + 30, fs * 0.85 * 1.55
+        cx0, cy0 = pl + 6, ypk / S - ch_ - 8
+        d.rounded_rectangle((cx0 * S, cy0 * S, (cx0 + cw_) * S, (cy0 + ch_) * S), int(ch_ * .4 * S), fill=(MANGO if chip_hi else LAV) + (255,))
+        ctext(lay, "2008", fs * 0.85, cx0 + cw_ / 2, cy0 + ch_ / 2 + 1, DEEP)
+        # peak dot pops at 'since'
+        k = eback(tp / 0.30); r = 0.024 * w * k
+        pxk, pyk = X(CH_PTS[PK_I][0]), Y(PK_V)
+        d.ellipse([pxk - r * S, pyk - r * S, pxk + r * S, pyk + r * S], fill=MANGO + (255,), outline=WHITE + (255,), width=S * 3)
+        for pt0 in list(pulses) + [T_SINCE]:
+            q = (t - pt0) / 0.6
+            if 0 < q < 1:
+                rr = (0.024 + 0.06 * q) * w * S; d.ellipse([pxk - rr, pyk - rr, pxk + rr, pyk + rr], outline=mix(DEEP, WHITE, 1 - q) + (255,), width=S * 3)
+    # latest point: pulsing dot, up-arrow, label
+    if t >= FIN_T:
+        xf, yf = X(1), Y(CH_PTS[-1][1]); fq = t - FIN_T
+        r = 0.032 * w * (eback(fq / 0.3) if fq < 0.3 else 1 + 0.10 * math.sin(t * 7))
+        q = (fq % 1.1) / 1.1; rr = (0.032 + 0.07 * q) * w * S
+        d.ellipse([xf - rr, yf - rr, xf + rr, yf + rr], outline=mix(DEEP, MANGO, 1 - q) + (255,), width=S * 3)
+        d.ellipse([xf - r * S, yf - r * S, xf + r * S, yf + r * S], fill=MANGO + (255,), outline=WHITE + (255,), width=S * 4)
+        ah = min(0.20 * h, (yf / S) - 0.06 * h - r) * ease(fq / 0.35); y0 = yf - r * S - 6 * S; y1 = y0 - ah * S
+        aw = fs * 0.42 * S
+        d.line([(xf, y0), (xf, y1 + aw)], fill=WHITE + (255,), width=int(0.011 * w * S))
+        d.polygon([(xf, y1), (xf - aw * .8, y1 + aw * 1.3), (xf + aw * .8, y1 + aw * 1.3)], fill=WHITE + (255,))
+        lf = font(FB, int(fs * S)); lw_ = d.textlength(label, font=lf) / S; ch_ = fs * 1.6; cw_ = lw_ + 44
+        cx1 = min(xf / S - aw / S * 1.6 - cw_, w - 20 - cw_); cx1 = xf / S - 0.07 * w - cw_ + 0.01 * w
+        cy1 = 0.05 * h + 4
+        d.rounded_rectangle((cx1 * S, cy1 * S, (cx1 + cw_) * S, (cy1 + ch_) * S), int(ch_ * .38 * S), fill=MANGO + (255,))
+        ctext(lay, label, fs, cx1 + cw_ / 2, cy1 + ch_ / 2 + 1, DEEP)
     return lay.out()
+
+def chart(canvas, t, x, y, w, h, label, fs, a=1.0, **kw):
+    paste(canvas, chart_layer(w, h, t, label, fs, **kw), x, y, alpha=a)
+
+def tunnel_soft(canvas, ph, k=0.62):
+    tunnel(canvas, ph); canvas[:] = (canvas.astype(np.float32) * (1 - k) + np.array(DEEP, np.float32) * k).astype(np.uint8)
+
+def rrect(w, h, r, fill, outline=None, ow=0):
+    lay = IsoLayer(w, h); lay.d.rounded_rectangle((0, 0, w * 2 - 1, h * 2 - 1), r * 2, fill=fill + (255,), outline=(outline + (255,)) if outline else None, width=ow * 2)
+    return lay.out()
+
+# ------------------------------------------------------------------ term : calm tunnel + sentence + chart draws itself
 def scene_term(canvas, t):
     tau = t - T_TERM; ph = tunnel_phase(t, T_TERM) + 0.3
-    tunnel(canvas, ph)
-    late = t >= T_AT - 0.02
-    zoom_phrases(canvas, ph, 1.0)
-    # CNN context panel (Korean) before the phrase is spoken
-    f = font(FB, 56)
-    if not late:
-        lines = ["CNN: 호르무즈 공격이", "전쟁 이후 최고 수준"]
-        pw = 788; ph_ = 270; px = SX0; py = 330 + 20 * (1 - ease(tau / 0.3))
-        lay = IsoLayer(pw, ph_); lay.d.rounded_rectangle((0, 0, pw * 2 - 1, ph_ * 2 - 1), 44, fill=DEEP + (255,), outline=MANGO + (255,), width=8)
-        im = lay.out(); d = ImageDraw.Draw(im)
-        for k, l in enumerate(lines):
-            tl = txt_layer(l, f, WHITE if k == 0 else MANGO); im.alpha_composite(tl, ((pw - tl.width) // 2, 52 + k * 92))
-        a = ease(tau / 0.3); paste(canvas, im, px, py, alpha=a)
+    tunnel_soft(canvas, ph)
+    pw = 788
+    if t < T_AT - 0.02:
+        ph_ = 250; im = rrect(pw, ph_, 44, DEEP, MANGO, 4); f = font(FB, 56)
+        for k, l in enumerate(["CNN: 호르무즈 공격이", "전쟁 이후 최고 수준"]):
+            tl = txt_layer(l, f, WHITE if k == 0 else MANGO); im.alpha_composite(tl, ((pw - tl.width) // 2, 44 + k * 94))
+        paste(canvas, im, SX0, 306 + 16 * (1 - ease(tau / 0.3)), alpha=ease(tau / 0.3))
     else:
-        # phrase panel: words pop in on their timestamps
-        pw, ph_ = 788, 390; px, py = SX0, 306
-        lay = IsoLayer(pw, ph_); lay.d.rounded_rectangle((0, 0, pw * 2 - 1, ph_ * 2 - 1), 44, fill=DEEP + (255,), outline=MANGO + (255,), width=8)
-        im = lay.out()
-        pf = font(FB, 108)
-        rows = [[("at", 13), ("the", 14)], [("highest", 15)], [("level", 16), ("since", 17)]]
-        # row layout
+        ph_ = 270; im = rrect(pw, ph_, 44, DEEP, MANGO, 4)
+        pf = fit_font(FB, "at the highest", 700, 112, 60)
+        rows = [[("at", 13), ("the", 14), ("highest", 15)], [("level", 16), ("since", 17)]]
         for r, row in enumerate(rows):
-            sp = 30; ws_ = [tsize(pf, w_)[0] for w_, _ in row]; tot = sum(ws_) + sp * (len(row) - 1); x = (pw - tot) // 2
-            for (w_, idx), wd in zip(row, ws_):
-                p = (t - words[idx]["s"]) / 0.18
-                col = MANGO if w_ == "highest" else WHITE
-                if p <= 0:
-                    gt = txt_layer(w_, pf, mix(DEEP, LAV, .4)); im.alpha_composite(gt, (x, 34 + r * 114 + (gt.height - gt.height) // 2))
-                if p > 0:
-                    tl = txt_layer(w_, pf, col); sc = 1 + 0.35 * (1 - eout(p)) if p < 1 else 1
-                    tl2 = tl.resize((int(tl.width * sc), int(tl.height * sc)), Image.BILINEAR)
-                    im.alpha_composite(tl2, (x + (wd - tl2.width) // 2, 34 + r * 114 + (tl.height - tl2.height) // 2))
+            sp = 26; wsx = [tsize(pf, w_)[0] for w_, _ in row]; x = (pw - sum(wsx) - sp * (len(row) - 1)) // 2
+            for (w_, idx), wd in zip(row, wsx):
+                p = (t - words[idx]["s"]) / 0.18; col = MANGO if w_ == "highest" else WHITE
+                if p <= 0: im.alpha_composite(txt_layer(w_, pf, mix(DEEP, LAV, .45)), (x, 28 + r * 120))
+                else:
+                    tl = txt_layer(w_, pf, col); sc = 1 + 0.3 * (1 - eout(p)) if p < 1 else 1
+                    t2 = tl.resize((int(tl.width * sc), int(tl.height * sc)), Image.BILINEAR)
+                    im.alpha_composite(t2, (x + (wd - t2.width) // 2, 28 + r * 120 + (tl.height - t2.height) // 2))
                 x += wd + sp
-        paste(canvas, im, px, py, alpha=ease((t - T_AT + 0.02) / 0.15))
-        # rising iso bars
-        bl = bars_layer(t, T_HIGHEST - 0.08)
-        paste(canvas, bl, 232, 600)
-        # 'highest level' flag on tallest bar
-        fp = ease((t - T_LEVEL - 0.6) / 0.3)
-        if fp > 0:
-            ff = font(FB, 46); tl = txt_layer("HIGHEST", ff, DEEP)
-            bw, bh = tl.width + 44, 74; fl = Image.new("RGBA", (bw, bh), (0, 0, 0, 0))
-            ImageDraw.Draw(fl).rounded_rectangle((0, 0, bw - 1, bh - 1), 22, fill=MANGO + (255,)); fl.alpha_composite(tl, (22, (bh - tl.height) // 2))
-            paste(canvas, fl, 600 - bw // 2 + 10, 945 - 20 * (1 - fp) , alpha=fp)
+        paste(canvas, im, SX0, 306, alpha=ease((t - T_AT + 0.02) / 0.15))
+    chart(canvas, t, SX0, 610, 788, 640, "지금 = 최고 수준", 50, a=ease(tau / 0.35))
 
-# ------------------------------------------------------------------ meaning : halftone gradient wipe onto mango
+# ------------------------------------------------------------------ meaning : mango, soft halftone, chart small up top
 MEAN_HT = HT(0, 0, W, H, 34, 45)
 def scene_mean(canvas, t):
     canvas[:] = MANGO
-    # deep halftone gradient from bottom-left (big dots) fading toward top-right, slowly drifting
     f = np.clip(1 - (MEAN_HT.cx / W * 0.55 + (1 - MEAN_HT.cy / H) * 0.9) + 0.06 * np.sin(t * 1.6), 0, 1)
-    rad = (f ** 1.1 * 0.62 * 34).astype(np.float32)
-    comp(canvas, mix(MANGO, DEEP, .86), MEAN_HT.alpha(rad))
+    comp(canvas, mix(MANGO, DEEP, .24), MEAN_HT.alpha((f ** 1.1 * 0.50 * 34).astype(np.float32)))
     tau = t - T_MEAN
-    # iso stairs echo in the lower-right
-    lay = IsoLayer(420, 360)
-    for i in range(4):
-        p = ease((tau - 0.4 - i * 0.12) / 0.4); h = (i + 1) * 34 * p
-        if h > 1:
-            ox, oy = iso_pt2(i * 66, 0, 0, 40, 330); lay.box(ox, oy, 60, 60, h, 0, shades(GRAPE if i < 3 else DEEP), iso_pt)
-    paste(canvas, lay.out(), 470, 1060)
-    # text
-    f1 = font(FB, 170); a1 = txt_layer("~ 이후", f1, DEEP); f2 = font(FB, 170); a2 = txt_layer("최고 수준", f2, GRAPE)
+    chf = font(FB, 44); chl = txt_layer("at the highest level since", chf, MANGO)
+    cw, ch_ = chl.width + 50, 84; chip = rrect(cw, ch_, 28, DEEP); chip.alpha_composite(chl, (25, (ch_ - chl.height) // 2))
+    paste(canvas, chip, SX0, 310, alpha=ease((tau - 0.05) / 0.25))
+    chart(canvas, t, SX0, 430, 788, 400, "지금 = 최고 수준", 40)
+    f1 = font(FB, 160); a1 = txt_layer("~ 이후", f1, DEEP); a2 = txt_layer("최고 수준", f1, GRAPE)
     for k, (im, tw) in enumerate(((a1, T_MEAN), (a2, ws(19)))):
         p = ease((t - tw) / 0.28)
-        if p > 0: paste(canvas, im, SX0 + 8 + 70 * (1 - p), 520 + k * 230, alpha=p)
-    # phrase chip
-    chf = font(FB, 44); chl = txt_layer("at the highest level since", chf, MANGO)
-    cw, ch_ = chl.width + 50, 84; chip = Image.new("RGBA", (cw, ch_), (0, 0, 0, 0))
-    ImageDraw.Draw(chip).rounded_rectangle((0, 0, cw - 1, ch_ - 1), 28, fill=DEEP + (255,)); chip.alpha_composite(chl, (25, (ch_ - chl.height) // 2))
-    paste(canvas, chip, SX0, 330, alpha=ease((tau - 0.1) / 0.25))
+        if p > 0: paste(canvas, im, SX0 + 8 + 70 * (1 - p), 900 + k * 210, alpha=p)
 
-# ------------------------------------------------------------------ example_en : halftone panel + mango box + big halftone 2008
-PANEL = HT(SX0, 306, 788, 640, 16, 45)
-G2008 = make_glyph_mask("2008", 330, FB)
-G2W, G2H = G2008.size
-G2X, G2Y = SX0 + (788 - G2W) // 2 - 0, 1000
-G2HT = HT(G2X, G2Y, G2W, G2H, 11, 45)
-_g20 = cv2.GaussianBlur(np.asarray(G2008).astype(np.float32) / 255, (0, 0), 4)
-_g20col = np.zeros((G2H, G2W, 3), np.float32)
-_gy2 = np.linspace(0, 1, G2H)[:, None]
-for k in range(3): _g20col[..., k] = MANGO[k] * (1 - _gy2) + LAV[k] * _gy2
+# ------------------------------------------------------------------ example_en : chart small + sentence panel
 def scene_en(canvas, t):
     tau = t - T_EN
-    bg_halftone(canvas, t, DEEP, mix(DEEP, GRAPE, .55), wave=1.4)
-    # panel with halftone texture (gradient: dots larger toward bottom-right, subtle so text keeps contrast)
-    pa = ease(tau / 0.3)
-    lay = IsoLayer(788, 640); lay.d.rounded_rectangle((0, 0, 788 * 2 - 1, 640 * 2 - 1), 50, fill=GRAPE + (255,)); mk = np.asarray(lay.out())[..., 3].astype(np.float32) / 255
-    pan = np.zeros((640, 788, 3), np.uint8); pan[:] = GRAPE
-    f = np.clip((PANEL.cx - SX0) / 788 * 0.5 + (PANEL.cy - 306) / 640 * 0.7 + 0.15 * np.sin(t * 1.2), 0, 1)
-    comp(pan, mix(GRAPE, LAV, .17), PANEL.alpha((f * 0.50 * 16).astype(np.float32)))
-    im = Image.fromarray(pan).convert("RGBA"); im.putalpha(Image.fromarray((mk * 255).astype(np.uint8)))
-    # sentence rows
-    pf = font(FB, 92); rows = [[("Prices", 23), ("are", 24)], [("at", 25), ("the", 26), ("highest", 27)], [("level", 28), ("since", 29)], [("2008.", 30)]]
-    hl_rows = (1, 2); y = 52; lh = 142; sp = 26
+    bg_halftone(canvas, t, DEEP, mix(DEEP, GRAPE, .55), strength=0.55, wave=1.4)
+    chart(canvas, t, SX0, 300, 788, 340, "2008 이후 최고", 40, chip_hi=(t >= ws(30)), pulses=[ws(30)])
+    pa = ease(tau / 0.3); pw, ph_ = 788, 580
+    im = rrect(pw, ph_, 50, GRAPE)
+    pf = font(FB, 84); rows = [[("Prices", 23), ("are", 24)], [("at", 25), ("the", 26), ("highest", 27)], [("level", 28), ("since", 29)], [("2008.", 30)]]
+    hl_rows = (1, 2); y = 40; lh = 130; sp = 24
     for r, row in enumerate(rows):
-        ws_ = [tsize(pf, w_)[0] for w_, _ in row]; tot = sum(ws_) + sp * (len(row) - 1); x = 52 if r != 0 else 52
-        # mango box behind highlighted rows (drawn as soon as first word of row appears)
+        wsx = [tsize(pf, w_)[0] for w_, _ in row]; tot = sum(wsx) + sp * (len(row) - 1); x = 52
         if r in hl_rows:
             bp = ease((t - words[row[0][1]]["s"] + 0.04) / 0.22)
             if bp > 0:
-                bw = int((tot + 44) * bp); lay2 = IsoLayer(tot + 44, 128)
-                lay2.d.rounded_rectangle((0, 0, (tot + 44) * 2 - 1, 128 * 2 - 1), 30, fill=MANGO + (255,))
-                bim = lay2.out().crop((0, 0, max(1, bw), 128)); im.alpha_composite(bim, (x - 22, y + r * lh - 8 - 6))
-        for (w_, idx), wd in zip(row, ws_):
+                bim = rrect(tot + 44, 118, 30, MANGO).crop((0, 0, max(1, int((tot + 44) * bp)), 118)); im.alpha_composite(bim, (x - 22, y + r * lh - 4))
+        for (w_, idx), wd in zip(row, wsx):
             p = (t - words[idx]["s"]) / 0.16
-            if p <= 0:
-                gt = txt_layer(w_, pf, mix(GRAPE, LAV, .4)); im.alpha_composite(gt, (x, y + r * lh + (92 - gt.height) // 2 + 6))
-            if p > 0:
-                col = DEEP if r in hl_rows else WHITE
-                tl = txt_layer(w_, pf, col); dy = int(18 * (1 - eout(p)))
+            if p <= 0: gt = txt_layer(w_, pf, mix(GRAPE, LAV, .45)); im.alpha_composite(gt, (x, y + r * lh + (84 - gt.height) // 2 + 10))
+            else:
+                tl = txt_layer(w_, pf, DEEP if r in hl_rows else WHITE); dy = int(16 * (1 - eout(p)))
                 a = tl.copy(); a.putalpha(a.getchannel("A").point(lambda v: int(v * min(1, p))))
-                im.alpha_composite(a, (x, y + r * lh + dy + (92 - tl.height) // 2 + 6))
+                im.alpha_composite(a, (x, y + r * lh + dy + (84 - tl.height) // 2 + 10))
             x += wd + sp
-    paste(canvas, im, SX0, 306 + 24 * (1 - pa), alpha=pa)
-    # big halftone 2008
-    tp = t - ws(30)
-    if True:
-        grow = eback(tp / 0.45) if tp < 0.45 else 1.0
-        pulse = 1.0 + 0.05 * math.sin(t * 5.5)
-        halftone_glyph(canvas, G2HT, _g20, _g20col, G2X, G2Y, t, pulse * (max(grow, 0.01) if tp > -0.02 else 0.35), rmax=0.66)
-        pass
-    else:
-        lbl = None
+    paste(canvas, im, SX0, 668 + 20 * (1 - pa), alpha=pa)
 
-# ------------------------------------------------------------------ example_ko : lavender, halftone gradient, big stairs
+# ------------------------------------------------------------------ example_ko : lavender, chart small + translation
 KO_HT = HT(0, 0, W, H, 40, 45)
 def scene_ko(canvas, t):
     tau = t - T_KO
     canvas[:] = LAV
     f = np.clip((KO_HT.cy / H) * 1.3 - 0.25 + 0.2 * np.sin(t * 1.4 + KO_HT.cx / 300), 0, 1)
-    comp(canvas, mix(LAV, GRAPE, .22), KO_HT.alpha((f * 0.6 * 40).astype(np.float32)))
-    pf = fit_font(FB, "최고 수준이에요.", 760, 112, 64)
+    comp(canvas, mix(LAV, GRAPE, .16), KO_HT.alpha((f * 0.45 * 40).astype(np.float32)))
+    chart(canvas, t, SX0, 300, 788, 340, "2008 이후 최고", 40, chip_hi=(t >= ws(32)), pulses=[ws(32)])
+    pf = fit_font(FB, "최고 수준이에요.", 740, 104, 64)
     rows = [[("물가가", 31)], [("2008년", 32), ("이후", 33)], [("최고", 34), ("수준이에요.", 35)]]
-    y0 = 420; lh = int(pf.size * 1.32); sp = int(pf.size * 0.3)
+    y0 = 690; lh = int(pf.size * 1.32); sp = int(pf.size * 0.3)
     for r, row in enumerate(rows):
-        ws_ = [tsize(pf, w_)[0] for w_, _ in row]; tot = sum(ws_) + sp * (len(row) - 1); x = SX0 + 4
+        wsx = [tsize(pf, w_)[0] for w_, _ in row]; tot = sum(wsx) + sp * (len(row) - 1); x = SX0 + 4
         if r >= 1:
             bp = ease((t - words[row[0][1]]["s"] + 0.03) / 0.22)
             if bp > 0:
-                bwid = tot + 40; lay = IsoLayer(bwid, lh - 8)
-                lay.d.rounded_rectangle((0, 0, bwid * 2 - 1, (lh - 8) * 2 - 1), 26, fill=MANGO + (255,))
-                paste(canvas, lay.out().crop((0, 0, max(1, int(bwid * bp)), lh - 8)), x - 20, y0 + r * lh - 8, alpha=1)
-        for (w_, idx), wd in zip(row, ws_):
+                bwid = tot + 40
+                paste(canvas, rrect(bwid, lh - 8, 26, MANGO).crop((0, 0, max(1, int(bwid * bp)), lh - 8)), x - 20, y0 + r * lh - 8, alpha=1)
+        for (w_, idx), wd in zip(row, wsx):
             p = (t - words[idx]["s"]) / 0.16
-            if p <= 0: paste(canvas, txt_layer(w_, pf, mix(LAV, GRAPE, .35)), x, y0 + r * lh + 4)
-            if p > 0:
+            if p <= 0: paste(canvas, txt_layer(w_, pf, mix(LAV, GRAPE, .4)), x, y0 + r * lh + 4)
+            else:
                 tl = txt_layer(w_, pf, DEEP); paste(canvas, tl, x, y0 + r * lh + 18 * (1 - eout(p)) + (pf.size - tl.height) // 2 + 4, alpha=min(1, p))
             x += wd + sp
-    # English echo
-    ef = font(FBD, 44); e = txt_layer("Prices are at the highest level since 2008.", fit_font(FBD, "Prices are at the highest level since 2008.", 788, 44, 30), GRAPE)
-    paste(canvas, e, SX0, 1060, alpha=ease((tau - 0.5) / 0.3))
-    # rising isometric bars (decor, low)
-    lay = IsoLayer(560, 400)
-    for i in range(6):
-        p = ease((tau - 0.3 - i * 0.1) / 0.5); h = (14 + i * 26) * p
-        if h > 1:
-            ox, oy = iso_pt2(i * 70, 0, 0, 30, 330); lay.box(ox, oy, 56, 56, h, 0, shades(MANGO if i == 5 else GRAPE), iso_pt)
-    paste(canvas, lay.out(), 300, 1105)
+    e = txt_layer("Prices are at the highest level since 2008.", fit_font(FBD, "Prices are at the highest level since 2008.", 788, 42, 30), GRAPE)
+    paste(canvas, e, SX0, 1130, alpha=ease((tau - 0.5) / 0.3))
 
-# ------------------------------------------------------------------ payoff : zoom out
+# ------------------------------------------------------------------ payoff : expression big (highlight while spoken) + chart small + save pop
 def scene_pay(canvas, t):
     tau = t - T_PAY
-    # zoom-OUT tunnel: phase runs backwards, fast then settling
     ph = 6.0 - (0.9 * tau + 4.0 * (1 - math.exp(-tau / 0.5)))
-    tunnel(canvas, ph + 0.0)
-    zoom_phrases(canvas, ph, 0.8)
-    p = eout(tau / 0.6); sc = 1.9 - 0.9 * p
-    f = font(FB, 120); a = txt_layer("저장해 두기", f, WHITE)
-    # dark plate for contrast
-    pw, ph_ = 788, 250; plate = IsoLayer(pw, ph_); plate.d.rounded_rectangle((0, 0, pw * 2 - 1, ph_ * 2 - 1), 50, fill=DEEP + (255,), outline=MANGO + (255,), width=8)
-    pim = plate.out(); pim.alpha_composite(a, ((pw - a.width) // 2, (ph_ - a.height) // 2 - 4))
-    paste(canvas, pim, SCX - int(pw * sc) // 2, 560 - int(ph_ * sc) // 2 + 120, alpha=min(1, tau / 0.12 + 0.0001) if tau > 0 else 0, scale=sc)
-    f2 = fit_font(FB, "at the highest level since", 690, 52, 34); t2 = txt_layer("at the highest level since", f2, DEEP)
-    bw, bh = t2.width + 54, t2.height + 44; box = Image.new("RGBA", (bw, bh), (0, 0, 0, 0))
-    ImageDraw.Draw(box).rounded_rectangle((0, 0, bw - 1, bh - 1), 24, fill=MANGO + (255,)); box.alpha_composite(t2, (27, 22))
-    q = eout((tau - 0.25) / 0.5); sc2 = 1.5 - 0.5 * q
-    if tau > 0.25: paste(canvas, box, SCX - int(bw * sc2) // 2, 880 - int(bh * sc2) // 2, alpha=min(1, q * 2), scale=sc2)
+    tunnel_soft(canvas, ph, 0.70)
+    chart(canvas, t, SX0, 300, 788, 330, "2008 이후 최고", 40, chip_hi=True, pulses=[T_EXPR1 - 0.4])
+    pw, ph_ = 788, 340; pa = ease(tau / 0.2)
+    im = rrect(pw, ph_, 50, DEEP, MANGO, 5); pf = fit_font(FB, "at the highest", 700, 118, 60)
+    rows = [[("at", 36), ("the", 37), ("highest", 38)], [("level", 39), ("since.", 40)]]
+    for r, row in enumerate(rows):
+        sp = 28; wsx = [tsize(pf, w_)[0] for w_, _ in row]; x = (pw - sum(wsx) - sp * (len(row) - 1)) // 2
+        for (w_, idx), wd in zip(row, wsx):
+            s_, e_ = words[idx]["s"], words[idx]["e"]; yy = 44 + r * 140
+            if t < s_: im.alpha_composite(txt_layer(w_, pf, mix(DEEP, LAV, .45)), (x, yy))
+            elif t <= e_ + 0.06:
+                tl = txt_layer(w_, pf, DEEP); bx = rrect(wd + 36, tl.height + 30, 26, MANGO)
+                pp = eout((t - s_) / 0.15); sc = 1 + 0.12 * (1 - pp)
+                bx = bx.resize((int(bx.width * sc), int(bx.height * sc)), Image.BILINEAR)
+                im.alpha_composite(bx, (x - 18 - (bx.width - wd - 36) // 2, yy - 15 - (bx.height - tl.height - 30) // 2)); im.alpha_composite(tl, (x, yy))
+            else: im.alpha_composite(txt_layer(w_, pf, WHITE), (x, yy))
+            x += wd + sp
+    paste(canvas, im, SX0, 670, alpha=pa)
+    # save element
+    sq = (t - T_SAVE) / 0.4
+    if sq > 0:
+        k = eback(sq) if sq < 1 else 1 + 0.03 * math.sin((t - T_SAVE) * 6)
+        sw, sh = 640, 150; pill = rrect(sw, sh, 75, MANGO, WHITE, 4)
+        f = font(FB, 78); tl = txt_layer("저장해 두기", f, DEEP)
+        lay = IsoLayer(70, 90); lay.poly([(8, 8), (62, 8), (62, 84), (35, 62), (8, 84)], DEEP); bm = lay.out()
+        tot = bm.width + 26 + tl.width; x0 = (sw - tot) // 2
+        pill.alpha_composite(bm, (x0, (sh - bm.height) // 2)); pill.alpha_composite(tl, (x0 + bm.width + 26, (sh - tl.height) // 2 - 2))
+        paste(canvas, pill, SX0 + (788 - sw) // 2 + (sw - int(sw * k)) // 2, 1065 + (sh - int(sh * k)) // 2, alpha=min(1, sq * 3), scale=k)
+        if sq < 1.2:
+            lay = IsoLayer(788, 200)
+            for j in range(8):
+                a_ = j * math.pi / 4; rr = 20 + 60 * min(1, sq); lay.d.line([(394 * 2 + rr * 2 * math.cos(a_) * 3.2, 100 * 2 + rr * 2 * math.sin(a_)), (394 * 2 + (rr + 24) * 2 * math.cos(a_) * 3.2, 100 * 2 + (rr + 24) * 2 * math.sin(a_))], fill=WHITE + (int(255 * max(0, 1 - sq)),), width=6)
 
 # ------------------------------------------------------------------ frame assembly
-BIRD_POS = {0: (150, 1500), 1: (150, 1500), 2: (150, 1500), 3: (150, 1500), 4: (150, 1500), 5: (SCX, 1420)}
+BIRD_POS = {i: (150, 1500) for i in range(6)}
 def beat_index(t):
     for i in range(6):
         if BOUNDS[i] <= t + 1e-6 < BOUNDS[i + 1]: return i
@@ -509,45 +522,42 @@ SCENES = [scene_hook, scene_term, scene_mean, scene_en, scene_ko, scene_pay]
 HANDLE_FG = [WHITE, WHITE, DEEP, WHITE, DEEP, WHITE]
 WIPE_DUR = 0.75
 WIPE = HT(0, 0, W, H, 30, 45)
-def render_scene(i, t, mouth):
-    c = np.zeros((H, W, 3), np.uint8); SCENES[i](c, t)
-    return c
+def render_scene(i, t):
+    c = np.zeros((H, W, 3), np.uint8); SCENES[i](c, t); return c
 def frame(t, env):
-    i = beat_index(t); c = render_scene(i, t, 0)
-    if i == 2 and t - T_MEAN < WIPE_DUR:       # halftone gradient wipe prev(term) -> meaning
-        prev = render_scene(1, t, 0); p = (t - T_MEAN) / WIPE_DUR
-        g = np.clip(WIPE.cx / W * 0.75 + (1 - WIPE.cy / H) * 0.25, 0, 1)   # gradient: left->right
-        r = np.clip((p * 1.5 - g) * 3.0, 0, 1) * 0.76 * 30
-        m = WIPE.alpha(r.astype(np.float32))[..., None]
+    i = beat_index(t); c = render_scene(i, t)
+    if i == 2 and t - T_MEAN < WIPE_DUR:
+        prev = render_scene(1, t); p = (t - T_MEAN) / WIPE_DUR
+        g = np.clip(WIPE.cx / W * 0.75 + (1 - WIPE.cy / H) * 0.25, 0, 1)
+        m = WIPE.alpha((np.clip((p * 1.5 - g) * 3.0, 0, 1) * 0.76 * 30).astype(np.float32))[..., None]
         c = (prev.astype(np.float32) + (c.astype(np.float32) - prev) * m).astype(np.uint8)
-    mo = float(env[min(len(env) - 1, int(t * FPS))])
-    cx, by = BIRD_POS[i]
-    if i in (1, 2, 3): bird_on_block(canvas=c, mouth=mo, cx=cx, base_y=by, t=t, size=200, blockcol=MANGO if i != 2 else GRAPE)
-    elif i == 0: bird_on_block(c, mo, 700 + 0, 1560, t, size=0 or 190, blockcol=MANGO) if False else bird_on_block(c, mo, cx, by, t, size=200)
-    else: bird_on_block(c, mo, cx, by, t, size=240 if i == 5 else 200, blockcol=MANGO if i != 4 else GRAPE)
+    mo = float(env[min(len(env) - 1, int(t * FPS))]); cx, by = BIRD_POS[i]
+    bird_on_block(c, mo, cx, by, t, size=200, blockcol=MANGO if i not in (2, 4) else GRAPE)
     paste(c, pill_layer(), SX0, 224)
     handle(c, HANDLE_FG[i])
     return c
 
 def check_contrast():
+    mt = mix(MANGO, DEEP, .24)
     pairs = {"hook sub (white on deep)": (WHITE, DEEP), "hook 3척 lav on deep": (LAV, DEEP), "3 dots mango on deep": (MANGO, DEEP),
-             "CNN panel white on deep": (WHITE, DEEP), "CNN panel mango on deep": (MANGO, DEEP), "phrase highest mango on deep": (MANGO, DEEP),
-             "meaning deep on mango": (DEEP, MANGO), "meaning grape on mango": (GRAPE, MANGO), "chip mango on deep": (MANGO, DEEP),
-             "example white on grape": (WHITE, GRAPE), "highlight deep on mango": (DEEP, MANGO), "2008 mango on deep": (MANGO, DEEP),
+             "term panel white on deep": (WHITE, DEEP), "term panel mango on deep": (MANGO, DEEP), "term ghost words lav45 on deep (placeholder)": (mix(DEEP, LAV, .45), DEEP),
+             "chart line mango on deep": (MANGO, DEEP), "chart line mango on grape fill": (MANGO, mix(DEEP, GRAPE, .8)),
+             "chart dashed lav on deep": (LAV, DEEP), "chart chip 2008 deep on lav": (DEEP, LAV), "chart chip label deep on mango": (DEEP, MANGO),
+             "chart 시간 label": (mix(DEEP, LAV, .85), DEEP),
+             "meaning deep on mango": (DEEP, MANGO), "meaning deep on halftone dot": (DEEP, mt), "meaning grape on mango": (GRAPE, MANGO), "meaning grape on dot": (GRAPE, mt),
+             "chip mango on deep": (MANGO, DEEP), "example white on grape": (WHITE, GRAPE), "highlight deep on mango": (DEEP, MANGO),
              "ko deep on lavender": (DEEP, LAV), "ko deep on mango box": (DEEP, MANGO), "en echo grape on lavender": (GRAPE, LAV),
-             "payoff white on deep": (WHITE, DEEP), "payoff phrase deep on mango": (DEEP, MANGO), "pill deep on mango": (DEEP, MANGO),
-             "handle white on deep": (WHITE, DEEP), "handle deep on mango/lav": (DEEP, MANGO)}
+             "payoff white on deep": (WHITE, DEEP), "payoff spoken deep on mango": (DEEP, MANGO), "save deep on mango": (DEEP, MANGO),
+             "pill deep on mango": (DEEP, MANGO), "handle white on deep": (WHITE, DEEP)}
     return {k: round(contrast(a, b), 2) for k, (a, b) in pairs.items()}
 
-def mouth_env():
-    return BIRD.envelope(MP3, FPS, NF + 2)
+def mouth_env(): return BIRD.envelope(MP3, FPS, NF + 2)
 
 def main():
-    os.makedirs(FR, exist_ok=True)
-    env = mouth_env()
+    os.makedirs(FR, exist_ok=True); env = mouth_env()
     if "--test" in sys.argv:
         for a in sys.argv[sys.argv.index("--test") + 1:]:
-            t = float(a); Image.fromarray(frame(t, env)).save(f"{FR}/test_{a}.png")
+            Image.fromarray(frame(float(a), env)).save(f"{FR}/test_{a}.png")
         return
     out = f"{OUT}/kw3_{RID}.mp4"
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
@@ -558,8 +568,8 @@ def main():
     for k in range(NF): p.stdin.write(frame(k / FPS, env).tobytes())
     p.stdin.close(); p.wait()
     if p.returncode: raise RuntimeError("ffmpeg failed")
-    marks = {"hook_0.0": 0.0, "hook_0.3": 0.3, "hook_1.0": 1.0, "hook_3.0": 3.0, "term_cnn": 6.0, "term_phrase": 10.2, "meaning": 12.6,
-             "example_en": 17.4, "example_ko": 20.6, "payoff": 21.6}
+    marks = {"hook_0.0": 0.0, "hook_0.3": 0.3, "hook_1.0": 1.0, "term_cnn": 6.0, "term_draw": 9.2, "term_peak": 9.8, "term_full": 11.0 - 0.4,
+             "meaning": 12.6, "example_en": 17.2, "example_ko": 20.6, "payoff_before_save": 23.5, "payoff_after_save": 24.4}
     for k, t in marks.items():
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{t:.3f}", "-i", out, "-frames:v", "1", f"{FR}/kw3_{RID}_{k}.png"], check=True)
     print("done", TOTAL, check_contrast())

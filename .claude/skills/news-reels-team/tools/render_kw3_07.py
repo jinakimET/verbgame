@@ -8,6 +8,13 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bird
 
+NOTEXT = False
+_otext = ImageDraw.ImageDraw.text
+def _text(self, *a, **k):
+    if NOTEXT: return
+    return _otext(self, *a, **k)
+ImageDraw.ImageDraw.text = _text   # lets --contrast render the same frame without any text
+
 ROOT = os.environ.get("NEWS_ROOT", "/home/user/verbgame/content/2026-11-23-cnn")
 OUT = f"{ROOT}/06_keyword_reels/v3"; FR = f"{OUT}/frames"
 os.makedirs(FR, exist_ok=True)
@@ -53,7 +60,7 @@ def foil(w, h, t, sat=.42, phase=0., glint=True, speed=1.0):
     if glint:
         span = w + h + 500; pos = ((t * 420 * speed + phase * 900) % span) - 250
         g = np.exp(-(((xs * 0.8 + ys * 0.6) - pos) / 46.0) ** 2)[..., None]
-        rgb = rgb + (255 - rgb) * g * 0.85
+        rgb = rgb + (255 - rgb) * g * 0.40
     return rgb.astype(np.float32)
 
 # worst-case foil luminance (sat .42 text on dark, sat .35 as fill under deep text)
@@ -68,10 +75,10 @@ BLOB = [(0.0, 0.0, 0.31, 0.7, 0.9, 1.1, 0.16), (1.3, 2.0, 0.52, 0.5, 1.3, 0.8, 0
         (3.9, 3.1, 0.62, 0.6, 1.1, 0.9, 0.15), (5.1, 1.2, 0.4, 0.8, 1.5, 0.6, 0.11)]
 VIG = (0.55 + 0.45 * smooth(0.05, 0.35, bys) * (1 - smooth(0.78, 1.0, bys) * 0.45))[..., None].astype(np.float32)
 def background(t, ripple=None):
-    u = bxs + 0.16 * np.sin(5.0 * bys + 0.7 * t) + 0.07 * np.sin(11 * bxs - 1.1 * t)
-    v = bys + 0.16 * np.sin(4.2 * bxs - 0.6 * t + 1.0) + 0.07 * np.sin(9 * bys + 0.9 * t)
+    u = bxs + 0.07 * np.sin(5.0 * bys + 0.5 * t) + 0.03 * np.sin(11 * bxs - 0.8 * t)
+    v = bys + 0.07 * np.sin(4.2 * bxs - 0.4 * t + 1.0) + 0.03 * np.sin(9 * bys + 0.6 * t)
     f = 0.5 + 0.25 * np.sin(6.5 * u + 3 * v + 0.5 * t) + 0.25 * np.sin(5.0 * v - 4.0 * u - 0.4 * t + 2.0)
-    f = f + 0.12 * np.sin(14 * (u + v) + 0.8 * t)
+    f = f + 0.05 * np.sin(14 * (u + v) + 0.5 * t)
     f = np.clip(f, 0, 1)
     base = DEEP * 0.7 + (GRAPE * 0.95 - DEEP * 0.7) * f[..., None]
     # metaballs
@@ -83,19 +90,19 @@ def background(t, ripple=None):
     # iridescent hue
     hue = (f * 0.7 + bys * 0.35 + bxs * 0.2 - 0.05 * t) % 1.0
     irid = hsv_pastel(hue, 0.65, 0.9) * 255
-    wt = (0.10 + 0.55 * np.exp(-((f - 0.5) / 0.18) ** 2))[..., None] * 0.55
-    col = base * (1 - wt) + irid * 0.55 * wt * 1.0
+    wt = (0.10 + 0.55 * np.exp(-((f - 0.5) / 0.18) ** 2))[..., None] * 0.35
+    col = base * (1 - wt) + irid * 0.45 * wt
     col = col * (1 - 0.25 * inside) + (GRAPE * 1.15) * 0.25 * inside
     # specular sheen from field gradient
     gy, gx = np.gradient(f)
     spec = np.clip(-(gx * 0.7 + gy * 0.7) * 40, 0, 1) ** 3
-    col = col + spec[..., None] * np.array([220, 205, 255], np.float32) * 0.28
-    col = col + rim * irid * 0.45
+    col = col + spec[..., None] * np.array([220, 205, 255], np.float32) * 0.07
+    col = col + rim * irid * 0.15
     if ripple is not None:  # (cx, cy, age)
         rcx, rcy, age = ripple
         d = np.sqrt((bxs - rcx * BW / BH) ** 2 + (bys - rcy) ** 2)
         ring = np.exp(-((d - age * 2.4) / 0.07) ** 2) * np.exp(-age * 4.5)
-        col = col + ring[..., None] * irid * 0.75
+        col = col + ring[..., None] * irid * 0.30
     col = col * VIG
     img = cv2.resize(np.clip(col, 0, 255).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC)
     return np.clip(img, 0, 255)
@@ -108,7 +115,7 @@ def draw_stars(frame, t):
         if a < 0.05: continue
         x, y = sx * W, (sy * 1750 + 60 + 40 * math.sin(t * .6 + ph * 5)); r = 10 + 24 * sz * a
         pts = [(x, y - r), (x + r * .18, y - r * .18), (x + r, y), (x + r * .18, y + r * .18), (x, y + r), (x - r * .18, y + r * .18), (x - r, y), (x - r * .18, y - r * .18)]
-        d.polygon(pts, fill=(255, 245, 255, int(210 * a)))
+        d.polygon(pts, fill=(255, 245, 255, int(150 * a)))
     blit(frame, np.asarray(ov).astype(np.float32) * np.array([1, 1, 1, 1 / 255], np.float32) * np.array([1, 1, 1, 1], np.float32), 0, 0, straight=True)
 
 # ---------------------------------------------------------------- layers
@@ -166,7 +173,7 @@ def text_layer(w, h, items, shadow_on=True):
     L = pil_premult(im); return shadow(L, 6, 6, .5) if shadow_on else L
 
 def wobble_fn(t, amp, ph=0.0, k=0.022, sp=4.2):
-    return lambda xs, ys: amp * np.sin(ys * k + t * sp + ph)
+    return lambda xs, ys: 0.4 * amp * np.sin(ys * k + t * sp + ph)
 
 def pop(t, t0, dur=0.38, s0=0.55):
     p = np.clip((t - t0) / dur, 0, 1); return s0 + (1 - s0) * back(p) if p < 1 else 1.0
