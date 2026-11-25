@@ -54,8 +54,12 @@
     },
     {
      "role": "payoff",
-     "spoken": "pay something in rent. 저장해 두세요.",
-     "on_screen": "pay ~ in rent"
+     "spoken": "pay something in rent. How much do you pay in rent? I pay half of my salary in rent. 저장해 두세요.",
+     "on_screen": "pay ~ in rent · 저장해 두기",
+     "examples": [
+      "How much do you pay in rent?",
+      "I pay half of my salary in rent."
+     ]
     }
    ],
    "highlight": "pays $900 a month in rent"
@@ -111,8 +115,12 @@
     },
     {
      "role": "payoff",
-     "spoken": "trade-off. 저장해 두세요.",
-     "on_screen": "trade-off"
+     "spoken": "trade-off. Every big choice has a trade-off. Small space, low rent. That's the trade-off. 저장해 두세요.",
+     "on_screen": "trade-off · 저장해 두기",
+     "examples": [
+      "Every big choice has a trade-off.",
+      "Small space, low rent. That's the trade-off."
+     ]
     }
    ],
    "highlight": "trade-off"
@@ -168,8 +176,12 @@
     },
     {
      "role": "payoff",
-     "spoken": "as of. 저장해 두세요.",
-     "on_screen": "as of"
+     "spoken": "as of. As of today, the sale has ended. As of this week, I work from home. 저장해 두세요.",
+     "on_screen": "as of · 저장해 두기",
+     "examples": [
+      "As of today, the sale has ended.",
+      "As of this week, I work from home."
+     ]
     }
    ],
    "highlight": "As of 2025"
@@ -225,8 +237,12 @@
     },
     {
      "role": "payoff",
-     "spoken": "technically. 저장해 두세요.",
-     "on_screen": "technically"
+     "spoken": "technically. Technically, a tomato is a fruit. Technically, I'm still on vacation. 저장해 두세요.",
+     "on_screen": "technically · 저장해 두기",
+     "examples": [
+      "Technically, a tomato is a fruit.",
+      "Technically, I'm still on vacation."
+     ]
     }
    ],
    "highlight": "Technically"
@@ -282,8 +298,12 @@
     },
     {
      "role": "payoff",
-     "spoken": "so... that. 저장해 두세요.",
-     "on_screen": "so ~ that"
+     "spoken": "so... that. It was so cold that I stayed home. She was so tired that she fell asleep on the train. 저장해 두세요.",
+     "on_screen": "so ~ that · 저장해 두기",
+     "examples": [
+      "It was so cold that I stayed home.",
+      "She was so tired that she fell asleep on the train."
+     ]
     }
    ],
    "highlight": "so small that"
