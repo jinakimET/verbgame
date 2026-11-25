@@ -313,6 +313,138 @@ def draw_confetti(ov, t, t0):
         pts = [(x + dx * c - dy * s * (.4 + .6 * abs(math.cos(tt * 4 + ph))), y + dx * s + dy * c) for dx, dy in ((-16, -9), (16, -9), (16, 9), (-16, 9))]
         d.polygon(pts, fill=col + (235,))
 
+# ---------------------------------------------------------------- hero image: balloon on one fraying thread (jeopardy)
+def build_balloon_big():
+    pad = 70; bw, bh = 400, 450; tipy = bh + 40
+    def shape(d, p, s):
+        d.ellipse((p, p, p + bw * s, p + bh * s), fill=255)
+        d.polygon([(p + bw / 2 * s, p + (bh - 10) * s), (p + (bw / 2 - 30) * s, p + tipy * s), (p + (bw / 2 + 30) * s, p + tipy * s)], fill=255)
+    mb = mask_draw(bw, tipy, shape, pad)
+    def ell(wd):
+        return mask_draw(bw, tipy, lambda d, p, s: d.ellipse((p + (bw - wd) / 2 * s, p, p + (bw + wd) / 2 * s, p + bh * s), fill=255), pad)
+    bal = clay(mb, RED, d=22, sh_off=(0, 22), sh_blur=22, sh_alpha=.35, hi=.7)
+    for wo, wi in ((345, 300), (215, 170)):
+        ring = ImageChops.multiply(ImageChops.subtract(ell(wo), ell(wi)), mb)
+        bal.alpha_composite(clay(ring, CLOUD, d=5, shadow=False, hi=.3))
+    sh = Image.new("RGBA", bal.size, (0, 0, 0, 0)); ImageDraw.Draw(sh).ellipse((pad + 70, pad + 50, pad + 140, pad + 170), fill=(255, 255, 255, 90))
+    bal.alpha_composite(sh.filter(ImageFilter.GaussianBlur(7)))
+    BIGC = Image.new("RGBA", (1200, 1200), (0, 0, 0, 0)); ox, oy = 600 - (pad + bw // 2), 960 - (pad + tipy)
+    BIGC.alpha_composite(bal, (ox, oy)); return BIGC, (600, 960)
+BAL2, BAL2_A = build_balloon_big()
+def build_post():
+    pad = 40; w, h = 120, 240
+    pole = mask_draw(w, h, lambda d, p, s: d.rounded_rectangle((p + 45 * s, p + 30 * s, p + 75 * s, p + h * s), radius=10 * s, fill=255), pad)
+    base = mask_draw(w, h, lambda d, p, s: d.ellipse((p + 5 * s, p + (h - 20) * s, p + 115 * s, p + (h + 12) * s), fill=255), pad)
+    ball = mask_draw(w, h, lambda d, p, s: d.ellipse((p + 30 * s, p, p + 90 * s, p + 60 * s), fill=255), pad)
+    spr = clay(base, NAVY, d=6, sh_off=(0, 8), sh_blur=8); spr.alpha_composite(clay(pole, CLOUD, d=7, sh_off=(0, 8), sh_blur=8))
+    spr.alpha_composite(clay(ball, RED2, d=8, sh_off=(0, 8), sh_blur=8)); return spr
+POST = build_post()
+def build_figs():
+    out = []
+    for k in range(7):
+        ss = 4; im = Image.new("RGBA", (40 * ss, 56 * ss), (0, 0, 0, 0)); d = ImageDraw.Draw(im); c = NAVY + (255,)
+        d.ellipse((13 * ss, 4 * ss, 27 * ss, 18 * ss), fill=c); d.rounded_rectangle((10 * ss, 18 * ss, 30 * ss, 52 * ss), radius=7 * ss, fill=c)
+        if k % 3 == 0: d.line((28 * ss, 22 * ss, 36 * ss, 6 * ss), fill=c, width=4 * ss); d.polygon([(36 * ss, 6 * ss), (36 * ss, 14 * ss), (44 * ss - 2, 10 * ss)], fill=RED + (255,)) if False else None
+        if k % 3 == 1: d.line((12 * ss, 22 * ss, 4 * ss, 8 * ss), fill=c, width=4 * ss)
+        if k % 3 == 2: d.line((28 * ss, 22 * ss, 36 * ss, 8 * ss), fill=c, width=4 * ss); d.line((12 * ss, 22 * ss, 4 * ss, 8 * ss), fill=c, width=4 * ss)
+        out.append(im.resize((40, 56), Image.LANCZOS))
+    return out
+FIGS = build_figs()
+def build_warn():
+    pad = 40; w, h = 190, 165
+    def tri(sc, cx_=95, cy_=0):
+        def fn(d, p, s):
+            pts = [(95, 4), (186, 158), (4, 158)]; gx = sum(q[0] for q in pts) / 3; gy = sum(q[1] for q in pts) / 3
+            d.polygon([(p + (gx + (x - gx) * sc) * s, p + (gy + (y - gy) * sc) * s) for x, y in pts], fill=255)
+        return mask_draw(w, h, fn, pad)
+    ob = clay(tri(1.08), NAVY, d=7, sh_off=(0, 12), sh_blur=12); ob.alpha_composite(clay(tri(.96), CLOUD, d=5, shadow=False, hi=.4)); ob.alpha_composite(clay(tri(.72), RED, d=5, shadow=False, hi=.4))
+    ImageDraw.Draw(ob).text((pad + 95, pad + 108), "!", font=font(92), fill=CLOUD + (255,), anchor="mm"); return ob
+WARN = build_warn()
+def build_burst():
+    ss = 4; n = 9; S = 130; im = Image.new("RGBA", (S * ss, S * ss), (0, 0, 0, 0)); d = ImageDraw.Draw(im); c = S * ss / 2
+    pts = [(c + (S * ss * (.46 if k % 2 == 0 else .24)) * math.cos(math.pi * k / n), c + (S * ss * (.46 if k % 2 == 0 else .24)) * math.sin(math.pi * k / n)) for k in range(2 * n)]
+    d.polygon(pts, fill=CLOUD + (255,), outline=RED + (255,), width=5 * ss)
+    zz = [(c - 22 * ss, c - 26 * ss), (c + 4 * ss, c - 6 * ss), (c - 10 * ss, c + 4 * ss), (c + 20 * ss, c + 28 * ss)]
+    d.line(zz, fill=NAVY + (255,), width=6 * ss, joint="curve"); return with_shadow(im.resize((S, S), Image.LANCZOS), (0, 6), 5, .4)
+BURST = build_burst()
+SNAP = pill_sprite(200, 78, CLOUD, r=39); ImageDraw.Draw(SNAP).text((PAD + 100, PAD + 40), "snap?", font=font(46), fill=NAVY + (255,), anchor="mm")
+
+def draw_thread(img, p0, p1, f, t, sag=10):
+    (x0, y0), (x1, y1) = p0, p1; pad = 50
+    bx0, by0 = int(min(x0, x1)) - pad, int(min(y0, y1)) - pad - 20; bx1, by1 = int(max(x0, x1)) + pad, int(max(y0, y1)) + pad + 20
+    w, h = bx1 - bx0, by1 - by0; S = 3; d = ImageDraw.Draw(layer := Image.new("RGBA", (w * S, h * S), (0, 0, 0, 0)))
+    dx, dy = x1 - x0, y1 - y0; L = math.hypot(dx, dy); T = (dx / L, dy / L); Nn = (-T[1], T[0])
+    off = sag * (1 - .6 * f) + 3 * math.sin(t * 9) * f
+    cx_, cy_ = (x0 + x1) / 2 + Nn[0] * off, (y0 + y1) / 2 + Nn[1] * off
+    N = 48; pts = [((1 - u) ** 2 * x0 + 2 * (1 - u) * u * cx_ + u * u * x1, (1 - u) ** 2 * y0 + 2 * (1 - u) * u * cy_ + u * u * y1) for u in [k / N for k in range(N + 1)]]
+    P = lambda q: ((q[0] - bx0) * S, (q[1] - by0) * S)
+    for k in range(N):
+        u = (k + .5) / N; wd = max(2.2, 7.5 * (1 - .75 * f * math.exp(-((u - .5) / .13) ** 2)))
+        a_, b_ = P(pts[k]), P(pts[k + 1]); d.line(a_ + b_, fill=NAVY + (255,), width=int(wd * S)); r = wd * S / 2
+        d.ellipse((b_[0] - r, b_[1] - r, b_[0] + r, b_[1] + r), fill=NAVY + (255,))
+    mid = pts[N // 2]
+    for j in range(5):
+        o = (j - 2) * 4.2 * f; wob = 3 * f * math.sin(t * 8 + j * 1.7)
+        a_ = P((mid[0] - 26 * T[0] + o * Nn[0], mid[1] - 26 * T[1] + o * Nn[1])); b_ = P((mid[0] + 26 * T[0] + (o + wob) * Nn[0], mid[1] + 26 * T[1] + (o + wob) * Nn[1]))
+        d.line(a_ + b_, fill=NAVY + (235,), width=int(1.4 * S))
+    put(img, layer.resize((w, h), Image.LANCZOS), bx0, by0); return mid
+def draw_streaks(img, t, x0, x1, ys, alpha):
+    ov = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(ov)
+    for k, y0 in enumerate(ys):
+        u = (t * .55 + k * .31) % 1; ln = 190; x = x0 - 20 + u * (x1 - x0 + ln); al = math.sin(math.pi * u)
+        pts = [(x - ln * j / 6, y0 + 9 * math.sin(j * .9 + k + t * 3)) for j in range(7)]; pts = [q for q in pts if x0 <= q[0] <= x1]
+        if len(pts) >= 2: d.line(pts, fill=(255, 255, 255, int(110 * al * alpha)), width=5, joint="curve")
+    img.alpha_composite(ov)
+def draw_pop(img, spr, cx_, cy_, p, extra=1.0, rot=0):
+    if p <= 0: return
+    s = scaled(spr, max(.15, back(p)) * extra)
+    if rot: s = s.rotate(rot, resample=Image.BICUBIC)
+    put(img, s, cx_ - s.width / 2, cy_ - s.height / 2)
+
+HG = 1448; POSTX = 290; POSTY = HG - 218
+def hero_balloon(img, t, f, a, mood, streak=0.0, snap=0.0, tri=0.0, look=(1, -1)):
+    """balloon tethered to a post by one fraying thread; f = fray level 0..1"""
+    put(img, POST, POSTX - 100, POSTY - 70)
+    for k, fg in enumerate(FIGS):
+        put(img, fg, 62 + k * 27, HG - 56 + 4 + 2.5 * abs(math.sin(t * 3 + k * 1.3)) * -1)
+    draw_blob(img, 450, HG + 6, .25, a, t, mood=mood, look=look)
+    if streak > 0: draw_streaks(img, t, 62, 330, (880, 945, 1010), streak)
+    kx = 570 + 16 * f + 6 * f * math.sin(t * 23) + 4 * math.sin(t * 7); ky = 1150 - 10 * f + 5 * f * math.sin(t * 19 + 1)
+    mid = draw_thread(img, (POSTX, POSTY), (kx, ky), f, t, sag=10)
+    ang = -(20 + 5 * math.sin(t * 2.6) + 4 * f * math.sin(t * 11))
+    rot = BAL2.rotate(ang, resample=Image.BICUBIC, center=BAL2_A)
+    put(img, rot, kx - BAL2_A[0], ky - BAL2_A[1])
+    if tri > 0: draw_pop(img, WARN, 165, 770 + 5 * math.sin(t * 4), tri, 1 + .05 * math.sin(t * 6))
+    if snap > 0:
+        draw_pop(img, BURST, mid[0], mid[1], snap, 1 + .12 * math.sin(t * 9), 8 * math.sin(t * 7))
+        draw_pop(img, SNAP, mid[0] - 150, mid[1] - 80 + 3 * math.sin(t * 3), snap)
+
+STAGEP = Image.new("RGBA", (720, 500), (0, 0, 0, 0)); STAGEP.alpha_composite(STAGE, (60, 20))
+STAGEP_D = Image.new("RGBA", (720, 500), (0, 0, 0, 0)); STAGEP_D.alpha_composite(STAGE_DARK, (60, 20))
+HRAIN = np.random.default_rng(4); HRX = HRAIN.uniform(0, 1, 30); HRP = HRAIN.uniform(0, 1, 30); HRV = HRAIN.uniform(.7, 1.1, 30)
+def hero_hang(img, t, f, wet, rl, tri=0.0, snap=0.0):
+    cx = 320 + 10 * math.sin(t * 1.3); by = 4 * math.sin(t * 2.1); A = (cx, 892 + by)
+    put(img, scaled(STORM, .9), cx - 288, 745 - 63 + by)
+    d = ImageDraw.Draw(img)
+    for u, ph, v in list(zip(HRX, HRP, HRV))[:int(30 * rl)]:
+        x = 70 + u * 570 + (cx - 320) * .5; y = 900 + ((ph + v * t * .9) % 1) * 500
+        d.line((x, y, x - 7, y - 30), fill=(235, 246, 253, 200), width=4)
+    th = (3.5 + 3 * f) * math.sin(t * 2.1) + 1.5 * f * math.sin(t * 17)
+    L = 153 + 6 * f; R = (A[0] + L * math.sin(math.radians(th)), A[1] + L * math.cos(math.radians(th)))
+    st = Image.blend(STAGEP, STAGEP_D, min(1, wet)).rotate(-th, resample=Image.BICUBIC, center=(350, 60))
+    # puddle + ripples under the swinging stage
+    fx, fy = 320, 1432; pw = 90 + 160 * min(1, wet)
+    d.ellipse((fx - pw, fy - 15, fx + pw, fy + 17), fill=(77, 176, 232, 235), outline=(248, 250, 252, 230), width=3)
+    for k in range(3):
+        ph = (t * 1.2 + k / 3) % 1; rr = (16 + .9 * pw * ph) * 1.0
+        d.ellipse((fx - rr, fy - rr * .16, fx + rr, fy + rr * .16 + 2), outline=(248, 250, 252, int(220 * (1 - ph) * min(1, rl + .3))), width=3)
+    put(img, st, R[0] - 350, R[1] - 60)
+    mid = draw_thread(img, A, R, f, t, sag=4)
+    if tri > 0: draw_pop(img, WARN, 735, 985 + 5 * math.sin(t * 4), tri, 1 + .05 * math.sin(t * 6))
+    if snap > 0:
+        draw_pop(img, BURST, mid[0], mid[1], snap, 1 + .12 * math.sin(t * 9), 8 * math.sin(t * 7))
+        draw_pop(img, SNAP, mid[0] + 150, mid[1] - 8 + 3 * math.sin(t * 3), snap)
+
 # ---------------------------------------------------------------- cards
 def card_layout(lines, sz, bg, plain, hl_bg, hl_fg, inner_w, line_h, padv=62, padh=50, align="left"):
     """lines: [(words[(idx,text)], is_hl)] ; returns panel sprite, word sprites, pill sprites (panel-relative incl PAD)"""
@@ -359,7 +491,7 @@ def fit_en():
 EN_LINES, EN_SZ = fit_en()
 HK = [(i, w["t"]) for i, w in enumerate(words[4:10], 4)]
 HOOK2 = card_layout([(HK[:2], False), (HK[2:4], False), (HK[4:], False)], 46, CLOUD, NAVY, RED, CLOUD, 350, 64, padv=28, padh=50, align="center")
-EN_CARD = card_layout(EN_LINES, EN_SZ, CLOUD, NAVY, RED, CLOUD, 700, int(EN_SZ * 1.72))
+EN_CARD = card_layout(EN_LINES, EN_SZ, CLOUD, NAVY, RED, CLOUD, 700, int(EN_SZ * 1.72), padv=44)
 KO_TOK = spec["beats"][3]["on_screen"].split(); KO0 = 25
 KO_WORDS = [(KO0 + i, t) for i, t in enumerate(KO_TOK)]
 KO_LINES = [(KO_WORDS[:3], False), (KO_WORDS[3:4], True), (KO_WORDS[4:], False)]
@@ -368,12 +500,12 @@ def ko_layout():
     # highlight pill on '위태로워질' inside line 2: build manually via two-part line
     sz = 64; lh = 118
     f = font(sz); sp = f.getlength(" ") + 2
-    pw_, ph_ = 700 + 100, 62 * 2 + lh * 2
+    pw_, ph_ = 788, 62 * 2 + lh * 2
     panel = pill_sprite(pw_, ph_, RED, r=70); items = []; pills = []
     rows = [KO_WORDS[:3], KO_WORDS[3:]]
     for li, row in enumerate(rows):
         tot = sum(f.getlength(t) for _, t in row) + sp * (len(row) - 1) + (44 if li == 1 else 0)
-        x = PAD + 50 + (700 - tot) / 2; y = PAD + 62 + li * lh
+        x = PAD + 44 + (700 - tot) / 2; y = PAD + 62 + li * lh
         for k, (idx, t) in enumerate(row):
             hl = li == 1 and k == 0; wd = f.getlength(t)
             if hl:
@@ -381,12 +513,18 @@ def ko_layout():
             items.append((txt_flat(t, sz, DRED if hl else CLOUD), x - 6, y + (lh - sz * 1.6) / 2 - 2, idx)); x += wd + sp + (22 if hl else 0)
     return panel, items, pills
 KO_CARD = ko_layout()
-MEAN_PANEL = pill_sprite(788, 360, CLOUD, r=80)
+MEAN_PANEL = pill_sprite(788, 340, CLOUD, r=80)
 MEAN_L1 = txt_flat("~을", 124, NAVY); MEAN_L2 = txt_flat("위태롭게 하다", 118, RED)
 TERM_CHIP = pill_sprite(360, 150, NAVY, r=60)
 _d = ImageDraw.Draw(TERM_CHIP)
 for i, t in enumerate(("put ~ in", "jeopardy")):
     f = font(54); _d.text((PAD + 180, PAD + 38 + i * 70), t, font=f, fill=CLOUD + (255,), anchor="mm")
+PAY_PANEL = pill_sprite(788, 356, CLOUD, r=80); PAY_SZ = 112; PAY_ROWH = 128
+PAY_ROWS = []
+for _li, _tx in enumerate(("put ~ in", "jeopardy")):
+    _wd = tw(_tx, PAY_SZ); _y = 32 + _li * 152
+    PAY_ROWS.append(dict(pill=pill_sprite(int(_wd + 74), PAY_ROWH, RED, pad=40, r=PAY_ROWH // 2), pw=int(_wd + 74), y=_y,
+                         t_n=txt_flat(_tx, PAY_SZ, NAVY), t_h=txt_flat(_tx, PAY_SZ, CLOUD)))
 HEAD = pill_sprite(470, 64, RED, r=32); ImageDraw.Draw(HEAD).text((PAD + 235, PAD + 32), "NEWS ENGLISH · CNN", font=font(31), fill=CLOUD + (255,), anchor="mm")
 BTN = pill_sprite(700, 210, CLOUD, r=105)
 def build_btn():
@@ -399,53 +537,62 @@ HANDLE = Image.new("RGBA", (W, 60), (0, 0, 0, 0)); ImageDraw.Draw(HANDLE).text((
 
 def beat_idx(t): return max(i for i, b in enumerate(BT) if b <= t + 1e-6)
 def mouth_a(i): return float(BENV[min(i, len(BENV) - 1)])
+def ease(p): p = min(1, max(0, p)); return p * p * (3 - 2 * p)
+PB = next(b for b in WK["beats"] if b["role"] == "payoff"); EXS, EXE, SAVE = PB["expr_start"], PB["expr_end"], PB["save_start"]
+JEO_EN = wstart(24); COULD_EN = wstart(18); WIL_KO = wstart(28)
 def render(i):
     t = i / FPS; bi = beat_idx(t); t0 = BT[bi]; a = mouth_a(i)
-    img = background(t); ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    rl = rain_level(t); role = spec["beats"][bi]["role"]; pp = (t - t0)
-    wetv = min(1, max(0, (t - 8.8) / 6.0)) if t >= 8.8 else 0
-    if role in ("example_en", "example_ko", "payoff") or t > 8.2: wetv = min(1, max(0, (t - 8.8) / 6.0))
+    img = background(t); rl = rain_level(t); role = spec["beats"][bi]["role"]; pp = (t - t0)
+    wetv = min(1, max(0, (t - 8.8) / 6.0))
     if role == "hook":
-        draw_rain(ov, t, 0)
         pop = .82 + .18 * back(t / .3)
         draw_wind(img, t, 1.0 if t < 5 else max(0, 1 - (t - 5) / 1.2))
         by = 1150; look = (math.cos(t * 2), math.sin(t * 1.3) * .5)
         top = by - BLOBH * .9 * pop
-        draw_balloon(img, 700 + 6 * math.sin(t * 2.3), top + 14,   .5 * pop, t, 1.0 + .5 * math.sin(t * 1.7))
+        draw_balloon(img, 700 + 6 * math.sin(t * 2.3), top + 14, .5 * pop, t, 1.0 + .5 * math.sin(t * 1.7))
         draw_blob(img, 456, by, .9, a, t, with_text=True, pop=pop, look=look, dx=8 * math.sin(t * 4.1) * (1 if t < 5 else .4))
         draw_card(img, t, -1.0, 40, 1175, HOOK2, t=t, ghost=True)
     elif role == "meaning":
-        pop = .8 + .2 * back(pp / .3)
-        ybot = 780; draw_balloon(img, 330 + 5 * math.sin(t * 2.3), ybot - BLOBH * .42 * pop + 8, .42 * pop, t, .8)
-        draw_blob(img, 260, ybot, .42, a, t, pop=pop, look=(1, -.3))
-        c = scaled(TERM_CHIP, .86 + .14 * back(pp / .3)); put(img, c, 670 - c.width / 2 + 0, 590 - c.height / 2 + 4 * math.sin(t * 2))
-        mp = (t - t0) / .35; s = .85 + .15 * back(mp); ps = scaled(MEAN_PANEL, s)
-        by = 3 * math.sin(t * 2); put(img, ps, 62 - PAD + (MEAN_PANEL.width - ps.width) / 2, 790 - PAD + (MEAN_PANEL.height - ps.height) / 2 + by)
+        f = .3 + .6 * min(1, pp / 3.0)
+        hero_balloon(img, t, f, a, "talk", streak=min(1, pp / .5), snap=(t - t0 - .5) / .3, tri=(t - t0 - .2) / .3)
+        mp = (t - t0) / .35; s_ = .85 + .15 * back(mp); ps = scaled(MEAN_PANEL, s_)
+        by = 3 * math.sin(t * 2); put(img, ps, 62 - PAD + (MEAN_PANEL.width - ps.width) / 2, 306 - PAD + (MEAN_PANEL.height - ps.height) / 2 + by)
         for k, spr in enumerate((MEAN_L1, MEAN_L2)):
             q = (t - t0 - .12 - .1 * k) / .18
-            if q > 0: put(img, fade(spr, q), 62 + (788 - spr.width) / 2, 790 + 50 + k * 140 + by + 12 * (1 - min(1, q)) - 10)
-    elif role == "example_en":
-        draw_rain(ov, t, rl, (62, 560, 905, 1150))
-        draw_stage(img, ov, 62 - 20 * 0 - 30, 1090, t, wetv, 0.98, storm_y=905, rain=rl)
-        img.alpha_composite(ov); ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        draw_card(img, t, t0, 62, 290, EN_CARD, t=t)
-    elif role == "example_ko":
-        draw_rain(ov, t, rl, (90, 470, 380, 700))
-        draw_stage(img, ov, 40, 410, t, wetv, 0.78, storm_y=300, rain=rl)
-        img.alpha_composite(ov); ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        pop = .8 + .2 * back(pp / .3)
-        draw_blob(img, 705, 760, .36, a * 0.0, t, pop=pop, look=(-1, .3))
-        draw_card(img, t, t0, 62, 770, KO_CARD, t=t)
+            if q > 0: put(img, fade(spr, q), 62 + (788 - spr.width) / 2, 306 + 36 + k * 132 + by + 12 * (1 - min(1, q)) - 10)
+    elif role in ("example_en", "example_ko"):
+        if role == "example_en":
+            f = .25 + .3 * min(1, max(0, (t - t0) / (JEO_EN - t0))) + (.25 if t >= JEO_EN else 0)
+            hero_hang(img, t, f, wetv, rl, tri=(t - COULD_EN) / .3, snap=(t - JEO_EN) / .3)
+            draw_card(img, t, t0, 62, 306, EN_CARD, t=t)
+        else:
+            f = .8 + .15 * ease((t - WIL_KO) / .7)
+            hero_hang(img, t, f, wetv, rl, tri=1.0, snap=1.0)
+            draw_card(img, t, t0, 62, 306, KO_CARD, t=t)
     else:
-        draw_rain(ov, t, rl)
-        pop = .8 + .2 * back(pp / .3)
-        top = 700
-        draw_balloon(img, 775 + 4 * math.sin(t * 2.3), 860 - BLOBH * .62 * pop + 10, .45 * pop, t, .4)
-        draw_blob(img, 456, 860, .62, a * 0.0, t, mood="happy", pop=pop)
-        bs = 1 + .04 * math.sin(t * 7); sp = scaled(BTN, (.85 + .15 * back(pp / .3)) * bs)
-        put(img, sp, 456 - sp.width / 2, 1010 - sp.height / 2 + 0)
-        draw_confetti(ov, t, t0)
-    img.alpha_composite(ov)
+        pop = .55 + .45 * back(pp / .45) if pp < .45 else 1.0
+        sh = 1 - .18 * ease((t - SAVE) / .35)
+        cv = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        hero_balloon(cv, t, .55, 0.0, "happy", streak=0.0, snap=0.0, tri=min(1, pp / .3))
+        sc_ = pop * sh
+        if abs(sc_ - 1) < 1e-3: img.alpha_composite(cv)
+        else:
+            r_ = cv.resize((int(W * sc_), int(H * sc_)), Image.BILINEAR); put(img, r_, 62 - 62 * sc_, HG - HG * sc_)
+        mp = pp / .35; s_ = .85 + .15 * back(mp); ps = scaled(PAY_PANEL, s_)
+        by = 3 * math.sin(t * 2); put(img, ps, 62 - PAD + (PAY_PANEL.width - ps.width) / 2, 306 - PAD + (PAY_PANEL.height - ps.height) / 2 + by)
+        for k, r in enumerate(PAY_ROWS):
+            st_ = wstart(31) if k == 0 else wstart(33)
+            q_in = (t - st_ + .03) / .2; q_out = 1 - (t - EXE - .05) / .25
+            hp = min(q_in, q_out) if t >= st_ - .03 else 0; hp = min(1, hp)
+            cxp = 62 + 394; ry = 306 + r["y"] + by
+            if hp > 0:
+                pl = scaled(r["pill"], max(.2, back(hp)) if q_in < 1 else max(.01, min(1, q_out)))
+                put(img, pl, cxp - pl.width / 2, ry + PAY_ROWH / 2 - pl.height / 2)
+            ts = r["t_h"] if hp > .5 else r["t_n"]
+            put(img, ts, cxp - ts.width / 2, ry + (PAY_ROWH - PAY_SZ * 1.6) / 2 - 2)
+        if t >= SAVE:
+            bs = 1 + .03 * math.sin((t - SAVE) * 8); sp = scaled(BTN, .7 * (.8 + .2 * back((t - SAVE) / .3)) * bs)
+            put(img, sp, 62 + 245 - sp.width / 2, 740 - sp.height / 2)
     put(img, HEAD, 456 - HEAD.width / 2, 256 - HEAD.height / 2)
     draw_bird(img, i, t)
     put(img, HANDLE, 0, 1558)
@@ -468,7 +615,7 @@ def checks():
     pairs = [("handle CLOUD/NAVY hill", CLOUD, NAVY), ("hook text CLOUD/blob RED", CLOUD, RED), ("header CLOUD/RED", CLOUD, RED),
              ("example plain NAVY/CLOUD", NAVY, CLOUD), ("example highlight CLOUD/RED", CLOUD, RED), ("meaning RED/CLOUD", RED, CLOUD),
              ("meaning NAVY/CLOUD", NAVY, CLOUD), ("term chip CLOUD/NAVY", CLOUD, NAVY), ("ko text CLOUD/RED", CLOUD, RED), ("ko hl DRED/CLOUD", DRED, CLOUD),
-             ("button NAVY/CLOUD", NAVY, CLOUD)]
+             ("button NAVY/CLOUD", NAVY, CLOUD), ("payoff text NAVY/CLOUD", NAVY, CLOUD), ("payoff hl CLOUD/RED", CLOUD, RED), ("snap tag NAVY/CLOUD", NAVY, CLOUD), ("warn ! CLOUD/RED", CLOUD, RED), ("thread NAVY/sky mid", NAVY, (60, 160, 218)), ("balloon RED/sky mid (graphic)", RED, (60, 160, 218))]
     for n, a, b in pairs: print(f"contrast {n}: {contrast(a, b):.2f}")
     print("EN font", EN_SZ)
 

@@ -181,7 +181,7 @@ def pop_alpha(t, t0, dur=0.12): return float(np.clip((t - t0) / dur, 0, 1))
 
 # ---------------------------------------------------------------- bird on liquid blob
 def bird_scene(frame, t, env, cx, bottom, scale=1.0):
-    bw, bh = 820, 420
+    bw, bh = 820, 560
     # liquid blob + soft glow
     ang = np.linspace(0, 2 * math.pi, 90)
     r = 1 + 0.07 * np.sin(3 * ang + t * 2.2) + 0.05 * np.sin(5 * ang - t * 3.1) + 0.03 * np.sin(2 * ang + t * 1.3)
@@ -210,34 +210,36 @@ def bird_scene(frame, t, env, cx, bottom, scale=1.0):
 
 # ---------------------------------------------------------------- scene content
 F_HOOK = font("Black", 98)
-F_TERM_ANS = font("Black", 84)
-F_EN = font("Bold", 58); F_EN_S = font("Bold", 54); F_KO = font("Bold", 54)
-F_MEAN = font("Black", 128)
-F_SMALL = font("Black", 52)
+F_EN_S = font("Bold", 54); F_KO = font("Bold", 54)
+F_TAG = font("Black", 104)
+F_LBL = font("Bold", 42)
 F_HANDLE = font("Bold", 38); F_PILL = font("Bold", 36)
 
 def wlist(role): return [words[i] for i in range(BS[role]["first_word_idx"], BS[role]["first_word_idx"] + BS[role]["n_words"])]
-H_W = {w["t"]: w for w in wlist("hook")}
-TERM_T0 = wlist("term")[1]["s"]            # 5.68 'leverage.' start
-ANS_T0 = wlist("term")[0]["s"]             # 4.8 '답은,'
-EX = wlist("example_en"); KO = wlist("example_ko"); ME = wlist("meaning"); PO = wlist("payoff")
+TERM_T0 = wlist("term")[1]["s"]            # 5.68 'leverage.' start (Scribe)
+ANS_T0 = wlist("term")[0]["s"]             # 4.8 'da-eun,'
+EX = wlist("example_en"); KO = wlist("example_ko"); ME = wlist("meaning")
+PB = BS["payoff"]; EXPR_S, EXPR_E, SAVE_S = PB["expr_start"], PB["expr_end"], PB["save_start"]
 
-HOOK_LINES = [[("공격은", words[0]["s"], words[1]["s"]), ("늘었는데", words[1]["s"], words[3]["s"])],
-              [("협상력은", words[3]["s"], words[4]["s"]), ("왜", words[4]["s"], words[5]["s"])],
-              [("약해졌을까?", words[5]["s"], words[6]["s"])]]
-HOOK_LINES[0][1] = ("늘었는데", words[1]["s"], words[3]["s"])
+def wp(layer, s=1.0, dxf=None, dyf=None, **kw):
+    return layer if (s == 1.0 and dxf is None and dyf is None) else warp(layer, s, dxf, dyf, **kw)
 
-def line_x(f, parts, gap=30):
+# ---- HOOK: spoken '공격은 늘었는데, 이란의 협상력은 왜 약해졌을까요?' -> every word is on screen from frame 0 (ghost lavender)
+HW = words[:6]
+HOOK_LINES = [[("공격은", HW[0]["s"], HW[1]["s"]), ("늘었는데", HW[1]["s"], HW[2]["s"])],
+              [("이란의", HW[2]["s"], HW[3]["s"]), ("협상력은", HW[3]["s"], HW[4]["s"])],
+              [("왜", HW[4]["s"], HW[5]["s"]), ("약해졌을까?", HW[5]["s"], HW[5]["e"])]]
+def line_x(f, parts, gap=34):
     ws = [f.getlength(p) for p in parts]; tot = sum(ws) + gap * (len(parts) - 1); x = -tot / 2; xs = []
     for w_ in ws: xs.append(x + w_ / 2); x += w_ + gap
     return xs, tot
+assert max(line_x(F_HOOK, [p[0] for p in l])[1] for l in HOOK_LINES) < 740
 
 PW_H, PH_H = 788, 700
 def draw_hook(frame, t, env):
     ph = panel(PW_H, PH_H, t); y0 = 300
-    pp = min(1.0, 0.9 + 0.1 * back(min(1, t / .35)))
+    pp = 0.96 + 0.04 * min(1.0, t / .3)                     # panel never wider than 788 -> inside x 62..850 at t=0
     blit(frame, warp(ph, pp, wobble_fn(t, 2.5, 0, .03, 3)), 62, y0)
-    # text layer
     LW, LH = PW_H, PH_H; items = []; line_y = [150, 330, 510]
     colour_of = lambda a, b: (MANGO if a <= t < b else (WHITE if t >= b else LAV))
     for li, line in enumerate(HOOK_LINES):
@@ -247,75 +249,159 @@ def draw_hook(frame, t, env):
     PAD = 70
     items = [(a, b, (c[0] + PAD, c[1]), d) for a, b, c, d in items]
     tl = text_layer(LW + 2 * PAD, LH, items)
-    burst = 22 * math.exp(-t * 9) + 7
-    melt_t = np.clip((t - HOOK_LINES[2][0][1]) / 1.3, 0, 1)   # 약해졌을까? droops as it is spoken
-    D = 62 * melt_t ** 0.8 + 6 * math.sin(t * 2.5) * melt_t
+    burst = 6 * math.exp(-t * 9) + 2
+    melt_t = np.clip((t - HOOK_LINES[2][1][1]) / 1.3, 0, 1)   # last word droops a little as it is spoken
+    D = 30 * melt_t ** 0.8
     def dyf(xs, ys):
         wgt = smooth(line_y[2] - 70, line_y[2] + 10, ys)
         col = 0.55 + 0.45 * np.sin(xs * 0.028 + t * 2.6)
-        return D * wgt * col * (0.4 + 0.6 * smooth(line_y[2] - 70, line_y[2] + 100, ys))
-    def dxf(xs, ys):
-        return burst * np.sin(ys * 0.025 + t * 5.0) + 5 * np.sin(ys * 0.06 - t * 3) * (1 + melt_t)
-    s = 1.0 + 0.28 * math.exp(-t * 11)
-    blit(frame, warp(tl, s, dxf, dyf), 62 - PAD, y0 + 12)
-    return (62, y0, PW_H, PH_H)
+        return D * wgt * col
+    def dxf(xs, ys): return burst * np.sin(ys * 0.025 + t * 5.0)
+    s = 1.0 - 0.06 * math.exp(-t * 11)                        # slam in from slightly smaller (never wider than final)
+    dy = int(-44 * math.exp(-t * 13))                          # and drop in from above
+    blit(frame, warp(tl, s, dxf, dyf), 62 - PAD, y0 + 12 + dy)
 
-ANS_W, ANS_H = 788, 520
+# ---------------------------------------------------------------- HERO IMAGE: the lever
+LPW, LPH = 788, 440
+FY, PL, TH, FH = 240, 720, 34, 125           # fulcrum-top y (local), plank length, thickness, fulcrum height
+TH_REST, TH_UP, TH_DN = -0.16, 0.218, -0.12  # tilt: block resting / block lifted / block dropped (leverage weakened)
+P_LONG, P_SHORT = 0.68, 0.40                 # fulcrum position as fraction of plank from the hand end
+SS = 2
+K5 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
+OUTL = np.array([26, 18, 62], np.float32)
+
+def _over(lay, rgb, a):
+    a = a[..., None]; lay[..., :3] = rgb * a + lay[..., :3] * (1 - a); lay[..., 3:4] = a + lay[..., 3:4] * (1 - a)
+
+def lever_layer(t, th, p, press=0.0, labels=True, bracket=True):
+    """premultiplied RGBA LPHxLPW: glass panel + lever drawn with holographic foil fills.
+    returns (layer, anchors) anchors in layer coords."""
+    lay = panel(LPW, LPH, t, phase=.15)
+    C = np.array([394.0, FY + math.sin(th) * PL * (p - .5)])
+    d = np.array([math.cos(th), -math.sin(th)]); n = np.array([math.sin(th), math.cos(th)])
+    Le = C - d * PL / 2; Re = C + d * PL / 2; P = C + d * PL * (p - .5)
+    def newm(): im = Image.new("L", (LPW * SS, LPH * SS), 0); return im, ImageDraw.Draw(im)
+    def fin(im): return np.asarray(im.resize((LPW, LPH), Image.BOX)).astype(np.float32) / 255
+    S = lambda v: [(float(x) * SS, float(y) * SS) for x, y in v]
+    def rot_item(w, h, r, cen, ang, text=None):
+        big = Image.new("L", (w * SS, h * SS), 0); ImageDraw.Draw(big).rounded_rectangle((0, 0, w * SS - 1, h * SS - 1), r * SS, fill=255)
+        tb = Image.new("L", (w * SS, h * SS), 0)
+        if text: ImageDraw.Draw(tb).text((w * SS / 2, h * SS / 2 + 2 * SS), text, font=font("Bold", 42 * SS), fill=255, anchor="mm")
+        deg = math.degrees(ang)
+        return big.rotate(deg, Image.BICUBIC, expand=True), tb.rotate(deg, Image.BICUBIC, expand=True), cen
+    def paste(im, item, k):
+        x, y = int(item[2][0] * SS - item[k].width / 2), int(item[2][1] * SS - item[k].height / 2)
+        im.paste(255, (x, y), item[k])
+    # masks
+    gim, gd = newm(); gd.rounded_rectangle((22 * SS, (FY + FH) * SS, 766 * SS, (FY + FH + 16) * SS), 8 * SS, fill=255)
+    fim, fd = newm(); fd.polygon(S([(P[0] + n[0] * (TH / 2 - 2), P[1] + n[1] * (TH / 2 - 2)), (P[0] - 92, FY + FH + 2), (P[0] + 92, FY + FH + 2)]), fill=255)
+    pim, pd = newm()
+    pd.polygon(S([Le - n * TH / 2, Re - n * TH / 2, Re + n * TH / 2, Le + n * TH / 2]), fill=255)
+    for e in (Le, Re): pd.ellipse(S([e - TH / 2, e + TH / 2]), fill=255)
+    Wc = Le + d * 80 - n * (TH / 2 + 38); Bc = Re - d * 105 - n * (TH / 2 + 62)
+    wt = rot_item(150, 76, 22, Wc, th, "작은 힘" if labels else None)
+    bk = rot_item(210, 124, 28, Bc, th, "협상 조건" if labels else None)
+    wim, _ = newm(); paste(wim, wt, 0); bim, _ = newm(); paste(bim, bk, 0)
+    tim, _ = newm(); paste(tim, wt, 1); paste(tim, bk, 1)
+    M = {k: fin(v) for k, v in (("g", gim), ("f", fim), ("p", pim), ("w", wim), ("b", bim), ("t", tim))}
+    # foil textures tinted toward the card-2 palette (lavender / mango / grape), static-ish hue drift
+    f1 = foil(LPW, LPH, t, sat=.5, phase=.10, glint=False, speed=.5); f2 = foil(LPW, LPH, t, sat=.5, phase=.45, glint=False, speed=.5)
+    tex = {"g": np.array([112, 98, 182], np.float32) * .75 + f1 * .25, "f": np.array([170, 158, 226], np.float32) * .6 + f2 * .4,
+           "p": np.array(LAV, np.float32) * .55 + f1 * .45, "w": np.array([236, 232, 250], np.float32) * .6 + f2 * .4,
+           "b": np.array(MANGO, np.float32) * .62 + f1 * .38}
+    for k in ("g", "f", "p", "w", "b"):
+        m = M[k]; o = np.clip(cv2.dilate(m, K5) - m, 0, 1)
+        _over(lay, OUTL, o)
+        _over(lay, tex[k], m)
+        hl = np.clip(m - np.roll(m, 4, 0), 0, 1) * .55; sh = np.clip(m - np.roll(m, -6, 0), 0, 1) * .20
+        lay[..., :3] = lay[..., :3] * (1 - sh[..., None]) + 255 * hl[..., None] * lay[..., 3:4]
+    if labels: _over(lay, np.array(DEEPC, np.float32), M["t"])
+    anch = {"block_top": (float(Bc[0] - n[0] * 62), float(Bc[1] - n[1] * 62)), "plank": (float(Le[0] + d[0] * 200 - n[0] * TH / 2), float(Le[1] + d[1] * 200 - n[1] * TH / 2))}
+    ov, od = newm()
+    if bracket:                                           # long-arm bracket: hand end -> fulcrum (shrinks when the fulcrum slides)
+        by = FY + FH + 44; x0_, x1_ = max(30, Le[0]), P[0]
+        od.line(S([(x0_, by), (x1_, by)]), fill=255, width=7 * SS)
+        for x in (x0_, x1_): od.line(S([(x, by - 14), (x, by + 14)]), fill=255, width=7 * SS)
+    if press > 0.02:                                       # little hand-push arrow above the small weight
+        ax = Wc[0]; ay = Wc[1] - 50 - 6 * math.sin(t * 11)
+        od.polygon(S([(ax - 12, ay - 62), (ax + 12, ay - 62), (ax + 12, ay - 24), (ax + 30, ay - 24), (ax, ay + 6), (ax - 30, ay - 24), (ax - 12, ay - 24)]), fill=255)
+    _over(lay, np.array(MANGO, np.float32), fin(ov) * (1.0 if press > 0.02 or bracket else 0))
+    lay[..., :3] = np.minimum(lay[..., :3], lay[..., 3:4] * 255)
+    return lay.astype(np.float32), anch
+
+def lever_params(t, role):
+    press = 0.0
+    if role == "term":
+        q = back(float(np.clip((t - TERM_T0) / .55, 0, 1))); th = TH_REST + (TH_UP - TH_REST) * q; p = P_LONG
+        press = 1.0 - float(smooth(TERM_T0 + .5, TERM_T0 + 1.1, t)) if t >= TERM_T0 else 0.0
+    elif role == "meaning": th, p = TH_UP, P_LONG
+    elif role == "example_en":
+        q = float(smooth(EX[2]["s"], EX[2]["s"] + .9, t)); q = q * q * (3 - 2 * q) * 0.5 + q * 0.5
+        th = TH_UP + (TH_DN - TH_UP) * q; p = P_LONG + (P_SHORT - P_LONG) * q
+    else:  # payoff
+        q = back(float(np.clip((t - EXPR_S) / .5, 0, 1))); th = TH_REST + (TH_UP - TH_REST) * q; p = P_LONG
+        press = 1.0 - float(smooth(EXPR_S + .45, EXPR_S + 1.0, t))
+    return th, p, press
+
+# ---------------------------------------------------------------- beats
+TERM_H = 300
 def draw_term(frame, t, env):
-    y0 = 430; lt = t - ANS_T0
-    ph = panel(ANS_W, ANS_H, t, phase=0.4)
-    blit(frame, warp(ph, pop(t, ANS_T0, .4, .6), wobble_fn(t, 3, 1, .03, 3)), 62, y0)
-    lay = np.zeros((ANS_H, ANS_W, 4), np.float32)
-    ans = text_layer(ANS_W, ANS_H, [("답은,", F_TERM_ANS, (ANS_W / 2, 120), LAV)])
-    # leverage text with scramble
-    wtxt = "leverage"; fs = 190; f = font("Black", fs)
-    while f.getlength(wtxt) > 720: fs -= 4; f = font("Black", fs)
+    y0 = 300
+    ph = panel(ANS_W := 788, TERM_H, t, phase=0.4)
+    blit(frame, wp(ph, pop(t, ANS_T0, .4, .75), cx=None) if False else warp(ph, pop(t, ANS_T0, .4, .75), wobble_fn(t, 3, 1, .03, 3)), 62, y0)
+    ans = text_layer(ANS_W, TERM_H, [("답은,", font("Black", 62), (ANS_W / 2, 66), LAV)])
+    blit(frame, warp(ans, pop(t, ANS_T0 + .05, .3, .7), cx=ANS_W / 2, cy=66), 62, y0)
+    wtxt = "leverage"; fs = 170; f = font("Black", fs)
+    while f.getlength(wtxt) > 690: fs -= 4; f = font("Black", fs)
     adv = [f.getlength(c) for c in wtxt]; tot = sum(adv); x = ANS_W / 2 - tot / 2
     rng = np.random.default_rng(int(t * FPS) // 2 * 7 + 3)
-    glyphs = "!<>-_/[]{}=+*^?#:;|~"
-    fg = font("Black", int(fs * .8))
-    mask = Image.new("L", (ANS_W, ANS_H), 0); md = ImageDraw.Draw(mask); fin = True
+    glyphs = "!<>-_/[]{}=+*^?#:;|~"; fg = font("Black", int(fs * .8))
+    mask = Image.new("L", (ANS_W, TERM_H), 0); md = ImageDraw.Draw(mask)
     for i, c in enumerate(wtxt):
         res = TERM_T0 + 0.14 + i * 0.062
         if t >= res: ch = c
-        elif t >= TERM_T0: ch = glyphs[rng.integers(len(glyphs))]; fin = False
-        else: ch = "?"; fin = False
-        md.text((x + adv[i] / 2, 330), ch, font=(f if t >= res else fg), fill=255 if (t >= TERM_T0) else int(80 + 50 * math.sin(t * 9)), anchor="mm"); x += adv[i]
+        elif t >= TERM_T0: ch = glyphs[rng.integers(len(glyphs))]
+        else: ch = "?"
+        md.text((x + adv[i] / 2, 190), ch, font=(f if t >= res else fg), fill=255 if (t >= TERM_T0) else int(110 + 40 * math.sin(t * 9)), anchor="mm"); x += adv[i]
     m = np.asarray(mask).astype(np.float32) / 255
-    fo = foil(ANS_W, ANS_H, t, sat=.42, speed=1.6)
-    tlayer = np.concatenate([fo * m[..., None], m[..., None]], -1)
-    # unresolved glyph flicker tinted mango
-    tlayer = shadow(tlayer, 8, 8, .55)
-    jit = 0 if fin else 5
-    ans_a = ans
-    wob = wobble_fn(t, 6 + 10 * math.exp(-max(0, t - TERM_T0) * 4), 0, .02, 6)
-    blit(frame, warp(ans_a, pop(t, ANS_T0 + .05, .3, .6), cx=ANS_W / 2, cy=120), 62, y0)
-    blit(frame, warp(tlayer, 1 + 0.16 * math.exp(-max(0, t - TERM_T0) * 10) * (t >= TERM_T0), wob), 62, y0)
-    return (62, y0, ANS_W, ANS_H)
+    fo = foil(ANS_W, TERM_H, t, sat=.42, speed=1.0)
+    tlayer = shadow(np.concatenate([fo * m[..., None], m[..., None]], -1), 8, 8, .55)
+    wob = wobble_fn(t, 3 + 6 * math.exp(-max(0, t - TERM_T0) * 4), 0, .02, 6)
+    blit(frame, warp(tlayer, 1 + 0.05 * math.exp(-max(0, t - TERM_T0) * 10) * (t >= TERM_T0), wob), 62, y0)
+    # hero lever: appears with the answer card, lifts the block exactly at 'leverage' (Scribe start)
+    y1 = 300 + TERM_H + 25
+    th, p, press = lever_params(t, "term")
+    lay, _ = lever_layer(t, th, p, press)
+    blit(frame, wp(lay, pop(t, ANS_T0 + .12, .4, .7)), 62, y1)
+
+def hline_in(frame, x, y0, y1, prog, w=6):
+    if prog <= 0: return
+    ov = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(ov); yy = y0 + (y1 - y0) * min(1, prog)
+    d.line([(x, y0), (x, yy)], fill=MANGO + (255,), width=w)
+    if prog >= 1: d.ellipse((x - 11, y1 - 11, x + 11, y1 + 11), fill=MANGO + (255,), outline=DEEPC + (255,), width=3)
+    blit(frame, pil_premult(ov), 0, 0)
 
 def draw_meaning(frame, t, env):
-    out = []
-    rows = [("영향력", ME[0]["s"], 380, 62, 700), ("협상력", ME[1]["s"], 760, 150, 700)]
-    # small foil tag
-    for i, (txt, t0, y0, x0, w) in enumerate(rows):
-        h = 290
+    tags = [("영향력", ME[0]["s"], 290, 400), ("협상력", ME[1]["s"], 455, 62)]
+    TW, THH = 450, 150; ly = 640
+    th, p, _ = lever_params(t, "meaning")
+    lay, anc = lever_layer(t, th, p, 0.0)
+    blit(frame, lay, 62, ly)
+    for i, (txt, t0, y0, x0) in enumerate(tags):
         ghost = t < t0
-        ph = panel(w, h, t, r=60, phase=i * .37)
-        s = 1.0 if ghost else pop(t, t0, .42, .5)
+        ph = panel(TW, THH, t, r=60, ring=6, phase=i * .37)
+        s = 1.0 if ghost else pop(t, t0, .4, .6)
         blit(frame, warp(ph, s, wobble_fn(t, 3, i, .03, 3)), x0, y0)
-        fo = foil(w, h, t, sat=.42, speed=1.4, phase=i * .3)
-        gk = (0.3 + 0.1 * math.sin(t * 8)) if ghost else 1.0
-        im = Image.new("L", (w, h), 0); ImageDraw.Draw(im).text((w / 2, h / 2 + 6), txt, font=F_MEAN, fill=255, anchor="mm")
+        fo = foil(TW, THH, t, sat=.42, speed=1.0, phase=i * .3)
+        gk = 0.30 if ghost else 1.0
+        im = Image.new("L", (TW, THH), 0); ImageDraw.Draw(im).text((TW / 2, THH / 2 + 6), txt, font=F_TAG, fill=255, anchor="mm")
         m = np.asarray(im).astype(np.float32) / 255 * gk
         tl = shadow(np.concatenate([fo * m[..., None], m[..., None]], -1), 7, 7, .55)
-        dec = 0 if ghost else math.exp(-(t - t0) * 5)
-        blit(frame, warp(tl, s, wobble_fn(t, 4 + 18 * dec, i, .024, 5)), x0, y0)
-        out.append((x0, y0, w, h))
-    # small dot between
-    return out
+        blit(frame, warp(tl, s, wobble_fn(t, 2 + 8 * (0 if ghost else math.exp(-(t - t0) * 5)), i, .024, 5)), x0, y0)
+        ax, ay = (62 + anc["block_top"][0], ly + anc["block_top"][1] - 4) if i == 0 else (62 + anc["plank"][0], ly + anc["plank"][1] - 4)
+        hline_in(frame, int(ax), y0 + THH, int(ay), 0 if ghost else (t - t0) / .35)
 
 def lay_en(f, tokens, hl_idx, maxw, pad=18):
-    """tokens (text); returns lines of list of (idx,x_left,width)"""
     sp = f.getlength(" ") + 6; lines = [[]]; cur = 0
     for i, tk in enumerate(tokens):
         w = f.getlength(tk) + (2 * pad if i == hl_idx else 0)
@@ -324,53 +410,46 @@ def lay_en(f, tokens, hl_idx, maxw, pad=18):
     return lines
 
 EN_TOK = ["Low", "sales", "weakened", "our", "leverage", "in", "talks."]; HL = 4
-def draw_en_text(frame, t, ox, oy, f, maxw, lh, t_off=0.0, colour=WHITE, all_on=False, tag_t=None):
-    """draw example sentence with 'leverage' foil box; returns bbox"""
-    lines = lay_en(f, EN_TOK, HL, maxw)
-    wmax = max(l[-1][1] + l[-1][2] for l in lines); H_ = lh * len(lines)
-    im = Image.new("RGBA", (int(maxw) + 80, H_ + 60), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    boxes = []
-    for li, line in enumerate(lines):
-        lw = line[-1][1] + line[-1][2]; x0 = (maxw - lw) / 2 + 40
-        for i, x, w in line:
-            tk = EN_TOK[i]; s_t = EX[i]["s"]
-            cy = 30 + li * lh + lh / 2
-            if i == HL:
-                boxes.append((x0 + x, cy, w)); continue
-            active = (s_t <= t < s_t + .32) and not all_on
-            col = (MANGO if active else colour) if (all_on or t >= s_t) else (150, 140, 190)
-            d.text((x0 + x + w / 2, cy), tk, font=f, fill=col + (255,), anchor="mm")
-    L = shadow(pil_premult(im), 5, 5, .5)
-    # foil box for leverage
-    for bx, cy, w in boxes:
-        s_t = EX[HL]["s"]; bw_, bh_ = int(w), int(lh * 0.86)
-        p = pop(t, s_t, .35, .5) if (not all_on and t >= s_t) else 1.0
-        bl = np.zeros((bh_ + 60, bw_ + 60, 4), np.float32)
-        mm = rr_mask(bw_, bh_, int(bh_ * .32))
-        fo = foil(bw_, bh_, t, sat=.35, speed=1.8, phase=.2)
-        bl[30:30 + bh_, 30:30 + bw_, :3] = fo * mm[..., None]; bl[30:30 + bh_, 30:30 + bw_, 3] = mm
-        bl = shadow(bl, 5, 6, .5)
-        # text
-        im2 = Image.new("RGBA", bl.shape[1::-1], (0, 0, 0, 0)); ImageDraw.Draw(im2).text((bl.shape[1] / 2, bl.shape[0] / 2 + 2), "leverage", font=f, fill=DEEPC + (255,), anchor="mm")
-        t2 = pil_premult(im2); bl = bl * (1 - t2[..., 3:4]) + t2
-        bl = warp(bl, p, wobble_fn(t, 2, 0, .03, 4))
-        # compose into L at box position
-        blit_into(L, bl, int(bx - 30 + 0), int(cy - bl.shape[0] / 2))
-    blit(frame, L, ox - 40, oy - 30)
-    return (ox, oy, int(maxw), H_)
 def blit_into(L, layer, x, y):
     h, w = layer.shape[:2]; H_, W_ = L.shape[:2]
     x0, y0 = max(0, x), max(0, y); x1, y1 = min(W_, x + w), min(H_, y + h)
     if x1 <= x0 or y1 <= y0: return
     s = layer[y0 - y:y1 - y, x0 - x:x1 - x]; L[y0:y1, x0:x1] = L[y0:y1, x0:x1] * (1 - s[..., 3:4]) + s
+def draw_en_text(frame, t, ox, oy, f, maxw, lh, colour=WHITE, all_on=False):
+    """example sentence with 'leverage' foil box; returns nothing"""
+    lines = lay_en(f, EN_TOK, HL, maxw); H_ = lh * len(lines)
+    im = Image.new("RGBA", (int(maxw) + 80, H_ + 60), (0, 0, 0, 0)); d = ImageDraw.Draw(im); boxes = []
+    for li, line in enumerate(lines):
+        lw = line[-1][1] + line[-1][2]; x0 = (maxw - lw) / 2 + 40
+        for i, x, w in line:
+            tk = EN_TOK[i]; s_t = EX[i]["s"]; cy = 30 + li * lh + lh / 2
+            if i == HL: boxes.append((x0 + x, cy, w)); continue
+            active = (s_t <= t < s_t + .32) and not all_on
+            col = (MANGO if active else colour) if (all_on or t >= s_t) else (150, 140, 190)
+            d.text((x0 + x + w / 2, cy), tk, font=f, fill=col + (255,), anchor="mm")
+    L = shadow(pil_premult(im), 5, 5, .5)
+    for bx, cy, w in boxes:
+        s_t = EX[HL]["s"]; bw_, bh_ = int(w), int(lh * 0.86)
+        p = pop(t, s_t, .35, .5) if (not all_on and t >= s_t) else 1.0
+        bl = np.zeros((bh_ + 60, bw_ + 60, 4), np.float32)
+        mm = rr_mask(bw_, bh_, int(bh_ * .32)); fo = foil(bw_, bh_, t, sat=.35, speed=1.0, phase=.2)
+        bl[30:30 + bh_, 30:30 + bw_, :3] = fo * mm[..., None]; bl[30:30 + bh_, 30:30 + bw_, 3] = mm
+        bl = shadow(bl, 5, 6, .5)
+        im2 = Image.new("RGBA", bl.shape[1::-1], (0, 0, 0, 0)); ImageDraw.Draw(im2).text((bl.shape[1] / 2, bl.shape[0] / 2 + 2), "leverage", font=f, fill=DEEPC + (255,), anchor="mm")
+        t2 = pil_premult(im2); bl = bl * (1 - t2[..., 3:4]) + t2
+        bl = wp(bl, p)
+        blit_into(L, bl, int(bx - 30), int(cy - bl.shape[0] / 2))
+    blit(frame, L, ox - 40, oy - 30)
 
 def draw_example_en(frame, t, env):
-    pw, ph_ = 788, 480; y0 = 520
-    p = panel(pw, ph_, t, phase=.7); s = pop(t, BS["example_en"]["start"], .35, .75)
+    pw, lh = 788, 104; y0 = 300
+    nl = len(lay_en(F_EN_S, EN_TOK, HL, pw - 48)); ph_ = nl * lh + 70
+    p = panel(pw, ph_, t, phase=.7); s = pop(t, BS["example_en"]["start"], .35, .8)
     blit(frame, warp(p, s, wobble_fn(t, 3, 2, .03, 3)), 62, y0)
-    # tag
-    draw_en_text(frame, t, 62 + 24, y0 + 120, F_EN, pw - 48, 118)
-    return (62, y0, pw, ph_)
+    draw_en_text(frame, t, 62 + 24, y0 + 35, F_EN_S, pw - 48, lh)
+    th, pl, _ = lever_params(t, "example_en")        # fulcrum slides toward the hand: long arm shortens, block drops
+    lay, _ = lever_layer(t, th, pl, 0.0)
+    blit(frame, lay, 62, y0 + ph_ + 25)
 
 def draw_example_ko(frame, t, env):
     pw = 788; y0 = 300; h1 = 330
@@ -384,45 +463,51 @@ def draw_example_ko(frame, t, env):
     for li, ln in enumerate(lines):
         sp = F_KO.getlength(" ") + 8; ws = [F_KO.getlength(KT[i]) for i in ln]; tot = sum(ws) + sp * (len(ln) - 1); x = (pw - tot) / 2
         for i, w_ in zip(ln, ws):
-            s_t = KO[i]["s"]
-            active = s_t <= t < s_t + .3
+            s_t = KO[i]["s"]; active = s_t <= t < s_t + .3
             col = (MANGO if (active or i == 4) else WHITE) if t >= s_t else (150, 140, 190)
-            d.text((x + w_ / 2, 130 + li * 120), KT[i], font=F_KO, fill=col + (255,), anchor="mm")
-            x += w_ + sp
+            d.text((x + w_ / 2, 130 + li * 120), KT[i], font=F_KO, fill=col + (255,), anchor="mm"); x += w_ + sp
     L = shadow(pil_premult(im), 5, 5, .5)
-    # droop on '힘을 약하게'
     ts = KO[5]["s"]; dm = np.clip((t - ts) / 0.8, 0, 1)
-    def dyf(xs, ys): return 10 * dm * (0.5 + 0.5 * np.sin(xs * .03 + t * 2)) * smooth(160, 210, ys)
+    def dyf(xs, ys): return 6 * dm * (0.5 + 0.5 * np.sin(xs * .03 + t * 2)) * smooth(160, 210, ys)
     blit(frame, warp(L, 1, wobble_fn(t, 3, 0, .03, 3), dyf), 62, y1)
-    return (62, y0, pw, h1)
 
 def draw_payoff(frame, t, env):
-    t0 = BS["payoff"]["start"]; lt = t - t0
-    pw, ph_ = 760, 200; y0 = 800; s = pop(t, t0, .45, .45) * (1 + 0.025 * math.sin(t * 6))
-    m = rr_mask(pw, ph_, 100); inner = rr_mask(pw, ph_, 100, 8); edge = np.clip(m - inner, 0, 1)
-    fo = foil(pw, ph_, t, sat=.35, speed=2.4, phase=.5); fo2 = foil(pw, ph_, t, sat=.7, speed=2.4, phase=.5, glint=False) * .85
-    rgb = fo * inner[..., None] + fo2 * edge[..., None]
-    a = m[..., None]; lay = np.concatenate([rgb * a, a], -1)
-    # bookmark icon + text
-    im = Image.new("RGBA", (pw, ph_), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
-    ix, iy = 130, ph_ / 2
-    d.polygon([(ix - 34, iy - 52), (ix + 34, iy - 52), (ix + 34, iy + 52), (ix, iy + 24), (ix - 34, iy + 52)], fill=DEEPC + (255,))
-    d.text((pw / 2 + 60, ph_ / 2 + 4), "저장해 두기", font=font("Black", 82), fill=DEEPC + (255,), anchor="mm")
-    tx = pil_premult(im); lay = lay * (1 - tx[..., 3:4]) + tx
-    lay = shadow(lay, 12, 18, .6)
-    dec = math.exp(-lt * 4)
-    blit(frame, warp(lay, s, wobble_fn(t, 3 + 14 * dec, 0, .03, 5)), 62 + (788 - pw) // 2 - 30, y0)
-    # foil tag above
-    tg = text_layer(788, 200, [("leverage", font("Black", 96), (394, 100), WHITE)], shadow_on=True)
-    fo3 = foil(788, 200, t, sat=.42, speed=1.6)
-    im3 = Image.new("L", (788, 200), 0); ImageDraw.Draw(im3).text((394, 100), "leverage", font=font("Black", 112), fill=255, anchor="mm")
-    m3 = np.asarray(im3).astype(np.float32) / 255
-    # backing glass chip so foil text keeps contrast
-    ch = panel(560, 170, t, r=85, ring=5, phase=.3)
-    blit(frame, warp(ch, pop(t, t0 + .1, .4, .5)), 62 + 114, 470)
-    tl = shadow(np.concatenate([fo3 * m3[..., None], m3[..., None]], -1), 6, 6, .5)
-    blit(frame, warp(tl, pop(t, t0 + .1, .4, .5)), 62, 455)
-    return (62, y0, pw, ph_)
+    t0 = PB["start"]; pw, ph_ = 788, 280; y0 = 300
+    p = panel(pw, ph_, t, phase=.3); s = pop(t, t0, .4, .75)
+    blit(frame, warp(p, s, wobble_fn(t, 2.5, 0, .03, 3)), 62, y0)
+    # big expression, highlighted while spoken (expr_start..expr_end), then holographic
+    wtxt = "leverage"; fs = 168; f = font("Black", fs)
+    while f.getlength(wtxt) > 690: fs -= 4; f = font("Black", fs)
+    tw = f.getlength(wtxt); active = EXPR_S <= t < EXPR_E
+    im = Image.new("L", (pw, ph_), 0); ImageDraw.Draw(im).text((pw / 2, 130), wtxt, font=f, fill=255, anchor="mm")
+    m = np.asarray(im).astype(np.float32) / 255
+    col = np.array(MANGO, np.float32) if active else foil(pw, ph_, t, sat=.42, speed=1.0)
+    tl = shadow(np.concatenate([col * m[..., None] if active else col * m[..., None], m[..., None]], -1), 8, 8, .55)
+    sc = (1 + 0.05 * math.exp(-max(0, t - EXPR_S) * 9)) * (1.0 if t >= EXPR_S else 0.9)
+    blit(frame, warp(tl, sc, wobble_fn(t, 2 * math.exp(-max(0, t - EXPR_S) * 4), 0, .02, 6)), 62, y0)
+    # underline fills while the word is spoken
+    prog = float(np.clip((t - EXPR_S) / max(.1, EXPR_E - EXPR_S), 0, 1))
+    ub = Image.new("RGBA", (pw, ph_), (0, 0, 0, 0)); ud = ImageDraw.Draw(ub)
+    ux0 = pw / 2 - tw / 2; ud.rounded_rectangle((ux0, 232, ux0 + tw * prog, 244), 6, fill=MANGO + (255,))
+    blit(frame, pil_premult(ub), 62, y0)
+    # small lever (tilted block lifted again as 'leverage' is said)
+    th, pl, press = lever_params(t, "payoff")
+    lay, _ = lever_layer(t, th, pl, press, labels=False, bracket=False)
+    k = .62; small = cv2.resize(lay, (int(LPW * k), int(LPH * k)), interpolation=cv2.INTER_AREA)
+    blit(frame, wp(small, pop(t, t0 + .1, .4, .7)), 456 - small.shape[1] // 2, y0 + ph_ + 25)
+    # save pill pops at 'jeojanghae' start
+    if t >= SAVE_S:
+        pw2, ph2 = 700, 150; mm = rr_mask(pw2, ph2, 75); inner = rr_mask(pw2, ph2, 75, 8); edge = np.clip(mm - inner, 0, 1)
+        fo = foil(pw2, ph2, t, sat=.30, speed=1.0, phase=.5); fo2 = foil(pw2, ph2, t, sat=.7, speed=1.0, phase=.5, glint=False) * .85
+        rgb = fo * inner[..., None] + fo2 * edge[..., None]; a = mm[..., None]; lay2 = np.concatenate([rgb * a, a], -1)
+        im2 = Image.new("RGBA", (pw2, ph2), (0, 0, 0, 0)); d = ImageDraw.Draw(im2)
+        ix, iy = 120, ph2 / 2
+        d.polygon([(ix - 28, iy - 44), (ix + 28, iy - 44), (ix + 28, iy + 44), (ix, iy + 20), (ix - 28, iy + 44)], fill=DEEPC + (255,))
+        d.text((pw2 / 2 + 50, ph2 / 2 + 3), "저장해 두기", font=font("Black", 76), fill=DEEPC + (255,), anchor="mm")
+        tx = pil_premult(im2); lay2 = lay2 * (1 - tx[..., 3:4]) + tx; lay2 = shadow(lay2, 10, 14, .55)
+        dec = math.exp(-(t - SAVE_S) * 4)
+        blit(frame, warp(lay2, pop(t, SAVE_S, .35, .45), wobble_fn(t, 10 * dec, 0, .03, 5)), 456 - pw2 // 2 - 30, 925)
+
 
 # ---------------------------------------------------------------- static overlays
 def top_pill(frame, t):
@@ -439,14 +524,15 @@ def handle(frame, t):
     tx = pil_premult(im); lay = lay * (1 - tx[..., 3:4]) + tx
     blit(frame, lay, 540 - w // 2, 1588 - h // 2)
 
+
 # ---------------------------------------------------------------- timeline
 def beat_of(t):
     cur = beats[0]
     for b in beats:
         if b["start"] <= t + 1e-6: cur = b
     return cur
-BIRD = {"hook": (330, 1400, 1.0), "term": (640, 1400, 1.0), "meaning": (650, 1400, 1.0),
-        "example_en": (250, 1400, 1.0), "example_ko": (700, 1440, 1.0), "payoff": (456, 1440, 1.25)}
+BIRD = {"hook": (330, 1400, 1.0), "term": (650, 1440, .8), "meaning": (650, 1440, .8),
+        "example_en": (250, 1440, .8), "example_ko": (700, 1440, 1.0), "payoff": (456, 1440, .72)}
 RIP = {"hook": (0.5, 0.35), "term": (0.5, 0.45), "meaning": (0.3, 0.55), "example_en": (0.7, 0.4), "example_ko": (0.4, 0.6), "payoff": (0.5, 0.5)}
 DUR = max(b["end"] for b in beats)
 ENV = bird.envelope(MP3, FPS)
@@ -465,20 +551,27 @@ def render(t):
     handle(frame, t)
     return np.clip(frame, 0, 255).astype(np.uint8)
 
-def contrast_report():
-    # worst case: panel body = top colour at 90% over a pure-white background + 10% gloss
-    worst = 0.9 * np.array([62, 46, 120]) + 0.1 * 255; worst = np.clip(worst + 25, 0, 255)
-    rows = {"white on panel": contrast(WHITE, worst), "lavender on panel": contrast(LAV, worst), "mango on panel": contrast(MANGO, worst),
-            "foil text(min L) on panel": (lum(worst) + .05) and (( FOIL_TXT_MINL + .05) / (lum(worst) + .05)),
-            "deep on foil fill (min L)": (FOIL_FILL_MINL + .05) / (lum(DEEPC) + .05),
-            "deep on mango": contrast(DEEPC, MANGO)}
-    return rows
+def measure(t):
+    """contrast on ACTUAL pixels: render with and without text, compare text pixels to the pixels under them"""
+    global NOTEXT
+    NOTEXT = True; a = render(t).astype(np.float32); NOTEXT = False; b = render(t).astype(np.float32)
+    diff = np.abs(a - b).sum(-1); core = (diff > 150); core[:300] = False; core[1500:] = False
+    core = cv2.erode(core.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    if core.sum() < 50: return None
+    def L(x):
+        x = x / 255; x = np.where(x <= .03928, x / 12.92, ((x + .055) / 1.055) ** 2.4); return .2126 * x[..., 0] + .7152 * x[..., 1] + .0722 * x[..., 2]
+    lt, lb = L(b[core]), L(a[core]); cr = (np.maximum(lt, lb) + .05) / (np.minimum(lt, lb) + .05)
+    # bg local mean (blurred no-text frame) so pixel noise in bg does not hide the worst case
+    return int(core.sum()), float(cr.min()), float(np.percentile(cr, 2)), float(np.median(cr))
 
 if __name__ == "__main__":
-    total = DUR + TAIL; N = int(math.ceil(total * FPS))
     if "--stills" in sys.argv:
         for ts in sys.argv[sys.argv.index("--stills") + 1].split(","):
             Image.fromarray(render(float(ts))).save(f"{FR}/kw3_{ID}_t{float(ts):05.2f}.png")
+        sys.exit()
+    if "--contrast" in sys.argv:
+        for ts in sys.argv[sys.argv.index("--contrast") + 1].split(","):
+            r = measure(float(ts)); print(f"t={float(ts):5.2f} text_px/min/p2/median contrast:", r)
         sys.exit()
     audio_d = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", MP3], capture_output=True, text=True).stdout)
     total = audio_d + TAIL; N = int(math.ceil(total * FPS))
@@ -490,5 +583,4 @@ if __name__ == "__main__":
     for i in range(N):
         pr.stdin.write(render(i / FPS).tobytes())
     pr.stdin.close(); pr.wait()
-    for k, v in contrast_report().items(): print(f"contrast {k}: {v:.2f}")
     print("wrote", outp, "frames", N)

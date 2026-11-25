@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""kw3_11 ("nonessential"): BAUHAUS + VAPORWAVE + LINE ANIMATION + kinetic typography.
+"""kw3_11 ("nonessential") rev2: HERO IMAGE (suitcase sorting scene) + calm vaporwave backdrop + Bauhaus + line animation.
 Usage: NEWS_ROOT=/home/user/verbgame/content/2026-11-23-cnn python3 render_kw3_11.py            (full render)
        NEWS_ROOT=... python3 render_kw3_11.py --frames 0 0.3 1.0 ...                           (PNG stills only)
 Inputs: 03_script/keyword_scripts_v3.json, audio/v3/kw3_11.mp3, audio/words_kw_v3.json, 02_bento/cards.json (card 3).
@@ -92,7 +92,7 @@ def make_bg(now):
     reg = top[ys0:ys0 + h2, xs0:xs0 + w2]
     top[ys0:ys0 + h2, xs0:xs0 + w2] = reg * (1 - a) + b["sun"] * a
     for (sx, sy, ph0, k) in STARS:
-        v = 120 + 135 * (0.5 + 0.5 * math.sin(now * 3 + ph0))
+        v = 150 + 60 * (0.5 + 0.5 * math.sin(now * 1.5 + ph0))
         top[sy - 1:sy + 2, sx - 1:sx + 2] = (v, v, v)
         if k == 2: top[sy, sx - 5:sx + 6] = (v, v, v); top[sy - 5:sy + 6, sx] = (v, v, v)
     fr[:HOR] = top
@@ -101,7 +101,7 @@ def make_bg(now):
     dist = np.minimum(s % 1, 1 - (s % 1)) * d * d / 420.0
     th = 1.5 + d * 0.008
     ha = (np.clip(1 - dist / th, 0, 1) + np.clip(1 - dist / (th * 4.5), 0, 1) ** 2 * 0.4) * np.clip(d / 100, 0, 1) ** 1.5
-    fl = b["fl"] + b["vcol"] + ha[..., None] * np.array(MAG, np.float64)[None, None, :]
+    fl = b["fl"] + b["vcol"] * 0.38 + ha[..., None] * np.array(MAG, np.float64)[None, None, :] * 0.42
     fr[HOR:] = fl
     fr[HOR - 2:HOR + 2] = (255, 190, 235)
     return np.clip(fr, 0, 255).astype(np.uint8)
@@ -243,186 +243,349 @@ def slide(img, now, s, spr, cx, cy, dx, dur=0.3):
 
 # ---------------------------------------------------------------- timing
 BS = {b["role"]: b["start"] for b in BEATS}
+BE = {b["role"]: b for b in BEATS}
 WT = lambda i: WORDS[i]["s"]
 CUTS = [b["start"] for b in BEATS]
-HITS = [(WT(6), 16), (WT(8), 11)] + [(t, 7) for t in CUTS[1:]]
-def shake_at(now):
-    sx = sy = 0.0
-    for t, a in HITS:
-        dt = now - t
-        if 0 <= dt < 0.45:
-            k = a * math.exp(-dt * 11); sx += k * math.cos(dt * 70); sy += k * 0.7 * math.sin(dt * 83)
-    return int(sx), int(sy)
-
+PAY = BE["payoff"]; EXPR_S, EXPR_E, SAVE_S = PAY["expr_start"], PAY["expr_end"], PAY["save_start"]
+TE = WT(15)            # Scribe start of "nonessential" in the term beat -> x items fly out
+SHX = SHY = 0
 def beat_index(now):
     i = 0
     for k, t in enumerate(CUTS):
         if now >= t - 1e-6: i = k
     return i
 
-# ---------------------------------------------------------------- beats
+# ---------------------------------------------------------------- hero image sprites (Bauhaus primitives, SS=3 antialias)
+SKY2 = (77, 176, 232)
+class P:
+    def __init__(s, d, SS): s.d = d; s.S = SS
+    def _p(s, pts): return [(x * s.S, y * s.S) for x, y in pts]
+    def rrect(s, x0, y0, x1, y1, r, fill, outline=None, ow=0):
+        s.d.rounded_rectangle((x0 * s.S, y0 * s.S, x1 * s.S, y1 * s.S), r * s.S, fill=fill, outline=outline, width=int(ow * s.S))
+    def rect(s, x0, y0, x1, y1, fill, outline=None, ow=0): s.rrect(x0, y0, x1, y1, 0, fill, outline, ow)
+    def ell(s, x0, y0, x1, y1, fill, outline=None, ow=0):
+        s.d.ellipse((x0 * s.S, y0 * s.S, x1 * s.S, y1 * s.S), fill=fill, outline=outline, width=int(ow * s.S))
+    def poly(s, pts, fill, outline=None, ow=0):
+        pp = s._p(pts); s.d.polygon(pp, fill=fill)
+        if outline: s.d.line(pp + [pp[0]], fill=outline, width=int(ow * s.S), joint="curve")
+    def line(s, pts, w, fill):
+        pp = s._p(pts); s.d.line(pp, fill=fill, width=int(w * s.S), joint="curve")
+        r = w * s.S / 2
+        for x, y in pp: s.d.ellipse((x - r, y - r, x + r, y + r), fill=fill)
+    def text(s, x, y, t, size, fill, fnt=FB, anchor="mm"):
+        s.d.text((x * s.S, y * s.S), t, font=font(fnt, size * s.S), fill=fill, anchor=anchor)
+def mk(w, h, fn, SS=3):
+    im = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0)); fn(P(ImageDraw.Draw(im), SS)); return im.resize((w, h), Image.LANCZOS)
+
+def _bottle(p):
+    p.rrect(20, 2, 50, 24, 5, SCARLET, INK, 4); p.rrect(8, 30, 62, 176, 16, SKY, INK, 5); p.rect(12, 88, 58, 132, CLOUD)
+    p.poly([(35, 96), (47, 116), (23, 116)], SKY2); p.ell(23, 104, 47, 128, SKY2)
+def _idcard(p):
+    p.rrect(3, 3, 147, 97, 10, CLOUD, INK, 5); p.rect(8, 8, 142, 26, SKY); p.ell(22, 34, 48, 60, INK); p.ell(14, 62, 56, 94, INK)
+    p.rect(70, 40, 136, 50, INK); p.rect(70, 58, 118, 66, INK); p.rect(70, 74, 128, 82, SCARLET)
+def _medkit(p):
+    p.rrect(40, 3, 90, 32, 8, CLOUD, INK, 5); p.rrect(3, 16, 127, 107, 12, CLOUD, INK, 5)
+    p.rect(55, 36, 75, 88, SCARLET); p.rect(39, 52, 91, 72, SCARLET)
+def _console(p):
+    p.rrect(22, 2, 62, 16, 5, NAVY, INK, 3); p.rrect(130, 2, 170, 16, 5, NAVY, INK, 3)
+    p.rrect(3, 10, 187, 112, 28, NAVY, INK, 5); p.rrect(58, 26, 132, 80, 6, SKY, CLOUD, 4)
+    p.rect(16, 54, 46, 66, CLOUD); p.rect(25, 45, 37, 75, CLOUD)
+    p.ell(146, 40, 168, 62, SCARLET); p.ell(158, 62, 180, 84, YEL); p.rect(70, 92, 120, 98, CLOUD)
+def _souvenir(p):
+    p.poly([(22, 166), (108, 166), (96, 126), (34, 126)], SCARLET, INK, 4)
+    p.ell(7, 7, 123, 123, SKY, INK, 5); p.poly([(28, 102), (65, 44), (102, 102)], CLOUD, INK, 3); p.ell(84, 24, 104, 44, YEL)
+def _shoe(p):
+    p.poly([(14, 72), (14, 16), (70, 16), (100, 48), (150, 56), (184, 72)], SCARLET, INK, 5)
+    p.rrect(4, 68, 186, 92, 10, NAVY, INK, 4)
+    for k in range(3): p.line([(40 + 20 * k, 26 + 7 * k), (66 + 20 * k, 40 + 7 * k)], 5, CLOUD)
+def _check(p):
+    p.ell(3, 3, 57, 57, SKY, WHITE, 5); p.line([(17, 31), (26, 41), (44, 19)], 9, INK)
+def _cross(p):
+    p.ell(3, 3, 57, 57, SCARLET, WHITE, 5); p.line([(19, 19), (41, 41)], 9, WHITE); p.line([(41, 19), (19, 41)], 9, WHITE)
+def _lid(p):
+    p.rrect(3, 3, 327, 167, 18, NAVY, INK, 5); p.rrect(18, 18, 312, 152, 10, SKY)
+    p.rect(18, 112, 312, 126, SKY2); p.rect(18, 134, 312, 152, CLOUD)
+def _body_back(p):
+    p.rrect(3, 3, 447, 337, 26, SCARLET, INK, 6); p.rrect(22, 14, 428, 148, 8, CLOUD, INK, 5)
+def _body_front(p):
+    p.rrect(3, 3, 447, 337, 26, SCARLET, INK, 6)
+    for x0 in (66, 334): p.rect(x0, 0, x0 + 34, 337, YEL, INK, 4)
+    p.ell(195, 80, 255, 140, CLOUD, INK, 5); p.ell(213, 98, 237, 122, SCARLET)
+    p.ell(60, 322, 116, 372, NAVY, INK, 4); p.ell(334, 322, 390, 372, NAVY, INK, 4)
+def _tag(bg, l1, l2, c2):
+    def f(p):
+        p.rect(0, 0, 310, 84, bg); p.text(155, 26, l1, 30, CLOUD); p.text(155, 60, l2, 32, c2)
+    return f
+def _plate(p):
+    p.rrect(3, 3, 327, 487, 22, (248, 250, 252, 238), SCARLET, 6)
+
+SPR = {}
+def sprites():
+    if SPR: return SPR
+    SPR.update(bottle=mk(70, 180, _bottle), id=mk(150, 100, _idcard), med=mk(130, 110, _medkit), con=mk(190, 118, _console),
+               sou=mk(130, 170, _souvenir), shoe=mk(190, 100, _shoe), chk=mk(60, 60, _check), crs=mk(60, 60, _cross),
+               lid=mk(330, 170, _lid), back=mk(450, 340, _body_back), front=mk(450, 372, _body_front), plate=mk(330, 490, _plate),
+               tagE=mk(310, 84, _tag(NAVY, "ESSENTIAL", "필수", SKY2)), tagN=mk(310, 84, _tag(SCARLET, "NONESSENTIAL", "불필요", WHITE)))
+    SPR["front"] = SPR["front"].crop((0, 146, 450, 372))
+    return SPR
+
+def comp(cv, spr, cx, cy, scale=1.0, rot=0.0, alpha=1.0):
+    if alpha <= 0.004: return
+    s = spr
+    if abs(scale - 1) > 1e-3: s = s.resize((max(1, int(s.width * scale)), max(1, int(s.height * scale))), Image.BILINEAR)
+    if rot: s = s.rotate(rot, expand=True, resample=Image.BICUBIC)
+    if alpha < 0.999:
+        s = s.copy(); s.putalpha(s.getchannel("A").point(lambda v: int(v * alpha)))
+    x, y = int(cx - s.width / 2), int(cy - s.height / 2)
+    X0, Y0 = max(0, x), max(0, y); X1, Y1 = min(cv.width, x + s.width), min(cv.height, y + s.height)
+    if X1 <= X0 or Y1 <= Y0: return
+    cv.alpha_composite(s.crop((X0 - x, Y0 - y, X1 - x, Y1 - y)), (X0, Y0))
+
+# ---- suitcase sorting scene: native 800x640 (suitcase left, NONESSENTIAL zone right)
+ESS = [("bottle", (95, 395), (92, 318)), ("id", (232, 395), (232, 335)), ("med", (368, 395), (368, 332))]
+NON = [("sou", (95, 262), (640, 215), -6), ("con", (230, 288), (640, 385), 5), ("shoe", (365, 270), (640, 512), -4)]
+NSC = {"sou": 0.62, "con": 0.62, "shoe": 0.62}
+DIM = {"sou": (130, 170), "con": (190, 118), "shoe": (190, 100), "bottle": (70, 180), "id": (150, 100), "med": (130, 110)}
+FLY = 0.8
+def scene_main(now, intro_t0, drop=True):
+    S = sprites(); cv = Image.new("RGBA", (800, 640), (0, 0, 0, 0))
+    pi = clamp((now - intro_t0) / 0.5); e = e_back(pi) if pi > 0 else 0
+    dy = -300 * (1 - e) if drop else 0
+    if pi <= 0 and drop: return cv
+    comp(cv, S["plate"], 635, 345 + dy); comp(cv, S["tagN"], 635, 42 + dy); comp(cv, S["tagE"], 225, 42 + dy)
+    comp(cv, S["lid"], 225, 195 + dy); comp(cv, S["back"], 225, 425 + dy)
+    fl = lambda k: 4 * math.sin(now * 2.0 + k)
+    def non_state(i, name, pin, pout, rot_f):
+        t = TE + 0.11 * i; p = clamp((now - t) / FLY)
+        wob = (math.sin(now * 38 + i) * 4 * clamp((now - (t - 0.55)) / 0.5)) if now < t else 0
+        if p <= 0: return pin[0], pin[1] + dy, NSC[name], wob, False, None
+        ee = e_io(p)
+        x = pin[0] + (pout[0] - pin[0]) * ee
+        y = pin[1] + (pout[1] - pin[1]) * ee - 230 * math.sin(math.pi * p) * (1 - 0.15 * p)
+        sc = NSC[name] + (1.0 - NSC[name]) * ee
+        rot = rot_f + 360 * (1 - ee) * (1 if i % 2 else -1)
+        dt = now - t - FLY
+        if dt > 0: y += -26 * math.exp(-dt * 4.2) * abs(math.sin(dt * 10)) + 3 * math.sin(now * 2 + i)
+        return x, y + dy, sc, rot, True, dt
+    def ess_state(i, name, pin, pout):
+        t = TE + 0.35; p = clamp((now - t) / 0.5); ee = e_back(p)
+        x = pin[0] + (pout[0] - pin[0]) * ee; y = pin[1] + (pout[1] - pin[1]) * ee
+        return x, y + dy + (fl(i) if now > t + 0.5 else 0), 0.78 + 0.22 * ee, 0, False, None
+    def pop(i): return clamp((now - intro_t0 - 0.35 - 0.1 * i) / 0.3)
+    inside, outside, ess = [], [], []
+    for i, (name, pin, pout, rf) in enumerate(NON):
+        st = non_state(i, name, pin, pout, rf); (outside if st[4] else inside).append((name, st, i))
+    for i, (name, pin, pout) in enumerate(ESS): ess.append((name, ess_state(i, name, pin, pout), i))
+    for name, st, i in inside: comp(cv, S[name], st[0], st[1], st[2], st[3], alpha=e_out(pop(i)) if drop else 1)
+    for name, st, i in ess: comp(cv, S[name], st[0], st[1], st[2], st[3], alpha=e_out(pop(3 + i)) if drop else 1)
+    comp(cv, S["front"], 225, 255 + 146 + 113 + dy)
+    for name, st, i in outside: comp(cv, S[name], st[0], st[1], st[2], st[3])
+    for name, st, i in outside:
+        dt = st[5]
+        if dt is not None and dt > 0:
+            bp = e_back(clamp(dt / 0.25)); w, h = DIM[name]
+            comp(cv, S["crs"], st[0] + w / 2 - 14, st[1] - h / 2 + 8, 1.15 * bp)
+    for name, st, i in ess:
+        tt = TE + 0.95 + 0.18 * i
+        if now > tt:
+            bp = e_back(clamp((now - tt) / 0.25)); w, h = DIM[name]
+            comp(cv, S["chk"], st[0] + w / 2 - 10, st[1] - h / 2 + 8, 1.1 * bp)
+    return cv
+
+# ---- travel scene: native 560x420
+def _bez(t, A=(70, 318), C=(240, 110), B=(480, 170)):
+    return ((1 - t) ** 2 * A[0] + 2 * (1 - t) * t * C[0] + t * t * B[0], (1 - t) ** 2 * A[1] + 2 * (1 - t) * t * C[1] + t * t * B[1])
+TRV = {}
+def _bag(p):
+    p.rrect(20, 0, 70, 26, 8, None, INK, 5); p.rrect(3, 18, 87, 74, 12, SCARLET, INK, 5); p.rect(36, 18, 54, 74, YEL, INK, 3)
+def _flag(p):
+    p.rect(2, 0, 10, 80, INK); p.poly([(10, 4), (60, 22), (10, 42)], SCARLET, INK, 3)
+def _plane(p):
+    p.poly([(4, 24), (64, 4), (44, 24), (64, 44)], NAVY, WHITE, 4); p.poly([(44, 24), (64, 4), (64, 44)], SCARLET)
+def _bigx(p):
+    p.line([(26, 26), (154, 154)], 36, WHITE); p.line([(154, 26), (26, 154)], 36, WHITE)
+    p.line([(26, 26), (154, 154)], 24, SCARLET); p.line([(154, 26), (26, 154)], 24, SCARLET)
+def _maptag(p):
+    p.rect(0, 0, 170, 62, NAVY); p.text(85, 33, "trips", 46, CLOUD)
+def _map(p):
+    p.rrect(3, 3, 557, 342, 24, CLOUD, INK, 6); p.ell(300, 220, 470, 330, SKY, None); p.ell(20, 20, 150, 150, SKY2)
+    p.poly([(380, 120), (440, 40), (520, 120)], SKY2); p.ell(480, 24, 530, 74, YEL)
+def travel_sprites():
+    if not TRV: TRV.update(bag=mk(90, 78, _bag), flag=mk(64, 82, _flag), plane=mk(68, 48, _plane), bigx=mk(180, 180, _bigx), tag=mk(170, 62, _maptag), map=mk(560, 345, _map))
+    return TRV
+def scene_travel(now, t0, x_t):
+    T = travel_sprites(); cv = Image.new("RGBA", (560, 420), (0, 0, 0, 0))
+    pp = e_back(clamp((now - t0) / 0.35))
+    if pp <= 0: return cv
+    comp(cv, T["map"], 280, 62 + 172, scale=0.6 + 0.4 * pp, alpha=min(1, pp * 3))
+    prog = e_io((now - t0 - 0.25) / 1.0); N = 90; n_up = int(N * prog)
+    L = Image.new("RGBA", (1120, 840), (0, 0, 0, 0)); d = ImageDraw.Draw(L)
+    pts = [_bez(i / N) for i in range(N + 1)]
+    for i in range(0, n_up, 8):
+        seg = [(x * 2, y * 2) for x, y in pts[i:min(i + 5, n_up) + 1]]
+        if len(seg) > 1:
+            d.line(seg, fill=SCARLET + (255,), width=18, joint="curve")
+            for (x, y) in (seg[0], seg[-1]): d.ellipse((x - 9, y - 9, x + 9, y + 9), fill=SCARLET + (255,))
+    cv.alpha_composite(L.resize((560, 420), Image.LANCZOS))
+    comp(cv, T["bag"], 70, 330, 1.0); comp(cv, T["flag"], 488, 150)
+    pr = 0.30 * e_io((now - t0 - 0.3) / 1.3); px, py = _bez(pr); qx, qy = _bez(pr + 0.02)
+    ang = -math.degrees(math.atan2(qy - py, qx - px))
+    if now > t0 + 0.3: comp(cv, T["plane"], px, py + 3 * math.sin(now * 3), 1.6, ang)
+    sl = e_out(clamp((now - t0 - 0.1) / 0.3)); comp(cv, T["tag"], 85 - 60 * (1 - sl), 40, alpha=sl)
+    if now >= x_t:
+        q = clamp((now - x_t) / 0.28); comp(cv, T["bigx"], 299, 172, scale=1 + 1.2 * (1 - e_out(q)), alpha=min(1, q * 4))
+    return cv
+
+def put_scene(img, cv, cx, top, scale, alpha=1.0):
+    s = cv.resize((int(cv.width * scale), int(cv.height * scale)), Image.LANCZOS)
+    if alpha < 0.999: s = s.copy(); s.putalpha(s.getchannel("A").point(lambda v: int(v * alpha)))
+    img.paste(s, (int(cx - s.width / 2), int(top)), s)
+
+# ---------------------------------------------------------------- shared bits
 SAFE_CX = 456
+def deco(img, now, t0, cols):
+    """two calm Bauhaus shapes parked in the right gutter (x>860), never behind text"""
+    items = [("circle", 210, cols[0], 975, 360, 0, 6), ("tri", 190, cols[1], 960, 1010, 8, -8)]
+    for i, (kind, size, col, x, y, r0, spin) in enumerate(items):
+        p = clamp((now - t0 - i * 0.08) / 0.5)
+        if p > 0: blit(img, shape_sprite(kind, size, col, r0 + spin * (now - t0)), x + 220 * (1 - e_out(p)), y + 8 * math.sin(now * 1.1 + i), alpha=min(1, p * 3), shake=False)
+def panel(img, x0, y0, x1, y1, col, now, t0, shadow=None, dur=0.3):
+    pp = e_out(clamp((now - t0) / dur)); px1 = x0 + int((x1 - x0) * pp)
+    if shadow: rect(img, x0 + 12, y0 + 12, px1 + 12, y1 + 12, shadow)
+    rect(img, x0, y0, px1, y1, col)
+    return pp
+def tchars(img, now, term, size, cy, t0, pulse=None, stagger=0.03):
+    f = font(FB, size); tot = f.getlength(term); x = SAFE_CX - tot / 2
+    for i, ch in enumerate(term):
+        w = f.getlength(ch); lx = x + w / 2; x += w
+        p = clamp((now - (t0 + stagger * i)) / 0.3)
+        if p <= 0: continue
+        eb = e_out(p)
+        blit(img, tsprite(ch, size, "chrome", stroke=5), lx, cy + 60 * (1 - eb), alpha=min(1, p * 4), shake=False)
+        if pulse is not None:
+            pl = max(0.0, 1 - abs(now - (pulse + i * 0.06 + 0.1)) / 0.16)
+            if pl > 0: blit(img, tsprite(ch, size, "solid", fill=YEL, stroke=5), lx, cy - 12 * pl, scale=1 + 0.1 * pl, alpha=pl, shake=False)
+    return tot
+
+# ---------------------------------------------------------------- beats
 def beat_hook(img, now):
-    t0 = 0.0
-    draw_shapes(img, now, t0, [("tri", 300, SCARLET, 70, 1010, 10, 40, -250, 0), ("square", 190, SKY, 960, 1060, 20, -55, 250, 0),
-                              ("half", 260, YEL, 930, 330, 0, 25, 0, -300), ("bar", (560, 46), BLK, 150, 255, -18, 0, -400, 0)])
-    band(img, 62, 306, 788, 50, now / 0.45, now); band(img, 62, 1086, 788, 50, (now - 0.1) / 0.45, now)
-    toks = SC["beats"][0]["on_screen"].split()          # 이 단어 모르면 절대 안 돼요!
+    toks = SC["beats"][0]["on_screen"].split()          # 이 단어 모르면 절대 안 됩니다!
     ts = [WT(0), WT(1), WT(2), WT(6), WT(7), WT(8)]
-    # forbidden sign: circle strokes in on 절대, slash on 안 됩니다
-    cx, cy, R = SAFE_CX, 722, 338
-    pline(img, ellipse_pts(cx, cy, R, R), 30, SCARLET, e_io((now - ts[3]) / 0.6), outline=6)
-    d = R * 0.7071
-    pline(img, [(cx - d, cy - d), (cx + d, cy + d)], 30, SCARLET, e_io((now - ts[4]) / 0.45), outline=6)
-    s1 = fit_size(toks[:3], 720, 126); r1, _ = row(toks[:3], s1, cx=SAFE_CX)
+    band(img, 62, 296, 788, 42, now / 0.4, now)
+    s1 = fit_size(toks[:3], 740, 120); r1, _ = row(toks[:3], s1, cx=SAFE_CX)
     for k, (t, x, w) in enumerate(r1):
-        sp = tsprite(t, s1, "chrome", stroke=9); gh = tsprite(t, s1, "ghost", fill=WHITE)
-        slam(img, now, ts[k], sp, x, 452 + 4 * math.sin(now * 3 + k) * (now > ts[k] + 0.3), ghost=gh, p0=0.55 if ts[k] < 0.05 else 0, sign=1 if k % 2 else -1)
-    s2 = 300; sp = tsprite(toks[3], s2, "solid", fill=YEL, stroke=16); gh = tsprite(toks[3], s2, "ghost", fill=WHITE)
-    sh = clamp((now - ts[3]) / 0.6); jx = int(16 * math.sin(now * 85) * (1 - sh)) if 0 < now - ts[3] < 0.6 else 0
+        slam(img, now, ts[k], tsprite(t, s1, "chrome", stroke=9), x, 450, ghost=tsprite(t, s1, "ghost", fill=WHITE), p0=0.55 if ts[k] < 0.05 else 0, dur=0.2, sign=1 if k % 2 else -1)
+    s2 = 250; sh = clamp((now - ts[3]) / 0.5); jx = int(10 * math.sin(now * 85) * (1 - sh)) if 0 < now - ts[3] < 0.5 else 0
     global SHX
-    old = SHX; SHX += jx; slam(img, now, ts[3], sp, SAFE_CX, 712, ghost=gh, dur=0.16); SHX = old
-    s3 = fit_size(toks[4:], 740, 200); r3, _ = row(toks[4:], s3, cx=SAFE_CX, gap=0.25)
+    old = SHX; SHX += jx
+    slam(img, now, ts[3], tsprite(toks[3], s2, "solid", fill=YEL, stroke=14), SAFE_CX, 665, ghost=tsprite(toks[3], s2, "ghost", fill=WHITE), dur=0.16); SHX = old
+    s3 = fit_size(toks[4:], 740, 160); r3, tot3 = row(toks[4:], s3, cx=SAFE_CX, gap=0.25)
     for k, (t, x, w) in enumerate(r3):
-        sp = tsprite(t, s3, "chrome", stroke=12); gh = tsprite(t, s3, "ghost", fill=WHITE)
-        slam(img, now, ts[4 + k], sp, x, 940, ghost=gh, dur=0.16, sign=-1 if k else 1)
+        slam(img, now, ts[4 + k], tsprite(t, s3, "chrome", stroke=11), x, 925, ghost=tsprite(t, s3, "ghost", fill=WHITE), dur=0.16, sign=-1 if k else 1)
+    pline(img, [(SAFE_CX - tot3 / 2, 1040), (SAFE_CX + tot3 / 2, 1040)], 12, SCARLET, e_io((now - ts[5]) / 0.5), outline=4)
+    cx, cy, R = 190, 1215, 92
+    pline(img, ellipse_pts(cx, cy, R, R), 22, SCARLET, e_io((now - ts[3]) / 0.5), outline=5)
+    d = R * 0.7071; pline(img, [(cx - d, cy - d), (cx + d, cy + d)], 22, SCARLET, e_io((now - ts[4]) / 0.35), outline=5)
+    deco(img, now, 0.0, (SKY, YEL))
 
 def beat_term(img, now):
     t0 = BS["term"]; term = SC["term"]
-    draw_shapes(img, now, t0, [("circle", 340, SCARLET, 830, 430, 0, 0, 300, -100), ("tri", 300, SKY, 110, 1060, -10, -35, -300, 100),
-                              ("square", 150, YEL, 905, 1010, 15, 50, 300, 0), ("bar", (520, 40), BLK, 650, 1020, -22, 0, 0, 300)])
-    # animated connecting lines
-    pline(img, [(830, 600), (850, 560), (850, 520)], 5, WHITE, e_io((now - t0 - 0.3) / 0.5))
-    pline(img, [(120, 940), (120, 880), (62, 880)], 5, WHITE, e_io((now - t0 - 0.9) / 0.5))
-    # context words (spoken order)
-    for (tk, wi, y, x0) in [("샌프란시스코", 9, 410, None), ("시장이", 10, 410, None), ("이동을", 11, 490, None), ("자제하래요", 12, 490, None)]:
-        pass
-    sz = 60
-    rA, _ = row(["샌프란시스코", "시장이"], sz, cx=SAFE_CX - 20); rB, _ = row(["이동을", "자제하래요"], sz, cx=SAFE_CX - 20)
-    for (rr, y, idxs) in [(rA, 408, (9, 10)), (rB, 486, (11, 12))]:
-        for (t, x, w), wi in zip(rr, idxs):
-            slide(img, now, WT(wi), tsprite(t, sz, "solid", fill=WHITE, stroke=7), x, y, -90 if wi % 2 else 90)
-    # panel: black block + yellow offset shadow
-    pp = e_out(clamp((now - t0) / 0.3)); px1 = 62 + int(788 * pp)
-    rect(img, 76, 626, px1 + 14, 868, YEL); rect(img, 62, 612, px1, 854, BLK)
-    s = fit_size([term], 720, 140, fnt=FB); f = font(FB, s); tot = f.getlength(term); x = SAFE_CX - tot / 2 - 5
-    cyc = 730
-    ul_l, ul_r = x, x + tot
-    for i, ch in enumerate(term):
-        w = f.getlength(ch); lx = x + w / 2; x += w
-        ts = t0 + 0.05 * i; p = clamp((now - ts) / 0.42)
-        if p <= 0: continue
-        eb = e_back(p); sgn = 1 if i % 2 == 0 else -1
-        spr = tsprite(ch, s, "chrome", stroke=5)
-        blit(img, spr, lx + sgn * -620 * (1 - eb), cyc + (-90 * sgn) * (1 - eb), rot=sgn * 35 * (1 - eb), alpha=min(1, p * 4))
-        pulse = max(0.0, 1 - abs(now - (WT(15) + i * 0.06 + 0.1)) / 0.16)
-        if pulse > 0:
-            blit(img, tsprite(ch, s, "solid", fill=YEL, stroke=5), lx, cyc - 16 * pulse, scale=1 + 0.14 * pulse, alpha=pulse)
-    pline(img, [(ul_l, 800), (ul_r, 800)], 14, YEL, e_io((now - t0 - 1.0) / 0.6))
-    pline(img, zigzag(ul_l, ul_r, 826, 7, 24), 6, CYAN, e_io((now - WT(15)) / 0.7))
-    # "그 단어가" pointing up at the term
-    for (t, wi, xx) in [("그", 13, 150), ("단어가", 14, 300)]:
-        slam(img, now, WT(wi), tsprite(t, 78, "solid", fill=YEL, stroke=8), xx, 960, dur=0.18)
-    pline(img, [(380, 940), (470, 905), (470, 875), (450, 892)], 7, YEL, e_io((now - WT(14) - 0.1) / 0.35))
+    deco(img, now, t0, (SCARLET, SKY))
+    sz = 48; fadeout = 1 - clamp((now - (WT(13) - 0.12)) / 0.12)
+    rA, _ = row(["샌프란시스코", "시장이"], sz, cx=SAFE_CX); rB, _ = row(["이동을", "자제하래요."], sz, cx=SAFE_CX)
+    if fadeout > 0:
+        for (rr, y, idxs) in [(rA, 322, (9, 10)), (rB, 376, (11, 12))]:
+            for (t, x, w), wi in zip(rr, idxs):
+                if now >= WT(wi):
+                    p = e_out(clamp((now - WT(wi)) / 0.25)); blit(img, tsprite(t, sz, "solid", fill=WHITE, stroke=6), x + (-70 if wi % 2 else 70) * (1 - p), y, alpha=p * fadeout, shake=False)
+    if now >= WT(13):
+        r, _ = row(["그", "단어가"], 64, cx=SAFE_CX, gap=0.3)
+        for (t, x, w), wi in zip(r, (13, 14)): slam(img, now, WT(wi), tsprite(t, 64, "solid", fill=YEL, stroke=7), x, 350, dur=0.18)
+    panel(img, 62, 424, 850, 562, BLK, now, t0, shadow=YEL)
+    s = fit_size([term], 720, 112); tot = tchars(img, now, term, s, 484, t0, pulse=TE)
+    x0 = SAFE_CX - tot / 2
+    pline(img, [(x0, 548), (x0 + tot, 548)], 8, YEL, e_io((now - TE) / 0.5))
+    put_scene(img, scene_main(now, t0 + 0.05), SAFE_CX, 600, 0.9)
 
 def beat_meaning(img, now):
     t0 = BS["meaning"]; term = SC["term"]
-    draw_shapes(img, now, t0, [("circle", 300, SKY, 800, 1100, 0, 0, 300, 200), ("tri", 270, SCARLET, 120, 340, 0, 50, -250, -100),
-                              ("half", 250, YEL, 925, 330, 180, -20, 300, 0), ("bar", (40, 420), BLK, 880, 760, 0, 0, 300, 0)])
-    # term chip with "non" circled (line animation)
-    s = 80; f = font(FB, s); tot = f.getlength(term); x0 = SAFE_CX - tot / 2
-    chip_y = 470
-    slide(img, now, t0, tsprite(term, s, "chrome", stroke=7), SAFE_CX, chip_y, 0, 0.01)
-    wn = f.getlength("non")
-    pline(img, ellipse_pts(x0 + wn / 2 - 6, chip_y + 4, wn / 2 + 4, 62, -90), 9, SCARLET, e_io((now - WT(18)) / 0.5), outline=4)
-    pline(img, [(x0 + wn + 6, chip_y + 66), (x0 + tot, chip_y + 66)], 7, CYAN, e_io((now - WT(18) - 0.45) / 0.45))
-    # yellow block
-    pp = e_out(clamp((now - t0) / 0.3)); bx1 = 62 + int(788 * pp)
-    rect(img, 76, 626, bx1 + 14, 1024, BLK); rect(img, 62, 612, bx1, 1010, YEL)
-    toks1 = ["꼭", "필요하지"]; s1 = fit_size(toks1, 680, 150)
-    r1, _ = row(toks1, s1, x0=108)
+    deco(img, now, t0, (SKY, SCARLET))
+    f = font(FB, 52); cw = int(f.getlength(term)) + 56
+    rect(img, 62, 304, 62 + cw, 372, BLK); blit(img, tsprite(term, 52, "chrome", stroke=4), 62 + 28 + f.getlength(term) / 2, 340, shake=False)
+    panel(img, 62, 396, 850, 560, YEL, now, t0, shadow=BLK)
+    toks = ["꼭", "필요하지", "않은"]; s1 = fit_size(toks, 700, 100); r1, tot = row(toks, s1, cx=SAFE_CX - 6, gap=0.2)
     for k, (t, x, w) in enumerate(r1):
-        slam(img, now, WT(16 + k), tsprite(t, s1, "solid", fill=BLK), x, 730, dur=0.2, sign=1 if k else -1)
-    slam(img, now, WT(18), tsprite("않은", s1, "solid", fill=SCARLET if False else BLK), 108 + font(FB, s1).getlength("않은") / 2, 890, dur=0.2)
-    pline(img, [(108, 985), (108 + font(FB, s1).getlength("않은") + 40, 985)], 11, SCARLET, e_io((now - WT(18) - 0.3) / 0.5))
+        slam(img, now, WT(16 + k), tsprite(t, s1, "solid", fill=BLK), x, 478, dur=0.2, sign=1 if k else -1)
+    ux0 = r1[2][1] - r1[2][2] / 2; ux1 = r1[2][1] + r1[2][2] / 2
+    pline(img, [(ux0, 540), (ux1, 540)], 9, SCARLET, e_io((now - WT(18) - 0.2) / 0.4))
+    sp = e_io((now - t0 - 0.3) / 0.35)
+    if sp > 0: rect(img, 640, 560, 700, 560 + int(46 * sp), YEL)
+    put_scene(img, scene_main(now, t0, drop=False), SAFE_CX, 600, 0.9)
+    q = e_io((now - WT(18)) / 0.4)
+    if q > 0:
+        x0 = 96 + 0.9 * 470; y0 = 600 + 0.9 * 100; x1 = 96 + 0.9 * 800; y1 = 600 + 0.9 * 590
+        pline(img, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 8, YEL, q, closed=True, outline=3)
 
 def beat_example_en(img, now):
-    t0 = BS["example_en"]; ex = SC["beats"][3]["on_screen"].split()    # Please avoid nonessential trips this week.
-    draw_shapes(img, now, t0, [("circle", 320, YEL, 90, 340, 0, 0, -300, 0), ("tri", 270, SCARLET, 900, 400, 0, -45, 300, -100),
-                              ("square", 200, SKY, 850, 1090, 10, 40, 300, 100), ("bar", (500, 42), BLK, 230, 1090, 8, 0, -400, 0)])
+    t0 = BS["example_en"]; ex = SC["beats"][3]["on_screen"].split()
+    deco(img, now, t0, (YEL, SCARLET))
     pw = e_out(clamp((now - t0) / 0.3))
-    ImageDraw.Draw(img)  # noqa
-    rect(img, 62, 496, 62 + int(788 * pw), 1046, NAVY, 0.93)
-    pline(img, [(62, 496), (850, 496), (850, 1046), (62, 1046)], 7, MAG, e_io((now - t0) / 0.9), closed=True)
-    # chip
-    slide(img, now, t0 + 0.1, tsprite("예문", 44, "solid", fill=WHITE), 62 + 70, 556, -60, 0.25)
-    rect(img, 62, 530, 62 + 140, 582, SCARLET, 0.0)
-    # line 1
-    S = 88; lx = 104
-    r1, _ = row(ex[:2], S, x0=lx)
-    for k, (t, x, w) in enumerate(r1):
-        slide(img, now, WT(21 + k), tsprite(t, S, "solid", fill=CLOUD, stroke=0, fnt=FBOLD), x, 676, -110 if k else 110)
-    # highlight box line: dashed-line frame draws first, fills on the word
-    hs = 96; hw = font(FB, hs).getlength(ex[2]); bx0, by0 = 90, 756; bx1, by1 = bx0 + hw + 44, by0 + 136
-    pline(img, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], 6, YEL, e_io((now - t0 - 0.35) / 0.6), closed=True)
+    rect(img, 62, 312, 62 + int(788 * pw), 744, NAVY, 0.95)
+    slide(img, now, t0 + 0.1, tsprite("예문", 44, "solid", fill=WHITE), 62 + 70, 346, -60, 0.25)
+    S = 84; lx = 100
+    r1, _ = row(ex[:2], S, x0=lx, fnt=FBOLD)
+    for k, (t, x, w) in enumerate(r1): slide(img, now, WT(21 + k), tsprite(t, S, "solid", fill=CLOUD, fnt=FBOLD), x, 430, -110 if k else 110)
+    hs = fit_size([ex[2]], 640, 96); hw = font(FB, hs).getlength(ex[2]); bx0, by0 = 88, 486; bx1, by1 = bx0 + hw + 44, by0 + 128
+    pline(img, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], 6, YEL, e_io((now - t0 - 0.3) / 0.6), closed=True)
     th = WT(23) - 0.05
     if now >= th:
         pw2 = e_out(clamp((now - th) / 0.22)); rect(img, bx0, by0, bx0 + int((bx1 - bx0) * pw2), by1, YEL)
-        slam(img, now, WT(23), tsprite(ex[2], hs, "solid", fill=BLK), bx0 + 22 + hw / 2, by0 + 68, dur=0.16)
-    r3, _ = row(ex[3:], S, x0=lx)
-    for k, (t, x, w) in enumerate(r3):
-        slide(img, now, WT(24 + k), tsprite(t, S, "solid", fill=CLOUD, fnt=FBOLD), x, 960, 110 if k % 2 else -110)
+        slam(img, now, WT(23), tsprite(ex[2], hs, "solid", fill=BLK), bx0 + 22 + hw / 2, by0 + 66, dur=0.16)
+    r3, _ = row(ex[3:], S, x0=lx, fnt=FBOLD)
+    for k, (t, x, w) in enumerate(r3): slide(img, now, WT(24 + k), tsprite(t, S, "solid", fill=CLOUD, fnt=FBOLD), x, 668, 110 if k % 2 else -110)
+    put_scene(img, scene_travel(now, t0 + 0.05, WT(24)), SAFE_CX, 768, 0.95)
 
 def beat_example_ko(img, now):
-    t0 = BS["example_ko"]; ko = SC["beats"][4]["on_screen"].split(); en = SC["beats"][3]["on_screen"]
-    draw_shapes(img, now, t0, [("circle", 360, SKY, 70, 1000, 0, 0, -300, 100), ("square", 210, SCARLET, 880, 380, 12, 35, 300, -100),
-                              ("tri", 250, YEL, 905, 1060, 0, -40, 300, 100), ("bar", (46, 520), BLK, 40, 520, 0, 0, -200, 0)])
+    t0 = BS["example_ko"]; ko = SC["beats"][4]["on_screen"].split()
+    deco(img, now, t0, (SKY, YEL))
     pw = e_out(clamp((now - t0) / 0.3))
-    rect(img, 62, 470, 62 + int(788 * pw), 1030, NAVY, 0.93)
-    rect(img, 62, 470, 62 + int(24 * pw), 1030, YEL)
-    slide(img, now, t0 + 0.1, tsprite("해석", 46, "solid", fill=WHITE), 62 + 90, 534, -60, 0.25)
-    S = fit_size(["이번", "주에는", "불필요한"], 640, 80)
-    r1, _ = row(ko[:3], S, x0=116)
-    ts = [WT(27), WT(28), WT(29)]
-    hlw = r1[2][2]; hx0 = r1[2][1] - hlw / 2 - 16
-    for k, (t, x, w) in enumerate(r1[:2]):
-        slide(img, now, ts[k], tsprite(t, S, "solid", fill=CLOUD, fnt=FBOLD), x, 664, -100)
-    th = ts[2] - 0.05
+    rect(img, 62, 312, 62 + int(788 * pw), 744, NAVY, 0.95); rect(img, 62, 312, 62 + int(24 * pw), 744, YEL)
+    slide(img, now, t0 + 0.1, tsprite("해석", 46, "solid", fill=WHITE), 62 + 90, 350, -60, 0.25)
+    S = fit_size(["외출을", "피해", "주세요."], 640, 86, gap=0.3, fnt=FBOLD); lx = 116
+    r1, _ = row(ko[:2], S, x0=lx, fnt=FBOLD)
+    for k, (t, x, w) in enumerate(r1): slide(img, now, WT(27 + k), tsprite(t, S, "solid", fill=CLOUD, fnt=FBOLD), x, 430, -100)
+    hw = font(FB, S).getlength(ko[2]); hx0, hy0 = 100, 486; hx1, hy1 = hx0 + hw + 40, hy0 + 124
+    th = WT(29) - 0.05
     if now >= th:
-        pw2 = e_out(clamp((now - th) / 0.22)); rect(img, hx0, 618, hx0 + int((hlw + 32) * pw2), 618 + int(S * 1.5), YEL)
-        slam(img, now, ts[2], tsprite(ko[2], S, "solid", fill=BLK), r1[2][1], 664, dur=0.16)
-    r2, _ = row(ko[3:], S, x0=116)
-    for k, (t, x, w) in enumerate(r2):
-        slide(img, now, WT(30 + k), tsprite(t, S, "solid", fill=CLOUD, fnt=FBOLD), x, 790, 100 if k % 2 else -100)
-    pline(img, [(116, 880), (820, 880)], 4, MAG, e_io((now - t0 - 0.5) / 0.6))
-    pline(img, [(hx0, 618 + int(S * 1.5) + 12), (hx0 + hlw + 32, 618 + int(S * 1.5) + 12)], 8, SCARLET, e_io((now - th - 0.1) / 0.4))
-    e1, e2 = "Please avoid nonessential", "trips this week."
-    for k, (tx, y) in enumerate([(e1, 925), (e2, 972)]):
-        slide(img, now, t0 + 0.7 + 0.15 * k, tsprite(tx, 40, "solid", fill=DIMKO, fnt=FBOLD), 116 + font(FBOLD, 40).getlength(tx) / 2, y, 0, 0.3)
+        pw2 = e_out(clamp((now - th) / 0.22)); rect(img, hx0, hy0, hx0 + int((hx1 - hx0) * pw2), hy1, YEL)
+        slam(img, now, WT(29), tsprite(ko[2], S, "solid", fill=BLK), hx0 + 20 + hw / 2, hy0 + 64, dur=0.16)
+    r3, _ = row(ko[3:], S, x0=lx, fnt=FBOLD)
+    for k, (t, x, w) in enumerate(r3): slide(img, now, WT(30 + k), tsprite(t, S, "solid", fill=CLOUD, fnt=FBOLD), x, 668, 100 if k % 2 else -100)
+    put_scene(img, scene_travel(now, BS["example_en"] + 0.05, WT(24)), SAFE_CX, 768, 0.95)
 
 def bookmark_pts(x, y, w, h):
     return [(x, y + h), (x, y), (x + w, y), (x + w, y + h), (x + w / 2, y + h - h * 0.24), (x, y + h)]
 
 def beat_payoff(img, now):
     t0 = BS["payoff"]; term = SC["term"]
-    draw_shapes(img, now, t0, [("circle", 330, SCARLET, 800, 420, 0, 0, 300, -200), ("tri", 260, SKY, 110, 1090, 0, 30, -300, 100),
-                              ("square", 180, YEL, 900, 1000, 18, -45, 300, 0), ("bar", (480, 40), BLK, 720, 1230, -14, 0, 500, 0)])
-    bx, by, bw, bh = 96, 520, 190, 330
-    prog = e_io((now - t0) / 0.7)
-    if now - t0 > 0.7:
-        fa = clamp((now - t0 - 0.7) / 0.25); ptsf = bookmark_pts(bx, by, bw, bh)
-        im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); ImageDraw.Draw(im).polygon(ptsf, fill=YEL + (int(255 * fa),))
-        img.paste(im.crop((bx - 4, by - 4, bx + bw + 4, by + bh + 4)), (bx - 4 + SHX, by - 4 + SHY), im.crop((bx - 4, by - 4, bx + bw + 4, by + bh + 4)))
-    pline(img, bookmark_pts(bx, by, bw, bh), 18, WHITE if now - t0 < 0.7 else NAVY, prog, outline=0)
-    toks = SC["beats"][5]["on_screen"].split()      # 저장해 두기
-    S = 150
-    for k, tk in enumerate(toks):
-        slam(img, now, WT(33 + k) if k == 0 else WT(34), tsprite(tk, S, "chrome", stroke=11), 560 + (0 if k == 0 else 20), 600 + k * 190, dur=0.2, sign=1 if k else -1)
-    # yellow bauhaus block with the term
-    hs = 82; hw = font(FB, hs).getlength(term); bx0 = 90; by0 = 960
-    pp = e_out(clamp((now - t0 - 0.5) / 0.3)); rect(img, bx0 + 12, by0 + 12, bx0 + 12 + int((hw + 56) * pp), by0 + 142, BLK); rect(img, bx0, by0, bx0 + int((hw + 56) * pp), by0 + 130, YEL)
-    if pp > 0.95: blit(img, tsprite(term, hs, "solid", fill=BLK), bx0 + 28 + hw / 2, by0 + 66)
-    pline(img, zigzag(bx0, bx0 + hw + 56, by0 + 168, 7, 26), 6, CYAN, e_io((now - t0 - 0.9) / 0.6))
+    deco(img, now, t0, (SCARLET, SKY))
+    on = EXPR_S <= now <= EXPR_E
+    panel(img, 62, 310, 850, 486, YEL if on else BLK, now, t0, shadow=(BLK if on else YEL), dur=0.2)
+    s = fit_size([term], 720, 124)
+    p = e_out(clamp((now - t0) / 0.2)); sp = tsprite(term, s, "solid", fill=BLK) if on else tsprite(term, s, "chrome", stroke=5)
+    blit(img, sp, SAFE_CX, 400, scale=1 + 0.25 * (1 - p), alpha=min(1, p * 4), shake=False)
+    bump = max(0.0, 1 - (now - EXPR_S) / 0.35) if now >= EXPR_S else 0
+    put_scene(img, scene_main(now, t0, drop=False), SAFE_CX, 522 - int(14 * bump), 0.62)
+    if now >= SAVE_S:
+        q = clamp((now - SAVE_S) / 0.3); e = e_back(q); wob = 1 + 0.02 * math.sin((now - SAVE_S) * 9) * (now - SAVE_S < 1)
+        L = Image.new("RGBA", (788, 150), (0, 0, 0, 0)); d = ImageDraw.Draw(L)
+        d.rectangle((12, 12, 787, 149), fill=BLK + (255,)); d.rectangle((0, 0, 775, 137), fill=YEL + (255,))
+        d.polygon(bookmark_pts(40, 22, 62, 96), fill=BLK + (255,))
+        spr = tsprite("저장해 두기", 88, "solid", fill=BLK)
+        L.alpha_composite(spr, (128, max(0, (137 - spr.height) // 2 + 4)))
+        if e > 0.02:
+            s2 = L.resize((max(1, int(L.width * e * wob)), max(1, int(L.height * e * wob))), Image.LANCZOS)
+            img.paste(s2, (int(SAFE_CX - s2.width / 2 - 6), int(1030 - s2.height / 2)), s2)
 
 BEAT_FN = [beat_hook, beat_term, beat_meaning, beat_example_en, beat_example_ko, beat_payoff]
 
@@ -457,32 +620,29 @@ def mouth_env(total):
 
 def render_frame(now, mouth):
     global SHX, SHY
-    arr = make_bg(now)
-    bi = beat_index(now); tcut = CUTS[bi]
-    fl = 0.38 * max(0.0, 1 - (now - tcut) / 0.14) if bi > 0 else 0.0
-    if fl > 0: arr = (arr * (1 - fl) + 255 * fl).astype(np.uint8)
-    img = Image.fromarray(arr, "RGB")
-    SHX, SHY = shake_at(now)
-    BEAT_FN[bi](img, now)
+    img = Image.fromarray(make_bg(now), "RGB")
     SHX = SHY = 0
+    bi = beat_index(now); tcut = CUTS[bi]
+    BEAT_FN[bi](img, now)
     img.paste(PILL, (62, 226), PILL)
-    # bird in front of the sun, bounces on cuts
-    since = now - tcut; bob = -22 * math.exp(-since * 9) * abs(math.cos(since * 14)) if since >= 0 else 0
-    sp = BIRD.sprite(mouth); bx = int(450 - sp.width / 2); by = int(1385 - sp.height + bob + 4 * math.sin(now * 2.2))
+    since = now - tcut; bob = -10 * math.exp(-since * 9) * abs(math.cos(since * 14)) if since >= 0 else 0
+    sp = BIRD.sprite(mouth); bx = int(735 - sp.width / 2); by = int(1430 - sp.height + bob + 3 * math.sin(now * 2.2))
     sh = Image.new("RGBA", (sp.width, 30), (0, 0, 0, 0)); ImageDraw.Draw(sh).ellipse((10, 4, sp.width - 10, 26), fill=(10, 4, 30, 150))
-    img.paste(sh, (bx, 1372), sh); img.paste(sp, (bx, by), sp)
+    img.paste(sh, (bx, 1417), sh); img.paste(sp, (bx, by), sp)
     img.paste(HANDLE, ((W - HANDLE.width) // 2, 1588), HANDLE)
     return img
 
 def contrast_report():
     navy_over = lambda base, a=0.93: tuple(int(NAVY[i] * a + base[i] * (1 - a)) for i in range(3))
     rows = [("hook chrome white vs stroke INK", contrast(WHITE, INK)), ("hook chrome pink end vs INK", contrast((255, 160, 228), INK)),
-            ("hook 절대 yellow vs INK stroke", contrast(YEL, INK)), ("hook slash/circle scarlet vs white outline", contrast(SCARLET, WHITE)),
+            ("hook yellow vs INK stroke", contrast(YEL, INK)), ("hook scarlet ring vs white outline", contrast(SCARLET, WHITE)),
             ("term chrome vs black panel", contrast((255, 160, 228), BLK)), ("term white ctx text vs INK stroke", contrast(WHITE, INK)),
-            ("meaning black on yellow", contrast(BLK, YEL)), ("example cloud on navy panel (over magenta worst)", contrast(CLOUD, navy_over((255, 60, 190)))),
-            ("example cloud on navy panel (over sun yellow worst)", contrast(CLOUD, navy_over((255, 225, 90)))),
-            ("example highlight black on yellow", contrast(BLK, YEL)), ("ko dim english C4D4E2 on navy panel worst", contrast(DIMKO, navy_over((255, 60, 190)))),
-            ("handle white on INK", contrast(WHITE, INK)), ("pill white on black", contrast(WHITE, BLK)), ("chip white on scarlet", contrast(WHITE, SCARLET))]
+            ("meaning black on yellow", contrast(BLK, YEL)), ("example cloud on navy panel (0.95 over magenta worst)", contrast(CLOUD, navy_over((255, 60, 190), 0.95))),
+            ("example cloud on navy panel (over sun yellow worst)", contrast(CLOUD, navy_over((255, 225, 90), 0.95))),
+            ("example/ko highlight black on yellow", contrast(BLK, YEL)), ("payoff black on yellow (expr + save)", contrast(BLK, YEL)),
+            ("tag ESSENTIAL cloud on navy", contrast(CLOUD, NAVY)), ("tag 필수 sky2 on navy", contrast(SKY2, NAVY)), ("tag NONESSENTIAL white on scarlet", contrast(WHITE, SCARLET)),
+            ("trips tag cloud on navy", contrast(CLOUD, NAVY)), ("check navy on sky badge (graphic)", contrast(INK, SKY)), ("X white on scarlet badge (graphic)", contrast(WHITE, SCARLET)),
+            ("handle white on INK", contrast(WHITE, INK)), ("pill white on black", contrast(WHITE, BLK))]
     for n, c in rows: print(f"  contrast {c:5.2f}  {n}")
 
 def main():
