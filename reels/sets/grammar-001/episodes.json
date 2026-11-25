@@ -1,0 +1,82 @@
+{
+  "mode": "grammar",
+  "set": "001",
+  "colors": { "pen": "노랑", "accent": "코랄" },
+  "episodes": [
+    {
+      "level": 1,
+      "points": ["enjoy + 동명사"],
+      "combo": false,
+      "audience": "중1~2 내신",
+      "lines": ["I enjoy {to play>playing}", "badminton with my", "friends after school."],
+      "ko": "나는 방과 후에 친구들과 배드민턴 치는 것을 즐긴다.",
+      "chip": {
+        "title": "enjoy + V-ing",
+        "sub": "enjoy 뒤에는 동명사",
+        "rows": [["finish doing", "~하는 것을 끝내다"], ["mind opening", "여는 것을 꺼리다"], ["keep trying", "계속 시도하다"]]
+      },
+      "why_wrong": "enjoy 는 목적어로 동명사만 취하고 to부정사는 취하지 않는다.",
+      "trap": "want to play, like to play 처럼 to 가 붙는 동사와 섞어 외워서 enjoy 에도 to 를 붙인다."
+    },
+    {
+      "level": 2,
+      "points": ["명사를 꾸미는 분사의 능동/수동"],
+      "combo": false,
+      "audience": "중3 내신·고입",
+      "lines": ["French is the language", "{speaking>spoken} in Quebec,", "a province of Canada."],
+      "ko": "프랑스어는 캐나다의 한 주인 퀘벡에서 사용되는 언어이다.",
+      "chip": {
+        "title": "명사 + 과거분사(수동)",
+        "sub": "언어는 사람에게 '말해지는' 대상",
+        "rows": [["a book written by Kim", "김이 쓴 책"], ["a broken window", "깨진 창문"], ["a girl singing a song", "노래하는 소녀"]]
+      },
+      "why_wrong": "language 는 말해지는 대상이므로 수동의 과거분사 spoken 이 앞 명사를 꾸민다.",
+      "trap": "speak 가 '말하다'라서 -ing 를 붙이지만, 꾸밈받는 명사가 행위를 당하는지 하는지를 따져야 한다."
+    },
+    {
+      "level": 3,
+      "points": ["가정법 과거완료"],
+      "combo": false,
+      "audience": "고1 학평",
+      "lines": ["If I had known the truth,", "I would not {go>have gone} to", "the party last Friday."],
+      "ko": "내가 사실을 알았더라면 지난 금요일 파티에 가지 않았을 텐데.",
+      "chip": {
+        "title": "If + had p.p., would + have p.p.",
+        "sub": "과거 사실의 반대",
+        "rows": [["If I had studied,", "공부했더라면,"], ["I would have passed.", "합격했을 텐데."], ["would not have said", "말하지 않았을 텐데"]]
+      },
+      "why_wrong": "if절이 had known(과거완료)이면 주절은 would + have p.p. 이어야 한다.",
+      "trap": "if절만 과거완료로 쓰고 주절은 would + 동사원형으로 짝을 맞추지 못한다."
+    },
+    {
+      "level": 4,
+      "points": ["부정어 문두 도치", "주어-동사 수일치"],
+      "combo": true,
+      "audience": "수능 29번",
+      "lines": ["Seldom {the kids has>have the kids}", "read such a difficult", "essay on their own."],
+      "ko": "아이들이 그렇게 어려운 에세이를 스스로 읽은 적은 좀처럼 없다.",
+      "chip": {
+        "title": "부정어 + 조동사 + 주어",
+        "sub": "도치 뒤 동사는 주어에 수일치",
+        "rows": [["Seldom have they", "그들은 좀처럼 ~않았다"], ["Never has she", "그녀는 결코 ~않았다"], ["Rarely do students", "학생들은 거의 ~않는다"]]
+      },
+      "why_wrong": "Seldom 이 문두에 오면 조동사가 주어 앞으로 가야 하고(have the students), 주어 kids 가 복수라 has 가 아니라 have.",
+      "trap": "도치되면 동사가 주어 앞에 와서 주어를 찾지 못하고 가까운 단수 느낌에 끌려 has 로 쓴다."
+    },
+    {
+      "level": 5,
+      "points": ["접속사 vs 전치사"],
+      "combo": false,
+      "audience": "토익 Part5",
+      "lines": ["{Despite>Although} it was", "raining, the meeting", "went ahead as planned."],
+      "ko": "비가 오고 있었지만 회의는 계획대로 진행되었다.",
+      "chip": {
+        "title": "접속사 + 절 / 전치사 + 명사",
+        "sub": "뒤에 절이 오면 접속사",
+        "rows": [["Although + S V", "~이지만"], ["Despite + 명사(구)", "~에도 불구하고"], ["because / because of", "~때문에 (절 / 명사)"]]
+      },
+      "why_wrong": "Despite 는 전치사라 뒤에 명사만 오고, 절(it was raining)을 이끌려면 접속사 Although 가 필요하다.",
+      "trap": "despite 와 although 가 둘 다 '~에도 불구하고'로 외워져 뒤에 오는 품사 차이를 놓친다."
+    }
+  ]
+}
