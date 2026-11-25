@@ -529,11 +529,7 @@ def ic_snow(d, x, y, n):
     for k in range(3):
         a = math.radians(90 + 60 * k); dx, dy = math.cos(a) * 48, math.sin(a) * 48
         d.line((cx - dx, cy - dy, cx + dx, cy + dy), fill=SPRUCE + (255,), width=9)
-        for sgn in (1, -1):
-            bx, by = cx + dx * .62 * sgn, cy + dy * .62 * sgn
-            for da in (35, -35):
-                b = math.atan2(dy * sgn, dx * sgn) + math.radians(180 + da)
-                d.line((bx, by, bx + math.cos(b) * 15, by + math.sin(b) * 15), fill=SPRUCE + (255,), width=7)
+    d.ellipse((cx - 10, cy - 10, cx + 10, cy + 10), fill=SPRUCE + (255,))
 def ic_house(d, x, y, n):
     cx = x + n / 2; d.polygon([(cx - 52, y + 76), (cx, y + 28), (cx + 52, y + 76)], fill=SPRUCE + (255,))
     d.rectangle((cx - 38, y + 74, cx + 38, y + 124), fill=SPRUCE + (255,)); d.rounded_rectangle((cx - 12, y + 92, cx + 12, y + 124), radius=5, fill=YEL + (255,))
@@ -542,7 +538,7 @@ def ic_batt(d, x, y, n):
     d.rounded_rectangle((x + 38, y + 58, x + 54, y + 92), radius=4, fill=SPRUCE + (255,))
 def ic_sleep(d, x, y, n):
     cx, cy = x + 62, y + 80; d.ellipse((cx - 38, cy - 38, cx + 38, cy + 38), fill=SPRUCE + (255,)); d.ellipse((cx - 16, cy - 52, cx + 56, cy + 22), fill=YEL + (255,))
-    d.text((x + 100, y + 92), "z", font=font(48), fill=SPRUCE + (255,)); d.text((x + 116, y + 54), "Z", font=font(40), fill=SPRUCE + (255,))
+    d.text((x + 96, y + 84), "z", font=font(40), fill=SPRUCE + (255,)); d.text((x + 104, y + 46), "Z", font=font(34), fill=SPRUCE + (255,))
 CH_COLD, CH_HOME = chip(OFF, ic_snow), chip(YEL, ic_house); CH_TIRED, CH_SLEEP = chip(OFF, ic_batt), chip(YEL, ic_sleep)
 ARW = mask_draw(120, 70, lambda dd, p, s: dd.polygon([(p, p + 22 * s), (p + 70 * s, p + 22 * s), (p + 70 * s, p), (p + 120 * s, p + 35 * s), (p + 70 * s, p + 70 * s), (p + 70 * s, p + 48 * s), (p, p + 48 * s)], fill=255), 20)
 ARROW = clay(ARW, YEL, d=6, sh_off=(0, 6), sh_blur=6, sh_alpha=.3)
