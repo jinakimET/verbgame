@@ -49,8 +49,8 @@
     },
     {
      "role": "example_ko",
-     "spoken": "그는 월세로 한 달에 900달러를 낸다.",
-     "on_screen": "그는 월세로 한 달에 900달러를 낸다."
+     "spoken": "그는 월세로 한 달에 nine hundred dollars를 낸다.",
+     "on_screen": "그는 월세로 한 달에 nine hundred dollars를 낸다."
     },
     {
      "role": "payoff",
