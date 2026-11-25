@@ -1,6 +1,6 @@
 {
  "version": 3,
- "note": "v3: 훅은 hook_patterns.md의 서로 다른 유형, 구성은 훅→(표현)→뜻→예문→해석→저장으로 단축, 편마다 다른 모션 스타일. 사실은 articles.md(검색 요약 기준) 범위. '3척·이틀'(05), 시장의 이동 자제(11), 풍선(09)은 검색 요약 기준.",
+ "note": "v3: 훅은 hook_patterns.md의 서로 다른 유형, 구성은 훅→(표현)→뜻→예문→해석→저장으로 단축, 편마다 다른 모션 스타일. 사실은 articles.md(검색 요약 기준) 범위. '3척·이틀'(05), 시장의 이동 자제(11), 풍선(09)은 검색 요약 기준. [11/24 수정] 4편(05·07·09·11)은 마무리에서 표현을 한 번 더 말하도록 음성 끝부분을 교체했고, 핵심 이미지를 추가해 재렌더했다.",
  "reels": [
   {
    "id": "01",
@@ -76,8 +76,8 @@
     },
     {
      "role": "payoff",
-     "spoken": "저장해 두세요.",
-     "on_screen": "저장해 두기"
+     "spoken": "leverage. 저장해 두세요.",
+     "on_screen": "leverage · 저장해 두기"
     }
    ],
    "highlight": "leverage"
@@ -111,8 +111,8 @@
     },
     {
      "role": "payoff",
-     "spoken": "저장해 두세요.",
-     "on_screen": "저장해 두기"
+     "spoken": "put in jeopardy. 저장해 두세요.",
+     "on_screen": "put ~ in jeopardy · 저장해 두기"
     }
    ],
    "highlight": "put the outdoor concert in jeopardy"
@@ -151,8 +151,8 @@
     },
     {
      "role": "payoff",
-     "spoken": "저장해 두세요.",
-     "on_screen": "저장해 두기"
+     "spoken": "at the highest level since. 저장해 두세요.",
+     "on_screen": "at the highest level since · 저장해 두기"
     }
    ],
    "highlight": "at the highest level since"
@@ -191,8 +191,8 @@
     },
     {
      "role": "payoff",
-     "spoken": "저장해 두세요.",
-     "on_screen": "저장해 두기"
+     "spoken": "nonessential. 저장해 두세요.",
+     "on_screen": "nonessential · 저장해 두기"
     }
    ],
    "highlight": "nonessential"
