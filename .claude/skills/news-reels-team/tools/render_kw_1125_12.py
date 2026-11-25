@@ -278,10 +278,14 @@ def glow(sz):
     return _gc[k]
 
 # room keyframes: anchor position per beat (sprite centre CW/2,CH/2 maps here)
-POS = {"hook": (440, 1085), "term": (456, 1105), "meaning": (456, 1150), "example_en": (456, 1135), "example_ko": (456, 625), "payoff": (456, 965)}
+POS = {"hook": (440, 1085), "term": (456, 1105), "meaning": (456, 1150), "example_en": (456, 1135), "example_ko": (456, 625), "payoff": (456, 462)}
 ROLES = [b["role"] for b in BEATS]
 def beat_idx(t): return max(i for i, b in enumerate(BT) if b <= t + 1e-6)
+PRE = .5
 def room_anchor(t):
+    if t >= BT[5] - PRE:
+        a0, a1 = POS["example_ko"], POS["payoff"]; p = ease((t - (BT[5] - PRE)) / PRE)
+        return (a0[0] + (a1[0] - a0[0]) * p, a0[1] + (a1[1] - a0[1]) * p)
     bi = beat_idx(t); cur = POS[ROLES[bi]]
     if bi == 0: return cur
     pv = POS[ROLES[bi - 1]]; p = ease((t - BT[bi]) / .55)
@@ -296,7 +300,7 @@ def room_scale(t):
     elif t >= T_SMALL and t < T_THAT: S = .86 + (.68 - .86) * ease((t - T_SMALL) / .3)
     elif t >= T_THAT:
         S = .68 + (.50 - .68) * back((t - T_THAT) / .45)
-        if t >= BT[5]: S = .50 + .08 * ease((t - BT[5]) / .5)
+    if t >= BT[5] - PRE: S = .50 - .14 * ease((t - (BT[5] - PRE)) / PRE)   # payoff: room settles small at top BEFORE the payoff panel appears
     return S
 def cozy(t):
     return ease((t - T_THAT) / .9) if t >= T_THAT else 0.0
@@ -492,23 +496,73 @@ for KO_SZ in range(72, 44, -2):
     if max(row_w(r, KO_SZ) for r in KO_ROWS) <= 690: break
 KO_CARD = card_rows(KO_ROWS, KO_SZ, int(KO_SZ * 1.78), 700, OFF, SPRUCE, YEL, SPRUCE, padv=40)
 
-# payoff
-PO0 = FW["payoff"]
-for PO_SZ in range(150, 80, -4):
-    if row_w([(PO0, "so", False), (PO0, "~", False), (PO0 + 1, "that", False)], PO_SZ) <= 640: break
+# payoff: expression (expr_start) -> example 1 (ex1_start) -> example 2 (ex2_start) -> save pill (save_start)
+PO0 = FW["payoff"]; PB = BEATS[5]
+T_EX1, T_EX2, T_SAVE = PB["ex1_start"], PB["ex2_start"], PB["save_start"]
+assert words[PO0]["t"].startswith("so") and words[PO0 + 1]["t"].startswith("that")
+assert words[PO0 + 2]["t"] == "It" and ws(PO0 + 2) == T_EX1 and words[PO0 + 10]["t"] == "She" and ws(PO0 + 10) == T_EX2 and ws(PO0 + 21) == T_SAVE
+EX1 = PO0 + 2; EX2 = PO0 + 10   # ex1 = 8 words, ex2 = 11 words
+PO_SZ = 100; EXP_Y = 640; CARD_Y = 810; CHIP_CY = 1218; BTN_CY = 1372
 def build_payoff():
     f = font(PO_SZ); sp = f.getlength(" ") + 10; parts = [("so", PO0), ("~", PO0), ("that", PO0 + 1)]
-    wds = [f.getlength(p) for p, _ in parts]; tot = sum(wds) + sp * 2; lh = int(PO_SZ * 1.7); pw = 700 + 88; ph = lh + 100
-    panel = pill_sprite(pw, ph, YEL, r=76); items = []; x = PAD + (pw - tot) / 2
+    wds = [f.getlength(p) for p, _ in parts]; tot = sum(wds) + sp * 2; lh = int(PO_SZ * 1.3); pw = 700 + 88; ph = lh + 30
+    panel = pill_sprite(pw, ph, YEL, r=70); items = []; x = PAD + (pw - tot) / 2
     for (p, i), wd in zip(parts, wds):
-        items.append((txt_flat(p, PO_SZ, SPRUCE if p != "~" else MID), x - 6, PAD + 50 + (lh - PO_SZ * 1.6) / 2 - 2, i)); x += wd + sp
+        items.append((txt_flat(p, PO_SZ, SPRUCE if p != "~" else MID), x - 6, PAD + 15 + (lh - PO_SZ * 1.6) / 2 - 2, i)); x += wd + sp
     return panel, items, [], pw, ph
 PAYOFF = build_payoff()
+def ex_rows(i0, cuts, hl):
+    toks = [(i0 + k, wt(i0 + k), k in hl) for k in range(cuts[-1])]
+    return [toks[a:b] for a, b in zip((0,) + cuts[:-1], cuts)]
+EX1_ROWS = ex_rows(EX1, (3, 5, 8), {2, 4}); EX2_ROWS = ex_rows(EX2, (4, 7, 11), {2, 4})
+for EX_SZ in range(70, 50, -2):
+    if max(row_w(r, EX_SZ) for r in EX1_ROWS + EX2_ROWS) <= 690: break
+EX_LH = 88
+EX1_CARD = card_rows(EX1_ROWS, EX_SZ, EX_LH, 700, OFF, SPRUCE, YEL, SPRUCE, padv=26)
+EX2_CARD = card_rows(EX2_ROWS, EX_SZ, EX_LH, 700, OFF, SPRUCE, YEL, SPRUCE, padv=26)
+# key images: cause chip -> arrow -> result chip (iconic, wordless)
+CHS = 150
+def chip(bg, fn):
+    s_ = pill_sprite(CHS, CHS, bg, r=46); d = ImageDraw.Draw(s_); fn(d, PAD, PAD, CHS); return s_
+def ic_snow(d, x, y, n):
+    cx, cy = x + n / 2, y + n / 2
+    for k in range(3):
+        a = math.radians(90 + 60 * k); dx, dy = math.cos(a) * 48, math.sin(a) * 48
+        d.line((cx - dx, cy - dy, cx + dx, cy + dy), fill=SPRUCE + (255,), width=9)
+        for sgn in (1, -1):
+            bx, by = cx + dx * .62 * sgn, cy + dy * .62 * sgn
+            for da in (35, -35):
+                b = math.atan2(dy * sgn, dx * sgn) + math.radians(180 + da)
+                d.line((bx, by, bx + math.cos(b) * 15, by + math.sin(b) * 15), fill=SPRUCE + (255,), width=7)
+def ic_house(d, x, y, n):
+    cx = x + n / 2; d.polygon([(cx - 52, y + 76), (cx, y + 28), (cx + 52, y + 76)], fill=SPRUCE + (255,))
+    d.rectangle((cx - 38, y + 74, cx + 38, y + 124), fill=SPRUCE + (255,)); d.rounded_rectangle((cx - 12, y + 92, cx + 12, y + 124), radius=5, fill=YEL + (255,))
+def ic_batt(d, x, y, n):
+    d.rounded_rectangle((x + 26, y + 46, x + 112, y + 104), radius=12, outline=SPRUCE + (255,), width=9); d.rounded_rectangle((x + 114, y + 64, x + 128, y + 86), radius=4, fill=SPRUCE + (255,))
+    d.rounded_rectangle((x + 38, y + 58, x + 54, y + 92), radius=4, fill=SPRUCE + (255,))
+def ic_sleep(d, x, y, n):
+    cx, cy = x + 62, y + 80; d.ellipse((cx - 38, cy - 38, cx + 38, cy + 38), fill=SPRUCE + (255,)); d.ellipse((cx - 16, cy - 52, cx + 56, cy + 22), fill=YEL + (255,))
+    d.text((x + 100, y + 92), "z", font=font(48), fill=SPRUCE + (255,)); d.text((x + 116, y + 54), "Z", font=font(40), fill=SPRUCE + (255,))
+CH_COLD, CH_HOME = chip(OFF, ic_snow), chip(YEL, ic_house); CH_TIRED, CH_SLEEP = chip(OFF, ic_batt), chip(YEL, ic_sleep)
+ARW = mask_draw(120, 70, lambda dd, p, s: dd.polygon([(p, p + 22 * s), (p + 70 * s, p + 22 * s), (p + 70 * s, p), (p + 120 * s, p + 35 * s), (p + 70 * s, p + 70 * s), (p + 70 * s, p + 48 * s), (p, p + 48 * s)], fill=255), 20)
+ARROW = clay(ARW, YEL, d=6, sh_off=(0, 6), sh_blur=6, sh_alpha=.3)
+SLOTCH = pill_sprite(CHS, CHS, DARK, r=46, d=6)
+CH_X = [456 - 235, 456 - 60, 456 + 85]   # left edges: cause, arrow(120 wide), result
+def draw_chips(img, t, cause, arrow, result, spr_c, spr_r, t0, t1):
+    if t < t0 or t >= t1: return
+    by = 3 * math.sin(t * 2.4)
+    for x, ts, spr, w in ((CH_X[0], cause, spr_c, CHS), (CH_X[1], arrow, ARROW, 120), (CH_X[2], result, spr_r, CHS)):
+        q = (t - ts) / .3
+        if x == CH_X[1]:
+            if q <= 0: continue
+            r = scaled(spr, max(.2, back(q))); put(img, r, x - PAD + (spr.width - 2 * PAD - 0) / 2 - (r.width - spr.width) / 2 + 0 - 0, CHIP_CY - spr.height / 2 + (spr.height - r.height) / 2 + by); continue
+        if q <= 0: put(img, fade(SLOTCH, .35), x - PAD, CHIP_CY - SLOTCH.height / 2 + by); continue
+        r = scaled(spr, max(.2, back(q))); put(img, r, x - PAD + (spr.width - r.width) / 2, CHIP_CY - spr.height / 2 + (spr.height - r.height) / 2 + by)
 def build_btn():
-    w, h = 700, 170; b = pill_sprite(w, h, OFF, r=85)
-    bm = mask_draw(64, 92, lambda dd, p, s: dd.polygon([(p, p), (p + 64 * s, p), (p + 64 * s, p + 92 * s), (p + 32 * s, p + 60 * s), (p, p + 92 * s)], fill=255), 20)
-    b.alpha_composite(clay(bm, MID, d=6, sh_off=(0, 6), sh_blur=6, sh_alpha=.3), (PAD + 66 - 20, PAD + 40 - 20))
-    ImageDraw.Draw(b).text((PAD + 405, PAD + 87), "저장해 두기", font=font(84), fill=SPRUCE + (255,), anchor="mm"); return b
+    w, h = 640, 130; b = pill_sprite(w, h, OFF, r=65)
+    bm = mask_draw(48, 70, lambda dd, p, s: dd.polygon([(p, p), (p + 48 * s, p), (p + 48 * s, p + 70 * s), (p + 24 * s, p + 46 * s), (p, p + 70 * s)], fill=255), 20)
+    b.alpha_composite(clay(bm, MID, d=5, sh_off=(0, 5), sh_blur=5, sh_alpha=.3), (PAD + 60 - 20, PAD + 30 - 20))
+    ImageDraw.Draw(b).text((PAD + 370, PAD + 66), "저장해 두기", font=font(70), fill=SPRUCE + (255,), anchor="mm"); return b
 BTN = build_btn()
 HEAD = pill_sprite(470, 64, YEL, r=32); ImageDraw.Draw(HEAD).text((PAD + 235, PAD + 33), "NEWS ENGLISH · CNN", font=font(31), fill=SPRUCE + (255,), anchor="mm")
 HANDLE = Image.new("RGBA", (W, 60), (0, 0, 0, 0)); ImageDraw.Draw(HANDLE).text((W // 2, 30), "지나쌤영어  @jina.ssam_english", font=font(34, "Bold"), fill=OFF + (255,), anchor="mm")
@@ -517,17 +571,23 @@ def render(i):
     t = i / FPS; bi = beat_idx(t); t0 = BT[bi]; role = ROLES[bi]; a = float(BENV[min(i, len(BENV) - 1)]); pp = t - t0
     img = background(t); c = cozy(t)
     M = render_room(img, t, a, c); draw_lights(img, M, t, c)
-    draw_particles(img, t, c, burst=(.5 * max(0, 1 - (t - ws(PO0 + 2)) / 1.2) if t >= ws(PO0 + 2) else 0))
+    draw_particles(img, t, c, burst=(.5 * max(0, 1 - (t - T_SAVE) / 1.2) if t >= T_SAVE else 0))
     if role == "hook": draw_hook(img, t)
     elif role == "term": draw_term(img, t, t0)
     elif role == "meaning": draw_meaning(img, t, t0)
     elif role == "example_en": draw_card(img, t, t0, 62, 300, EN_CARD, t=t)
     elif role == "example_ko": draw_card(img, t, t0, 62, 905, KO_CARD, t=t)
     else:
-        draw_card(img, t, t0, 62, 310, PAYOFF, t=t)
-        q = (t - ws(PO0 + 2)) / .3; on = q > 0
-        sc = (.88 + .12 * back(q)) * (1 + .035 * math.sin(t * 7)) if on else .86 + .02 * math.sin(t * 3)
-        b = scaled(BTN, sc); put(img, fade(b, 1.0 if on else .45), 456 - b.width / 2, 1330 - b.height / 2)
+        draw_card(img, t, t0, 62, EXP_Y, PAYOFF, t=t)
+        if t >= T_EX2:
+            draw_card(img, t, T_EX2, 62, CARD_Y, EX2_CARD, t=t, ghost_col=.22)
+            draw_chips(img, t, ws(EX2 + 4), ws(EX2 + 5), ws(EX2 + 7), CH_TIRED, CH_SLEEP, T_EX2, 1e9)
+        elif t >= T_EX1:
+            draw_card(img, t, T_EX1, 62, CARD_Y, EX1_CARD, t=t, ghost_col=.22)
+            draw_chips(img, t, ws(EX1 + 3), ws(EX1 + 4), ws(EX1 + 6), CH_COLD, CH_HOME, T_EX1, T_EX2)
+        if t >= T_SAVE:
+            q = (t - T_SAVE) / .3; sc = (.88 + .12 * back(q)) * (1 + .03 * math.sin(t * 7))
+            b = scaled(BTN, sc); put(img, b, 456 - b.width / 2, BTN_CY - b.height / 2)
     put(img, HEAD, 456 - HEAD.width / 2, 256 - HEAD.height / 2)
     put(img, HANDLE, 0, 1558)
     return img.convert("RGB")
@@ -538,7 +598,7 @@ def checks():
              ("example highlight SPRUCE/YEL", SPRUCE, YEL), ("payoff SPRUCE/YEL", SPRUCE, YEL), ("payoff ~ MID/YEL", MID, YEL), ("button SPRUCE/OFF", SPRUCE, OFF),
              ("handle OFF/bg DARK", OFF, DARK), ("handle OFF/bg top", OFF, (26, 74, 31)), ("header SPRUCE/YEL", SPRUCE, YEL)]
     for n, a_, b_ in pairs: print(f"contrast {n}: {contrast(a_, b_):.2f}")
-    print("EN font", EN_SZ, "KO font", KO_SZ, "PO font", PO_SZ, "words so/small/that", T_SO, T_SMALL, T_THAT)
+    print("EN font", EN_SZ, "KO font", KO_SZ, "PO font", PO_SZ, "EX font", EX_SZ, "words so/small/that", T_SO, T_SMALL, T_THAT)
 
 if __name__ == "__main__":
     checks()

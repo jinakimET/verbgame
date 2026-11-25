@@ -129,7 +129,7 @@ def term():
     tb = Sticker(250, 120, WH, ol=8, sh=12, tail=True, angle=2)
     E.append(El(tb, 250, 600, t0, 1.7, -8, t1=t5, dur=0.25))
     rows = [("tech", 165, WH, CH, 70, -3, ws(10)), ("nic", 165, YEL, CH, 150, 2.5, ws(10) + .1), ("ally", 165, CH, WH, 60, -2, ws(10) + .2)]
-    y = 350
+    y = 372
     for txt, size, bg, fg, xo, ang, t in rows:
         while measure(txt, size) + 90 > 770 - xo: size -= 4
         w = measure(txt, size) + 90; h = size * 1.18 + 56; cx = 62 + 14 + xo + w / 2; cy = y + h / 2
@@ -182,16 +182,45 @@ def example_ko():
     E.append(El(Sticker(pw, ph, CH, ol=10, sh=16, shc=OR), px + pw / 2 + 10, py + ph / 2, t0, 1.35, -3, idle=0))
     E.append(El(block("해석", 58, WH, OR, 4, padx=30, pady=10), 190, py - 12, t0 + .04, 1.8, 10))
     panel_text(E, lines, [0], size, px + 50, py + 70, 25, lh, WH, YEL, CH, hl_pad=14)
+def icon_sticker(kind):
+    w = h = 150; k = 2; ol = 8; sh = 10; pad = ol + sh + 4
+    im = Image.new("RGBA", ((w + 2 * pad) * k, (h + 2 * pad) * k), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    def circ(cx, cy, r, f, o=ol, shadow=False):
+        off = sh if shadow else 0
+        d.ellipse(((pad + cx - r - o + off) * k, (pad + cy - r - o + off) * k, (pad + cx + r + o + off) * k, (pad + cy + r + o + off) * k), fill=f)
+    if kind == "tomato":
+        circ(75, 85, 58, BLK, 0, True); circ(75, 85, 58, BLK); circ(75, 85, 58, (222, 60, 40), 0)
+        leaf = [(75, 28), (92, 8), (100, 30), (125, 24), (106, 44), (75, 40), (44, 44), (25, 24), (50, 30), (58, 8)]
+        d.polygon([((pad + x) * k, (pad + y) * k) for x, y in leaf], fill=BLK)
+        d.polygon([((pad + 75 + (x - 75) * .8) * k, (pad + 30 + (y - 30) * .8) * k) for x, y in leaf], fill=(60, 160, 70))
+    else:  # vacation: sun over waves
+        circ(75, 60, 46, BLK, 0, True); circ(75, 60, 46, BLK); circ(75, 60, 46, OR, 0)
+        for j, yv in enumerate((105, 128)):
+            pts = [((pad + x) * k, (pad + yv + 9 * math.sin(x / 14 + j)) * k) for x in range(4, 147, 3)]
+            d.line(pts, fill=BLK, width=16 * k); d.line(pts, fill=(40, 120, 200), width=8 * k)
+    st = Sticker(1, 1, None); st.src = im; st.angle = 0; st._c = {}; st.w, st.h, st.pad = w, h, pad; return st
+SAVE_T = None
 def payoff():
-    E = ELS[5]; t0 = BT[5]
-    rows = [("tech", WH, CH, 70, -3), ("nic", OR, CH, 130, 2.5), ("ally", CH, WH, 60, -2)]
-    y = 320; size = 150
-    for i, (txt, bg, fg, xo, ang) in enumerate(rows):
-        w = measure(txt, size) + 90; h = size * 1.18 + 56
-        E.append(El(block(txt, size, fg, bg, ang, padx=45, pady=28, ol=10, sh=16), 62 + 14 + xo + w / 2, y + h / 2, t0 + .07 * i, 2.2, -ang * 4, ph=y, dur=0.26)); y += int(h) + 22
-    sv = Sticker(470, 160, CH, ["저장해 두기"], 78, YEL, ol=10, sh=16, angle=-4, shc=OR)
-    E.append(El(sv, 62 + 20 + sv.w / 2, 1235, ws(32), 2.2, 14, idle=1.5))
-PAY_ARROW_AT = None
+    global SAVE_T
+    E = ELS[5]; t0 = BT[5]; P = WK["beats"][5]; SAVE_T = P["save_start"]
+    size = 100
+    while measure("technically", size) + 90 > 760: size -= 4
+    bw = measure("technically", size) + 90; bh = size * 1.18 + 56
+    E.append(El(block("technically", size, WH, CH, -2, padx=45, pady=28, ol=10, sh=16), 62 + 14 + bw / 2 + 20, 375 + bh / 2, P["expr_start"], 2.2, 8, dur=0.26))
+    for (idx0, lines, t_on, t_off, ic, panel_bg, fg, hlbg, hlfg, tag_t) in (
+            (32, [["Technically,"], ["a", "tomato", "is"], ["a", "fruit."]], P["ex1_start"], P["ex2_start"], "tomato", WH, CH, OR, CH, ws(37)),
+            (38, [["Technically,"], ["I'm", "still", "on"], ["vacation."]], P["ex2_start"], 1e9, "vac", CH, WH, YEL, CH, ws(42))):
+        n0 = len(E); sz = 72
+        while max(sum(measure(t, sz) for t in l) + measure(" ", sz) * (len(l) - 1) for l in lines) > 640: sz -= 4
+        lh = int(sz * 1.25); pw = 780; px, py = 62, 610; ph = lh * 3 + 26 + 66
+        E.append(El(Sticker(pw, ph, panel_bg, ol=10, sh=16, angle=0), px + pw / 2 + 10, py + ph / 2, t_on, 1.35, 3, idle=0))
+        panel_text(E, lines, [0], sz, px + 50, py + 45, idx0, lh, fg, hlbg, hlfg, hl_pad=12)
+        iy = py + ph + 92
+        E.append(El(icon_sticker(ic), 62 + 20 + 75, iy, tag_t, 1.8, -10))
+        E.append(El(block("well, actually", 44, CH, WH, -3, padx=24, pady=10, ol=7, sh=10), 62 + 190 + 150, iy, tag_t + .06, 1.6, 8))
+        for e in E[n0:]: e.t1 = t_off
+    sv = Sticker(430, 130, CH, ["저장해 두기"], 70, YEL, ol=10, sh=16, angle=-3, shc=OR)
+    E.append(El(sv, 62 + 20 + sv.w / 2, 1290, SAVE_T, 2.2, 14, idle=1.5))
 hook(); term(); meaning(); example_en(); example_ko(); payoff()
 
 def arrow_sticker():
@@ -314,12 +343,12 @@ def frame(t, fi):
     if bi == 2: starburst(img, t)
     for e in ELS[bi]: draw_el(img, e, t)
     if bi == 1: draw_dots(img, t)
-    if bi == 5: draw_arrow(img, t)
     shutters(img, t); draw_bird(img, t, fi); draw_chrome(img)
     return img
 
 MARKS = {"hook_0.0": 0.0, "hook_0.2": 0.2, "hook_0.3": 0.3, "hook_1.0": 1.0, "hook_end": 3.8, "term_typing": 4.8, "term_slam": 5.9,
-         "term_room": 7.6, "meaning": 10.0, "example_en": 13.8, "example_ko": 16.8, "payoff": 19.2}
+         "term_room": 7.6, "meaning": 10.0, "example_en": 13.8, "example_ko": 16.8, "pay_expr": 17.8, "pay_ex1": 20.4,
+         "pay_ex2_early": 21.6, "pay_ex2": 23.0, "pay_save": 24.3, "end": 25.3}
 def render():
     os.makedirs(FR, exist_ok=True); nfr = int(round(TOTAL * FPS)); out = f"{OUT}/kw_{RID}.mp4"
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",

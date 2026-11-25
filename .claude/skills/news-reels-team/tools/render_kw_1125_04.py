@@ -182,7 +182,8 @@ def scramble_sprite(target, size, res_times, t, fill_done, fill_scr, stroke=NAVY
     wd = int(x) + 2 * PAD; ht = int(size * 1.45) + 2 * PAD
     im = Image.new("RGBA", (wd, ht), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     for k, ch in enumerate(target):
-        if ch in keep and ch != "+" or ch == " ": show = ch; done = True
+        if ch in keep and ch != "+" or ch == " ":
+            show = ch; done = all(t >= res_times[j] for j, c in enumerate(target) if not (c in keep and c != "+" or c == " "))
         else:
             done = t >= res_times[k]; show = ch if done else rnd_char(t, k, ch)
         w = slots[k][1]; gw = f.getlength(show)
@@ -240,6 +241,42 @@ BOX_KO = rr_sprite(int(KO1.tot) + 80, 160, CORAL, r=38)
 PAN_KO = rr_sprite(788, 400, NAVY, outline=CORAL, ow=5, r=56, alpha=205)
 PAY_BOX = rr_sprite(790, 330, CORAL, r=70)
 PAY_SZ = fit(EN_TERM, 300, 700)
+
+spec_beat_payoff = WK["beats"][-1]
+assert ROLES[-1] == "payoff" and "ex1_start" in spec_beat_payoff
+PAN_PAY = rr_sprite(788, 330, NAVY, outline=BLUE, ow=5, r=56, alpha=215)
+def _mk(w0, texts, cy1, cy2):
+    sz = min(fit(" ".join(x for _, x in texts[0]), 92, 720), fit(" ".join(x for _, x in texts[1]), 92, 720))
+    l1 = Line(texts[0], sz, cy1, maxw=900); l2 = Line(texts[1], sz, cy2, maxw=900)
+    l1.size = l2.size = sz
+    l1 = Line(texts[0], sz, cy1, maxw=9999); l2 = Line(texts[1], sz, cy2, maxw=9999)
+    return l1, l2
+EX1_1, EX1_2 = _mk(0, [[(31, "As"), (32, "of"), (33, "today,")], [(34, "the"), (35, "sale"), (36, "has"), (37, "ended.")]], 790, 910)
+EX2_1, EX2_2 = _mk(0, [[(38, "As"), (39, "of"), (40, "this"), (41, "week,")], [(42, "I"), (43, "work"), (44, "from"), (45, "home.")]], 790, 910)
+def _hlbox(L):
+    a, b = L.items[0], L.items[1]
+    return rr_sprite(int(b["x"] + b["w"] / 2 - (a["x"] - a["w"] / 2)) + 22, int(L.size * 1.3), CORAL, r=26)
+BOX_EX1, BOX_EX2 = _hlbox(EX1_1), _hlbox(EX2_1)
+def calendar(mode, tt):
+    """text-free calendar: mode 1 = one day marked (today), mode 2 = a whole row (this week)"""
+    S = 2; w, h = 400, 270; pad = 30
+    im = Image.new("RGBA", ((w + 2 * pad) * S, (h + 2 * pad) * S), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    X = lambda v: (pad + v) * S
+    d.rounded_rectangle((X(0), X(0), X(w), X(h)), radius=34 * S, fill=WHITE + (255,))
+    d.rounded_rectangle((X(0), X(0), X(w), X(64)), radius=34 * S, fill=CORAL + (255,)); d.rectangle((X(0), X(40), X(w), X(64)), fill=CORAL + (255,))
+    for rx in (110, 290): d.rounded_rectangle((X(rx - 9), X(-18), X(rx + 9), X(30)), radius=9 * S, fill=NAVY + (255,))
+    pulse = .5 + .5 * math.sin(tt * 7)
+    for r in range(3):
+        for c in range(7):
+            x0 = 24 + c * 50; y0 = 88 + r * 58; on = (mode == 1 and r == 1 and c == 3) or (mode == 2 and r == 1)
+            fill = CORAL if on else BLUE
+            g = 4 if on else 0
+            d.rounded_rectangle((X(x0 - g), X(y0 - g), X(x0 + 38 + g), X(y0 + 44 + g)), radius=9 * S, fill=fill + (255,), outline=(NAVY + (255,)) if on else None, width=4 * S)
+    if mode == 1:  # pointer above the marked day
+        cx0 = 24 + 3 * 50 + 19; yy = 68 + 4 * pulse
+        d.polygon([(X(cx0 - 14), X(yy - 4)), (X(cx0 + 14), X(yy - 4)), (X(cx0), X(yy + 16))], fill=NAVY + (255,))
+    return im.resize((im.width // S, im.height // S), Image.LANCZOS)
+
 PILL_W, PILL_H = 600, 150
 PILL = rr_sprite(PILL_W, PILL_H, BLUE, r=75)
 def pill_content(a=1.0):
@@ -336,25 +373,36 @@ def render(i):
         put_c(img, BOX_KO, CX - 10, 480 + 4 * math.sin(t * 2), .85 + .15 * back(pp / .3))
         KO1.draw(img, t, 0, dy=4 * math.sin(t * 2), fill=NAVY, ghost_a=.3, slide=60)
         KO2.draw(img, t, 0, slide=-60); KO3.draw(img, t, 0, slide=60)
-    else:  # payoff
-        t_as, t_of = ws(29), ws(30)
-        pb = .85 + .15 * back(pp / .3)
-        put_c(img, PAY_BOX, CX, 640, pb * (1 + .012 * math.sin(t * 6)))
-        rt = [t_as, t_as + .08, 0, t_of, t_of + .08]
-        spr = scramble_sprite(EN_TERM, PAY_SZ, rt, t, NAVY, (120, 30, 40), stroke=None)
-        put_c(img, spr, CX, 650, pb)
-        s31 = ws(31); on = t >= s31
-        if on:
-            q = (t - s31) / .3; bs = (.8 + .2 * back(q)) * (1 + .03 * math.sin((t - s31) * 9))
-            put_c(img, PILL_FULL, CX, 1010, bs)
-            for k in range(8):   # little star burst
-                ang = k * math.pi / 4 + .3; r = 100 + 330 * min(1, (t - s31) / .5) ** .6
-                al = max(0, 1 - (t - s31) / .8)
-                if al > 0:
-                    x = CX + math.cos(ang) * r * 1.0; y = 1010 + math.sin(ang) * r * .45
-                    ImageDraw.Draw(img).polygon([(x, y - 14), (x + 4, y - 4), (x + 14, y), (x + 4, y + 4), (x, y + 14), (x - 4, y + 4), (x - 14, y), (x - 4, y - 4)], fill=CORAL + (int(255 * al),))
+    else:  # payoff: expression once -> example 1 -> example 2 -> save pill
+        PB = spec_beat_payoff
+        t_as, t_of = ws(29), ws(30); e1, e2, sv = PB["ex1_start"], PB["ex2_start"], PB["save_start"]
+        if t < e1:
+            pb = .85 + .15 * back(pp / .3)
+            put_c(img, PAY_BOX, CX, 640, pb * (1 + .012 * math.sin(t * 6)))
+            rt = [t_as, t_as + .08, 0, t_of, t_of + .08]
+            put_c(img, scramble_sprite(EN_TERM, PAY_SZ, rt, t, NAVY, (120, 30, 40), stroke=None), CX, 650, pb)
         else:
-            put_c(img, PILL_FULL, CX, 1010, .9, .25)
+            u = min(1, (t - e1) / .3)
+            put_c(img, CHIP, CX, 300, .9 * (.8 + .2 * back(u)))
+            put_c(img, tspr("as of", 96, NAVY, None), CX, 304, .9 * (.8 + .2 * back(u)))
+            ex2 = t >= e2; ts_ = e2 if ex2 else e1; q = min(1, (t - ts_) / .3)
+            put_c(img, calendar(2 if ex2 else 1, t - ts_), CX, 538, .85 + .15 * back(q))
+            put_c(img, PAN_PAY, CX, 850, 1, 1)
+            L1, L2, bx = (EX2_1, EX2_2, BOX_EX2) if ex2 else (EX1_1, EX1_2, BOX_EX1)
+            it0, it1 = L1.items[0], L1.items[1]
+            bcx = (it0["x"] - it0["w"] / 2 + it1["x"] + it1["w"] / 2) / 2
+            put_c(img, bx, bcx, L1.cy + 2, .85 + .15 * back(q))
+            hl = lambda it, tt: tspr(it["text"], L1.size, NAVY, None) if it["text"] in ("As", "of") else None
+            L1.draw(img, t, 0, special=hl, ghost_a=.4); L2.draw(img, t, 0, ghost_a=.4)
+        if t >= sv:
+            q = (t - sv) / .3; bs = (.8 + .2 * back(q)) * (1 + .03 * math.sin((t - sv) * 9))
+            put_c(img, PILL_FULL, CX, 1110, bs)
+            for k in range(8):   # little star burst
+                ang = k * math.pi / 4 + .3; r = 100 + 220 * min(1, (t - sv) / .5) ** .6
+                al = max(0, 1 - (t - sv) / .8)
+                if al > 0:
+                    x = CX + math.cos(ang) * r; y = 1110 + math.sin(ang) * r * .45
+                    ImageDraw.Draw(img).polygon([(x, y - 14), (x + 4, y - 4), (x + 14, y), (x + 4, y + 4), (x, y + 14), (x - 4, y + 4), (x - 14, y), (x - 4, y - 4)], fill=CORAL + (int(255 * al),))
     draw_bird(img, i, t)
     put(img, HANDLE, (W - HANDLE.width) / 2, 1588 - 14)
     return img.convert("RGB")
@@ -363,10 +411,10 @@ def checks():
     pairs = [("hook word BLUE/NAVY", BLUE, NAVY), ("hook white/NAVY", WHITE, NAVY), ("아니, CORAL/NAVY", CORAL, NAVY),
              ("number NAVY/CORAL box", NAVY, CORAL), ("sticker NAVY/CORAL", NAVY, CORAL), ("as of WHITE/NAVY stroke", WHITE, NAVY),
              ("meaning WHITE/NAVY panel", WHITE, NAVY), ("meaning NAVY/CORAL panel", NAVY, CORAL), ("example highlight NAVY/CORAL", NAVY, CORAL),
-             ("example plain WHITE/NAVY panel", WHITE, NAVY), ("payoff NAVY/CORAL", NAVY, CORAL), ("pill NAVY/BLUE", NAVY, BLUE),
+             ("example plain WHITE/NAVY panel", WHITE, NAVY), ("payoff NAVY/CORAL", NAVY, CORAL), ("pill NAVY/BLUE", NAVY, BLUE), ("payoff body WHITE/panel (0,41,65)", WHITE, (0,41,65)), ("payoff chip NAVY/CORAL", NAVY, CORAL),
              ("handle BLUE/ near-black tunnel (0,26,42)", BLUE, (0, 26, 42)), ("scramble BLUE/NAVY", BLUE, NAVY)]
     for n, a, b in pairs: print(f"contrast {n}: {contrast(a, b):.2f}")
-    print("sizes: num", NUM_SZ, "EN as-of", EN_SZ, "EXL_A", EXL_A.size, "EXL_B", EXL_B.size, "KO", KO1.size, KO2.size, KO3.size, "hook", HOOK[1].size, HOOK_TAIL.size)
+    print("payoff ex size", EX1_1.size, EX2_1.size, "widths", EX1_1.tot, EX1_2.tot, EX2_1.tot, EX2_2.tot); print("sizes: num", NUM_SZ, "EN as-of", EN_SZ, "EXL_A", EXL_A.size, "EXL_B", EXL_B.size, "KO", KO1.size, KO2.size, KO3.size, "hook", HOOK[1].size, HOOK_TAIL.size)
 
 if __name__ == "__main__":
     checks()

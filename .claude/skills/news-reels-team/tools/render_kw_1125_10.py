@@ -174,7 +174,8 @@ def handle(fr):
     return sp
 HANDLE_SP = handle(None)
 LEDGE = paper(330, 78, torn(330, 78, "t", 4, 22, 31, 2), fill=YEL, pad=18, sh=.55, sdy=8, sblur=6)
-ENV = bird.envelope(MP3, FPS, int((17.006 + TAIL) * FPS) + 5)
+AUD = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", MP3], capture_output=True, text=True).stdout)
+ENV = bird.envelope(MP3, FPS, int((AUD + TAIL) * FPS) + 5)
 def bird_on_roof(fr, t, env):
     place(fr, LEDGE, 660, 1500)
     sp = bird.sprite(float(env)); bob = 3 * math.sin(t * 3.1)
@@ -326,8 +327,16 @@ def mk_qslot():
 QSLOT = mk_qslot()
 TM = wl("term"); ANS_T = TM[3]["s"]   # 'trade-off.' start (5.36)
 SCX, SCY = 456, 600
+F_TS = font("Black", 60); TS_TOK = [[("학생은", None), ("아니래요.", None), ("답은,", None)]]
+TS_T = [(TM[0]["s"], TM[1]["s"]), (TM[1]["s"], TM[2]["s"]), (TM[2]["s"], TM[2]["e"])]
+TS_W = int(layout(TS_TOK, F_TS, int(F_TS.size * .26))[0][2]) + 70
+TS_CARD = paper(TS_W, 110, torn(TS_W, 110, "b", 4, 17, 83, 3), fill=OFF, pad=30)
 def scene_term(fr, t, env):
     lt = t - BEATS["term"]["start"]
+    if 3.3 <= t < 5.6:
+        k = back(pr(t, 3.3, 3.65)); ex = pr(t, 5.3, 5.6)
+        cd = draw_words(TS_CARD, TS_TOK, TS_T, F_TS, t, 110, TS_W / 2 + 30, 30 + 55, 30)
+        place(fr, cd, 456, 378 - (1 - k) * 200 - 500 * ex * ex, -1.2 + 1.5 * (1 - k))
     p = {"post": pr(t, 2.95, 3.5), "base": pr(t, 3.4, 3.75), "beam": pr(t, 3.65, 4.2), "strings": pr(t, 4.1, 4.55), "bowl": pr(t, 4.4, 4.8)}
     a = beam_angle(t, ANS_T)
     items, l, r = scale_items(SCX, SCY, 1.0, a, p)
@@ -375,12 +384,13 @@ def scene_meaning(fr, t, env):
     YA, YB = 500, 840; sw = sm(8.84, 9.4, t)
     ta, tb = ME[0]["s"], ME[1]["s"]
     # tags swap places along bulging paths
-    ay = YA + (YB - YA) * sw; ax = 456 - 118 * math.sin(math.pi * sw)
-    by = YB + (YA - YB) * sw; bx = 456 + 118 * math.sin(math.pi * sw)
+    ay = YA + (YB - YA) * sw; ax = 456 - 190 * math.sin(math.pi * sw)
+    by = YB + (YA - YB) * sw; bx = 456 + 150 * math.sin(math.pi * sw)
+    ssc = 1 - .25 * math.sin(math.pi * sw)
     ka = back(pr(t, ta, ta + .35)); kb = back(pr(t, tb, tb + .35))
     if t >= tb: place(fr, DOT, 456, 670, t * 90, back(pr(t, tb + .1, tb + .45)))
-    if t >= ta: place(fr, TAG_A, ax, ay - (1 - ka) * 260, -4 + 10 * math.sin(math.pi * sw) + 1.5 * math.sin(t * 2.2), 1)
-    if t >= tb: place(fr, TAG_B, bx, by - (1 - kb) * 300, 3 - 9 * math.sin(math.pi * sw) + 1.5 * math.sin(t * 2.6), 1)
+    if t >= ta: place(fr, TAG_A, ax, ay - (1 - ka) * 260, -4 + 10 * math.sin(math.pi * sw) + 1.5 * math.sin(t * 2.2), ssc)
+    if t >= tb: place(fr, TAG_B, bx, by - (1 - kb) * 300, 3 - 9 * math.sin(math.pi * sw) + 1.5 * math.sin(t * 2.6), ssc)
     p1 = pr(t, 8.0, 8.7)
     if p1 > 0:
         cl = bez((150, 450), (70, 670), (150, 890)); cr = bez((775, 890), (860, 670), (775, 450))
@@ -427,39 +437,84 @@ def scene_en(fr, t, env, ko=False):
         kk = back(pr(t, t1, t1 + .4)); kc = draw_ko(KCARD, t)
         place(fr, kc, 456, 900 + (1 - kk) * 700, 1.5 - 1 * math.sin(t * 1.5))
 
-# ------------------------------------------------------------------ SCENE: payoff
-PO = wl("payoff"); PT = BEATS["payoff"]["start"]
+# ------------------------------------------------------------------ SCENE: payoff (expression once, 2 examples, save)
+PO = wl("payoff"); PB = BEATS["payoff"]; PT = PB["start"]
+EXPR_S, EXPR_E, E1S, E1E, E2S, E2E, SAVE_S = PB["expr_start"], PB["expr_end"], PB["ex1_start"], PB["ex1_end"], PB["ex2_start"], PB["ex2_end"], PB["save_start"]
+def seg(a, b): return [w for w in words if a - 1e-6 <= w["s"] <= b + 1e-6]
+W1, W2 = seg(E1S, E1E), seg(E2S, E2E)
+assert " ".join(w["t"] for w in W1) == PB["ex1_text"] and " ".join(w["t"] for w in W2) == PB["ex2_text"], "on-screen must equal spoken"
+E1_TOK = [[("Every", None), ("big", None), ("choice", None)], [("has", None), ("a", None), ("trade-off.", "trade-off")]]
+E2_TOK = [[("Small", None), ("space,", None)], [("low", None), ("rent.", None)], [("That's", None), ("the", None), ("trade-off.", "trade-off")]]
+def mk_times(W, endt): return [(W[i]["s"], W[i + 1]["s"] if i + 1 < len(W) else endt) for i in range(len(W))]
+E1_T = mk_times(W1, E1E); E2_T = mk_times(W2, E2E)
+# one font size so the widest line fits in the card (<= 700px)
+def widest(f): return max(max(l[2] for l in layout(T, f, int(f.size * .26))) for T in (E1_TOK, E2_TOK))
+FS = 84
+while widest(font("Black", FS)) > 700: FS -= 2
+F_PE = font("Black", FS); PLH = int(FS * 1.5)
+PCW = 788
+PC1 = paper(PCW, 2 * PLH + 50, torn(PCW, 2 * PLH + 50, "b", 7, 16, 91, 3), fill=OFF, pad=30)
+PC2 = paper(PCW, 3 * PLH + 50, torn(PCW, 3 * PLH + 50, "b", 7, 16, 92, 3), fill=OFF, pad=30)
+TAG_RENT = mk_tag("RENT", 196, 98, OFF, font("Black", 44))
 TAB = paper(520, 130, [(0, 4), (500, 0), (520, 65), (500, 130), (0, 126), (20, 65)], fill=YEL, pad=24, cb=lambda d, p: text_c(d, (p + 280, p + 68), "저장해 두기", font("Black", 66), SP))
 BM_PTS = [(0, 0), (92, 0), (92, 148), (46, 108), (0, 148), (0, 0)]
+PHIT = [(W1[5]["s"], 5.0), (W2[-1]["s"], -5.0)]   # trade-off words: beam tips one way, then the other
+def pay_angle(t):
+    a = math.radians(1.1 * math.sin(3.4 * (t - 3.6)) * sm(14.9, 15.6, t)); prev = a; tgt = a
+    for th, deg in PHIT:
+        if t >= th:
+            tau = t - th; tgt = math.radians(deg)
+            a = tgt + (prev - tgt) * math.exp(-2.6 * tau) * math.cos(8.5 * tau); prev = tgt
+    return a
+PS = .5; PCY = 905; PCX = 456
+def pay_scale(fr, t):
+    p = {"post": pr(t, EXPR_S + .2, EXPR_S + .55), "base": pr(t, EXPR_S + .5, EXPR_S + .7), "beam": pr(t, EXPR_S + .6, EXPR_S + .9), "strings": pr(t, EXPR_S + .85, EXPR_S + 1.05), "bowl": pr(t, EXPR_S + 1.0, EXPR_S + 1.2)}
+    a = pay_angle(t); items, l, r = scale_items(PCX, PCY, PS, a, p)
+    org = (PCX - 300, PCY - 80); lay = stroke_items((600, 400), items, org=org)
+    fr.alpha_composite(lay, org)
+    rent_t = [w for w in W2 if w["t"] == "rent."][0]["s"]
+    for e, t0, side in ((l, EXPR_S + 1.1, "L"), (r, EXPR_S + 1.3, "R")):
+        sp, sc = (TAG_SPACE, .55) if side == "L" else ((PIN, .5) if t < rent_t else (TAG_RENT, .55))
+        t0 = t0 if (side == "L" or t < rent_t) else rent_t
+        k = pr(t, t0, t0 + .3)
+        if k > 0: place(fr, sp, e[0], e[1] + HANG * PS - 8 - (sp.height * sc) / 2 + 22 + (1 - k) ** 2 * -170, -math.degrees(a) * .3, sc)
 def scene_payoff(fr, t, env):
-    # big paper-cut letters drop in two rows: 'trade-' / 'off'
-    rows = [(0, 6, 400), (6, 9, 630)]
-    for r0, r1, yy in rows:
-        tot = sum(TILES_BIG[i][1] for i in range(r0, r1)) + 10 * (r1 - r0 - 1); x = -tot / 2
-        for i in range(r0, r1):
-            sp, w_ = TILES_BIG[i]; u = x + w_ / 2; x += w_ + 10
-            tau = t - (PT + .1 * i)
-            if tau < 0: continue
-            if tau < .3: off = -(520 - 5780 * tau * tau); rr = (1 - tau / .3) * (16 if i % 2 else -16)
-            else: t2 = tau - .3; off = -22 * math.exp(-6 * t2) * abs(math.sin(12 * t2)); rr = 0
-            wob = 1.6 * math.sin(t * 2.4 + i) * sm(PT + 1.2, PT + 1.6, t)
-            place(fr, sp, 456 + u, yy + off, rr + (2.5 if i % 2 else -2.5) + wob)
-    # save element: bookmark drawn by stroke + paper tab
-    sv = PO[1]["s"]; p = pr(t, 15.55, 16.25)
-    bx, by = 140, 960
-    pts = [(bx + x - 46, by + y - 74) for x, y in BM_PTS]
-    fillp = pr(t, 16.3, 16.7)
-    lay = Image.new("RGBA", (200, 220), (0, 0, 0, 0))
-    if fillp > 0:
-        d = ImageDraw.Draw(lay); d.polygon([(x - (bx - 100) + 0, y - (by - 110)) for x, y in pts], fill=YEL + (int(255 * fillp),))
-    st = stroke_items((200, 220), [(pts, p, 12, OFF)], org=(bx - 100, by - 110)); lay.alpha_composite(st); fr.alpha_composite(lay, (bx - 100, by - 110))
-    kt = back(pr(t, sv, sv + .4))
-    if t >= sv: place(fr, TAB, 520 + (1 - kt) * 500, 960 + 6 * math.sin(t * 2.6), -2.5 + 1.2 * math.sin(t * 2), 1)
+    # expression: one row of big paper-cut tiles, dropped letter by letter from expr_start
+    tot = sum(w_ for _, w_ in TILES_BIG) * .68 + 8 * 8; x = -tot / 2
+    for i, (sp, w_) in enumerate(TILES_BIG):
+        u = x + w_ * .68 / 2; x += w_ * .68 + 8
+        tau = t - (EXPR_S + .05 * i)
+        if tau < 0: continue
+        if tau < .25: off = -(420 - 6700 * tau * tau); rr = (1 - tau / .25) * (16 if i % 2 else -16)
+        else: t2 = tau - .25; off = -20 * math.exp(-6 * t2) * abs(math.sin(12 * t2)); rr = 0
+        wob = 1.4 * math.sin(t * 2.4 + i) * sm(EXPR_S + 1.0, EXPR_S + 1.4, t)
+        place(fr, sp, 456 + u, 365 + off, rr + (2 if i % 2 else -2) + wob, .68)
+    pay_scale(fr, t)
+    # example cards: ex1 -> swap -> ex2 -> exit before save
+    CY = 625
+    if E1S <= t < E2S + .1:
+        k = back(pr(t, E1S, E1S + .38)); ex = pr(t, E2S - .15, E2S + .1)
+        cd = draw_words(PC1, E1_TOK, E1_T, F_PE, t, PLH, PCW / 2 + 30, 30 + 25 + PLH / 2, 30, hl_t0=W1[5]["s"])
+        place(fr, cd, 456 - 700 * ex * ex, CY - (1 - k) * 600, -1.2 + 2.5 * ex + 2 * (1 - k))
+    if E2S <= t < SAVE_S + .1:
+        k = back(pr(t, E2S, E2S + .38)); ex = pr(t, SAVE_S - .3, SAVE_S)
+        cd = draw_words(PC2, E2_TOK, E2_T, F_PE, t, PLH, PCW / 2 + 30, 30 + 25 + PLH / 2, 30, hl_t0=W2[-1]["s"])
+        place(fr, cd, 456 + 800 * ex * ex, CY + 40 - (1 - k) * 700, 1.2 - 2.5 * ex - 2 * (1 - k))
+    # save: pill + bookmark appear only at save_start
+    if t >= SAVE_S:
+        p = pr(t, SAVE_S, SAVE_S + .7); bx, by = 140, CY
+        pts = [(bx + x - 46, by + y - 74) for x, y in BM_PTS]; fillp = pr(t, SAVE_S + .75, SAVE_S + 1.1)
+        lay = Image.new("RGBA", (200, 220), (0, 0, 0, 0))
+        if fillp > 0:
+            d = ImageDraw.Draw(lay); d.polygon([(x - (bx - 100), y - (by - 110)) for x, y in pts], fill=YEL + (int(255 * fillp),))
+        lay.alpha_composite(stroke_items((200, 220), [(pts, p, 12, OFF)], org=(bx - 100, by - 110))); fr.alpha_composite(lay, (bx - 100, by - 110))
+        kt = back(pr(t, SAVE_S, SAVE_S + .4))
+        place(fr, TAB, 540 + (1 - kt) * 500, CY + 6 * math.sin(t * 2.6), -2.5 + 1.2 * math.sin(t * 2), 1)
 
 # ------------------------------------------------------------------ frame
 def render(t):
     fr = Image.new("RGBA", (W, H)); bg(fr, t); scraps(fr, t)
-    e = ENV[min(len(ENV) - 1, int(t * FPS))] if t < 17.2 else 0.0
+    e = ENV[min(len(ENV) - 1, int(t * FPS))] if t < AUD else 0.0
     place(fr, PILL, 62 + PILL.width / 2 - 14, 262, -1.5)
     if t < 2.92: scene_hook(fr, t, e)
     elif t < 6.8:

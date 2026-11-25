@@ -398,41 +398,105 @@ def scene_ko(fr, t):
     act, gh = compose((RH, RW), KO_ITEMS, t, RX, RY)
     draw_groups(fr, (RH, RW), RX, RY, act, gh, {"w": WW, "o": OR}, t, r=4, seed=4.0, wob_amp=2.0)
 
-# ---- payoff
-_pi = B["payoff"]["first_word_idx"]        # pay something in rent. 저장해 두세요.
+# ---- payoff: expression big -> expression small (+ meaning icon) + example 1 -> example 2 -> save pill
+PB = B["payoff"]; _pi = PB["first_word_idx"]        # pay something in rent. | ex1 (7 words) | ex2 (8 words) | 저장해 두세요.
+EX1_T, EX2_T = PB["ex1_text"].split(), PB["ex2_text"].split()
+EX1_I = _pi + 4; EX2_I = EX1_I + len(EX1_T); SAVE_I = EX2_I + len(EX2_T)
+assert words[EX1_I]["s"] == PB["ex1_start"] and words[EX2_I]["s"] == PB["ex2_start"] and words[SAVE_I]["s"] == PB["save_start"]
+assert [w["t"] for w in words[EX1_I:EX2_I]] == EX1_T and [w["t"] for w in words[EX2_I:SAVE_I]] == EX2_T
 P_L1, P_L2 = ["pay", "~"], ["in", "rent"]
 P_SZ = fit_sz([P_L1, P_L2], 720, 225)
 PAY_ITEMS = (line_words(P_L1, P_SZ, 665, 456, _pi, lambda i, t: "c") + line_words(P_L2, P_SZ, 665 + int(P_SZ * 1.2), 456, _pi + 2, lambda i, t: "c"))
-BTN_W, BTN_H = 560, 150; BTN_PM = rrect_mask(BTN_W, BTN_H, 75, 40); BTN_TXT, _bb = tmask("저장해 두기", 66)
+PS_SZ = fit_sz([P_L1, P_L2], 440, 130); PS_CX = 300
+PAYS_ITEMS = (line_words(P_L1, PS_SZ, 470, PS_CX, _pi, lambda i, t: "c") + line_words(P_L2, PS_SZ, 470 + int(PS_SZ * 1.18), PS_CX, _pi + 2, lambda i, t: "c"))
+for it in PAYS_ITEMS: it.t0 = PB["ex1_start"]          # small expression pops in together when example 1 starts
+def ex_items(toks, i0, br, hl, sz, y1):
+    """two-line sentence; hl = set of highlighted token indices (the expression part)."""
+    L1, L2 = toks[:br], toks[br:]
+    mk = lambda off: (lambda i, t: "k" if (off + i) in hl else "w")
+    return line_words(L1, sz, y1, 456, i0, mk(0)) + line_words(L2, sz, y1 + int(sz * 1.5), 456, i0 + br, mk(br))
+EX1_SZ = fit_sz([EX1_T[:4], EX1_T[4:]], 745, 88); EX2_SZ = fit_sz([EX2_T[:5], EX2_T[5:]], 745, 88)
+EX_SZ = min(EX1_SZ, EX2_SZ)
+EX_Y1 = 830
+EX1_ITEMS = ex_items(EX1_T, EX1_I, 4, {4, 5, 6}, EX_SZ, EX_Y1)           # How much do you | pay in rent?
+EX2_ITEMS = ex_items(EX2_T, EX2_I, 5, {1, 6, 7}, EX_SZ, EX_Y1)
+# tokens: ex2 = I(0) pay(1) half(2) of(3) my(4) | salary(5) in(6) rent.(7)
+def hl_runs(items):
+    runs = []
+    for ln in sorted({i.yb for i in items}):
+        cur = []
+        for it in [i for i in items if i.yb == ln]:
+            if it.grp == "k": cur.append(it)
+            elif cur: runs.append(cur); cur = []
+        if cur: runs.append(cur)
+    return runs
+def ex_boxes(shape, items, sz, ox, oy, t):
+    """per-run liquid orange box; faint ghost until the run's first word is spoken, then pops."""
+    full = np.zeros(shape, F32); ghost = np.zeros(shape, F32)
+    for run in hl_runs(items):
+        x0 = min(i.x for i in run) - sz * .26; x1 = max(i.x + tlen(i.txt, sz) for i in run) + sz * .26
+        ln = run[0].yb; y0 = ln - sz * .92; y1 = ln + sz * .30
+        rm = rrect_mask(int(x1 - x0), int(y1 - y0), int((y1 - y0) / 2), 40); X, Y = x0 - ox - 40, y0 - oy - 40
+        place(ghost, rm, X, Y)
+        p = (t - (run[0].t0 - .08)) / .40
+        if p >= 0:
+            m = np.zeros(shape, F32); place(m, rm, X, Y); sc = .65 + .35 * back(p)
+            np.maximum(full, xform(m, (x0 + x1) / 2 - ox, (y0 + y1) / 2 - oy, sc, sc, 0, 0, shape) * min(1, p * 4), out=full)
+    return full, ghost
+def house_icon(t):
+    pad = 20; w = h = 250; M = Image.new("L", (w, h), 0); d = ImageDraw.Draw(M)
+    d.polygon([(20, 120), (125, 28), (230, 120)], fill=255); d.rectangle((45, 112, 205, 228), fill=255)
+    d.rectangle((105, 150, 145, 228), fill=0); d.rectangle((62, 140, 92, 172), fill=0); d.rectangle((158, 140, 188, 172), fill=0)
+    a = np.asarray(M, F32) / 255
+    cy = 20 + int(10 * math.sin(t * 3.0)); C = np.zeros((h, w), F32)
+    cv2.circle(C, (212, cy + 28), 26, 1.0, -1, cv2.LINE_AA); cv2.circle(C, (212, cy + 28), 14, 0.0, -1, cv2.LINE_AA)
+    return blurf(np.maximum(a, C), .8)
+SAVE_T = PB["save_start"]
+BTN_W, BTN_H = 520, 140; BTN_PM = rrect_mask(BTN_W, BTN_H, 70, 40); BTN_TXT, _bb = tmask("저장해 두기", 64)
 def bookmark_mask(w=64, h=92, pad=20):
     im = Image.new("L", (w + 2 * pad, h + 2 * pad), 0); ImageDraw.Draw(im).polygon([(pad, pad), (pad + w, pad), (pad + w, pad + h), (pad + w // 2, pad + int(h * .70)), (pad, pad + h)], fill=255)
     return blurf(np.asarray(im, F32) / 255, 1.2)
 BOOK = bookmark_mask()
 def scene_payoff(fr, t):
-    t0 = BT[5]
-    slab(fr, 40, 335, 872, 975, t, 6.0, 100, orange=True, drips=((.12, .35, .62, .88), 85))
-    RX, RY, RW, RH = 30, 330, 860, 700
-    act, gh = compose((RH, RW), PAY_ITEMS, t, RX, RY)
-    draw_groups(fr, (RH, RW), RX, RY, act, gh, {"c": CH}, t, r=8, seed=5.0, wob_amp=3.0, shadow=0, ghost=.26)
-    # save pill
-    s1 = S(_pi + 4); p = t - s1; cx, cy = 62 + BTN_W / 2, 1105
-    sc = 1 + .55 * math.exp(-max(p, 0) * 7) * math.cos(max(p, 0) * 13) if p > 0 else 1
-    sc *= 1 + (.035 * math.sin(t * 7) if p > .6 else 0)
+    if t < PB["ex1_start"]:
+        slab(fr, 40, 335, 872, 975, t, 6.0, 100, orange=True, drips=((.12, .35, .62, .88), 85))
+        RX, RY, RW, RH = 30, 330, 860, 700
+        act, gh = compose((RH, RW), PAY_ITEMS, t, RX, RY)
+        draw_groups(fr, (RH, RW), RX, RY, act, gh, {"c": CH}, t, r=8, seed=5.0, wob_amp=3.0, shadow=0, ghost=.26)
+        return
+    # key image: expression (small) + house/coin icon
+    slab(fr, 40, 320, 872, 660, t, 6.0, 90, orange=True, drips=((.15, .5, .85), 50))
+    RX, RY, RW, RH = 30, 330, 860, 340
+    act, gh = compose((RH, RW), PAYS_ITEMS, t, RX, RY)
+    draw_groups(fr, (RH, RW), RX, RY, act, gh, {"c": CH}, t, r=6, seed=5.0, wob_amp=2.0, shadow=0, ghost=.26)
+    ic = house_icon(t); pp = min(1, max(0, (t - PB["ex1_start"]) / .4)); sc = .6 + .4 * back(pp)
+    ic = xform(ic, 125, 125, sc, sc, 0, 0, ic.shape)
+    draw_layer(fr, ic, 590, 400, CH, r=3, shadow=0, spec=.35)
+    # example slab, sentence 1 then sentence 2
+    two = t >= PB["ex2_start"]; items = EX2_ITEMS if two else EX1_ITEMS
+    slab(fr, 40, 710, 872, 1030, t, 7.0 if two else 4.0, 85)
+    RX, RY, RW, RH = 30, 730, 860, 330
+    full, ghost = ex_boxes((RH, RW), items, EX_SZ, RX, RY, t)
+    paste(fr, np.array(OR, F32), goo(ghost, 4) * .30, RX, RY)
+    if full.max() > .01:
+        full = goo(wob(full, t, 2, 4., .02, 1.8), 5, .5, .15); draw_layer(fr, full, RX, RY, OR, r=8, shadow=.4, spec=.8)
+    act, gh = compose((RH, RW), items, t, RX, RY)
+    draw_groups(fr, (RH, RW), RX, RY, act, gh, {"w": WW, "k": CH}, t, r=3, seed=3.0, wob_amp=1.2, shadow=0, ghost=.26)
+    # save pill: empty before save_start
+    p = t - SAVE_T
+    if p < 0: return
+    cx, cy = 62 + BTN_W / 2, 1120
+    sc = 1 + .55 * math.exp(-p * 7) * math.cos(p * 13); sc *= 1 + (.035 * math.sin(t * 7) if p > .6 else 0)
     pm = goo(wob(xform(BTN_PM, BTN_PM.shape[1] / 2, BTN_PM.shape[0] / 2, sc, sc, 0, 0, BTN_PM.shape), t, 2, 7, .04, 2.2), 3)
     ox_, oy_ = cx - pm.shape[1] / 2, cy - pm.shape[0] / 2
-    if p < 0:
-        paste(fr, np.array(SLABC, F32), pm * .5, ox_, oy_)
-        ring = pm * (1 - sstep(.62, .92, blurf(pm, 8))); paste(fr, np.array(OR, F32), ring * .5, ox_, oy_)
-        h, w = BTN_TXT.shape; paste(fr, np.array(WW, F32), BTN_TXT * .25, cx - w / 2 + 40, cy - h / 2 + 6)
-    else:
-        pm2 = add_drips(np.pad(pm, ((0, 120), (0, 0))), t, (.25, .6, .82), 9, 40, 2.3, 12); pm2 = goo(pm2, 3)
-        paste(fr, np.array((8, 8, 8), F32), blurf(np.roll(pm2, 12, 0), 12) * .6, ox_, oy_)
-        ring = pm2 * (1 - sstep(.62, .92, blurf(pm2, 8)))
-        rgb = shade(pm2, SLABC, 14, .3, 30, amb=.85, dif=.25); rgb = rgb * (1 - ring[..., None]) + np.array(OR, F32)[None, None] * ring[..., None]
-        paste(fr, rgb, pm2, ox_, oy_)
-        bk = xform(BOOK, BOOK.shape[1] / 2, BOOK.shape[0] / 2, sc, sc, 0, 0, BOOK.shape)
-        draw_layer(fr, bk, cx - BTN_W / 2 + 62 * sc - bk.shape[1] / 2 * 0 - 20, cy - bk.shape[0] / 2 + 2, OR, r=5, shadow=0, spec=.7)
-        h, w = BTN_TXT.shape; paste(fr, np.array(WW, F32), BTN_TXT * min(1, p * 8), cx - w / 2 + 52, cy - h / 2 + 6)
+    pm2 = add_drips(np.pad(pm, ((0, 120), (0, 0))), t, (.25, .6, .82), 9, 40, 2.3, 12); pm2 = goo(pm2, 3)
+    paste(fr, np.array((8, 8, 8), F32), blurf(np.roll(pm2, 12, 0), 12) * .6, ox_, oy_)
+    ring = pm2 * (1 - sstep(.62, .92, blurf(pm2, 8)))
+    rgb = shade(pm2, SLABC, 14, .3, 30, amb=.85, dif=.25); rgb = rgb * (1 - ring[..., None]) + np.array(OR, F32)[None, None] * ring[..., None]
+    paste(fr, rgb, pm2, ox_, oy_)
+    bk = xform(BOOK, BOOK.shape[1] / 2, BOOK.shape[0] / 2, sc, sc, 0, 0, BOOK.shape)
+    draw_layer(fr, bk, cx - BTN_W / 2 + 62 * sc - 20, cy - bk.shape[0] / 2 + 2, OR, r=5, shadow=0, spec=.7)
+    h, w = BTN_TXT.shape; paste(fr, np.array(WW, F32), BTN_TXT * min(1, p * 8), cx - w / 2 + 52, cy - h / 2 + 6)
 
 # ------------------------------------------------------------------ frame assembly
 def beat_idx(t): return max(i for i, b in enumerate(BT) if b <= t + 1e-6)
@@ -464,7 +528,7 @@ def checks():
              ("highlight ink CH / orange box", CH, OR), ("payoff ink CH / orange slab", CH, OR), ("chip/label ink CH / orange pill", CH, OR),
              ("handle WW / charcoal backing", WW, (10, 10, 10)), ("pill text WW / slab", WW, SLABC)]
     for n, a, b in pairs: print(f"contrast {n}: {contrast(a, b):.2f}")
-    print("number size", NUM_SZ, "term sz", T_SZ, "meaning sz", M_SZ1, M_SZ2, "en sz", EN_SZ, "ko sz", KO_SZ, "payoff sz", P_SZ)
+    print("number size", NUM_SZ, "term sz", T_SZ, "meaning sz", M_SZ1, M_SZ2, "en sz", EN_SZ, "ko sz", KO_SZ, "payoff sz", P_SZ, PS_SZ, "ex sz", EX_SZ)
 
 if __name__ == "__main__":
     checks()
