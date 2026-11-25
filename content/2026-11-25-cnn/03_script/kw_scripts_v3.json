@@ -1,0 +1,54 @@
+{
+ "episode": "2026-11-25-cnn",
+ "note": "지나쌤이 직접 준 대본(2026-11-25). 숫자는 영어로 읽는다(speak에 영어 철자), 화면(show)은 숫자. 저장해 두세요 없음. roles: hook/question/answer/meaning/ex1_en/ex1_ko/ex2_en/ex2_ko/tail",
+ "reels": [
+  {"id":"12","term":"so ~ that","style":"claymorphism + soft isometric","lines":[
+   {"role":"hook","speak":"two point eight 평도 안 되는 방이 그 화려한 파리에 있다면 믿으시겠어요?","show":"2.8평도 안 되는 방이 그 화려한 파리에 있다면 믿으시겠어요?"},
+   {"role":"hook","speak":"너무 작아서 지금 제 공간이 궁궐처럼 보일 정도예요.","show":"너무 작아서 지금 제 공간이 궁궐처럼 보일 정도예요."},
+   {"role":"question","speak":"이렇게 너무 무엇해서 무엇하다, 라는 말을 영어로 하면?","show":"이렇게 너무 무엇해서 무엇하다, 라는 말을 영어로 하면?"},
+   {"role":"answer","speak":"정답은… so, that","show":"정답은… so ~ that"},
+   {"role":"meaning","speak":"너무 무엇해서 무엇하다, 라는 뜻이에요","show":"너무 ~해서 ~하다, 라는 뜻이에요"},
+   {"role":"ex1_en","speak":"The room is so small that my place looks like a palace.","show":"The room is so small that my place looks like a palace."},
+   {"role":"ex1_ko","speak":"방이 너무 작아서 내가 사는 곳이 궁궐처럼 보인다.","show":"방이 너무 작아서 내가 사는 곳이 궁궐처럼 보인다."},
+   {"role":"ex2_en","speak":"She was so tired that she fell asleep on the train.","show":"She was so tired that she fell asleep on the train."},
+   {"role":"ex2_ko","speak":"그녀는 너무 피곤해서 기차에서 잠들었다.","show":"그녀는 너무 피곤해서 기차에서 잠들었다."}]},
+  {"id":"04","term":"as of","style":"infinite zoom (restrained)","lines":[
+   {"role":"hook","speak":"파리의 화려한 건물 꼭대기에는 아주 작은 방이 ninety thousand 개가 넘게 있대요.","show":"파리의 화려한 건물 꼭대기에는 아주 작은 방이 9만 개가 넘게 있대요."},
+   {"role":"hook","speak":"이 통계는 twenty twenty-two 년 기준이에요.","show":"이 통계는 2022년 기준이에요."},
+   {"role":"question","speak":"이 기준이라는 말은 영어로?","show":"이 기준이라는 말은 영어로?"},
+   {"role":"answer","speak":"정답은… as of","show":"정답은… as of"},
+   {"role":"meaning","speak":"기준으로, 현재로, 라는 뜻이에요","show":"기준으로, 현재로, 라는 뜻이에요"},
+   {"role":"ex1_en","speak":"As of twenty twenty-two, Paris had over ninety thousand of these tiny rooms.","show":"As of 2022, Paris had over 90,000 of these tiny rooms."},
+   {"role":"ex1_ko","speak":"twenty twenty-two 년 기준으로 파리에는 이런 작은 방이 ninety thousand 개가 넘었다.","show":"2022년 기준으로 파리에는 이런 작은 방이 9만 개가 넘었다."},
+   {"role":"ex2_en","speak":"As of today, the sale has ended.","show":"As of today, the sale has ended."},
+   {"role":"ex2_ko","speak":"오늘 기준으로 세일은 끝났다.","show":"오늘 기준으로 세일은 끝났다."}]},
+  {"id":"09","term":"pay ~ in rent","style":"liquid (restrained)","lines":[
+   {"role":"hook","speak":"그 작은 방의 월세는 한 달에 eight hundred dollars쯤이래요.","show":"그 작은 방의 월세는 한 달에 800달러쯤이래요."},
+   {"role":"question","speak":"월세로 얼마를 낸다고 말할 때는 영어로 어떻게 할까요?","show":"월세로 얼마를 낸다고 말할 때는 영어로 어떻게 할까요?"},
+   {"role":"answer","speak":"정답은… pay 얼마 in rent","show":"정답은… pay ~ in rent"},
+   {"role":"meaning","speak":"월세로 얼마를 내다, 라는 뜻이에요","show":"월세로 얼마를 내다, 라는 뜻이에요"},
+   {"role":"ex1_en","speak":"He pays about eight hundred dollars a month in rent.","show":"He pays about $800 a month in rent."},
+   {"role":"ex1_ko","speak":"그는 월세로 한 달에 eight hundred dollars쯤 낸다.","show":"그는 월세로 한 달에 800달러쯤 낸다."},
+   {"role":"ex2_en","speak":"How much do you pay in rent?","show":"How much do you pay in rent?"},
+   {"role":"ex2_ko","speak":"너는 월세로 얼마를 내니?","show":"너는 월세로 얼마를 내니?"}]},
+  {"id":"11","term":"technically","style":"neo-brutalism (restrained)","lines":[
+   {"role":"hook","speak":"친구들이 제가 사는 방이 작다고, 이 방은 감옥 같은데? 라고 말한다면 어떨까요?","show":"친구들이 제가 사는 방이 작다고, 이 방은 감옥 같은데? 라고 말한다면 어떨까요?"},
+   {"role":"hook","speak":"하지만 엄밀히 말하면 감옥은 아니고, 그냥 작은 방인걸요.","show":"하지만 엄밀히 말하면 감옥은 아니고, 그냥 작은 방인걸요."},
+   {"role":"question","speak":"이 엄밀히 말하면을 영어로 하면?","show":"이 엄밀히 말하면을 영어로 하면?"},
+   {"role":"answer","speak":"정답은… technically","show":"정답은… technically"},
+   {"role":"meaning","speak":"엄밀히 말하면, 정확히 따지면, 이라는 뜻이에요","show":"엄밀히 말하면, 정확히 따지면, 이라는 뜻이에요"},
+   {"role":"ex1_en","speak":"Technically, it's not a prison. It's just a small room.","show":"Technically, it's not a prison. It's just a small room."},
+   {"role":"ex1_ko","speak":"엄밀히 말하면 감옥이 아니다. 그냥 작은 방일 뿐이다.","show":"엄밀히 말하면 감옥이 아니다. 그냥 작은 방일 뿐이다."},
+   {"role":"ex2_en","speak":"Technically, I'm still on vacation.","show":"Technically, I'm still on vacation."},
+   {"role":"ex2_ko","speak":"엄밀히 말하면 나는 아직 휴가 중이다.","show":"엄밀히 말하면 나는 아직 휴가 중이다."}]},
+  {"id":"10","term":"trade-off","style":"paper cutout (restrained)","lines":[
+   {"role":"hook","speak":"파리의 화려한 건물들 사이에서 좁은 방에 사는 것은 희생일까요?","show":"파리의 화려한 건물들 사이에서 좁은 방에 사는 것은 희생일까요?"},
+   {"role":"answer","speak":"어떤 학생은 그걸 trade-off라고 표현해요.","show":"어떤 학생은 그걸 trade-off라고 표현해요."},
+   {"role":"meaning","speak":"절충이라는 뜻이에요. 공학에서는 모든 걸 다 충족할 수는 없다는 말이죠.","show":"절충이라는 뜻이에요. 공학에서는 모든 걸 다 충족할 수는 없다는 말이죠."},
+   {"role":"ex1_en","speak":"It's not a sacrifice. It's a trade-off.","show":"It's not a sacrifice. It's a trade-off."},
+   {"role":"ex1_ko","speak":"희생이 아니라 맞교환이다.","show":"희생이 아니라 맞교환이다."},
+   {"role":"ex2_en","speak":"He gave up space and got a great location.","show":"He gave up space and got a great location."},
+   {"role":"ex2_ko","speak":"좁은 공간을 내주고, 좋은 위치를 얻었다.","show":"좁은 공간을 내주고, 좋은 위치를 얻었다."},
+   {"role":"tail","speak":"That's the trade-off.","show":"That's the trade-off."}]}
+ ]
+}
