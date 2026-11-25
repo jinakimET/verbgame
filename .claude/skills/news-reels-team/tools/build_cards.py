@@ -48,6 +48,13 @@ NBSP = ["센 수", "지장을 주다", "줄 수 있다", "아직 없다"]  # kee
 def glue(t):
     for k in NBSP: t = t.replace(k, k.replace(" ", "&nbsp;"))
     return t
+# 회차별 설정: {ROOT}/02_bento/card_config.json 이 있으면 팔레트·줄바꿈·글자 크기를 그걸로 덮어쓴다
+_cfgp = f"{OUT}/card_config.json"
+if os.path.exists(_cfgp):
+    _c = json.load(open(_cfgp))
+    PAL = {int(k): v for k, v in _c["PAL"].items()}
+    for p in PAL.values(): p["D"] = p["A"]
+    TERM_HTML = _c.get("TERM_HTML", {}); TERM_SIZE = _c.get("TERM_SIZE", {}); NBSP = _c.get("NBSP", [])
 POS = {"A": (48, 470, 580, "big"), "B": (652, 470, 380, "small"), "C": (48, 1027, 380, "small"), "D": (452, 1027, 580, "big")}
 
 def check(card):
