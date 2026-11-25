@@ -32,3 +32,7 @@ description: "'뉴스 만들어'라고만 해도 뉴스 검색 → 벤토 카드
 - `content/<날짜>-<slug>/`: 01_news, 02_bento, 03_script, audio, 04_zoom_reels, 06_keyword_reels. 공용 `content/assets/bird_sprite.png`.
 - QA: 오른쪽 230px 비움은 키워드 영상에만 적용(줌인은 줌인 스킬 규격).
 - 한글 폰트 없으면 `apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra`. 홀로그래픽 렌더(`render_kw3_07.py`)는 `pip install opencv-python-headless scipy pocketsphinx`가 필요하다. 게시는 하지 않고 푸시까지.
+
+## 숫자 읽기 규칙 (지나쌤 확정)
+- 숫자·연도는 영어로 읽는다. 대본 spoken에는 영어 철자로 쓴다(2008 → "twenty oh-eight", 한국어 문장 안에서도 "twenty oh-eight 년").
+- 화면 글자는 숫자(2008)로 두되 음성과 같은 뜻이어야 한다.
