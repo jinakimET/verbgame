@@ -82,7 +82,9 @@ def render(card):
                           "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
                           "-c:a", "aac", "-b:a", "192k", "-af", "apad", "-shortest", outp], stdin=subprocess.PIPE)
     marks = {f"zoom{k + 1}": int(round((zi[k] + zin[k] + ze[k]) / 2 * FPS)) for k in range(4)}
-    marks["base"] = int(round((ze[3] + zo[3] + 0.15) * FPS))
+    marks["base"] = min(nfr - 1, int(round((ze[3] + zo[3] + 0.15) * FPS)))
+    for k in range(3):
+        marks[f"hand{k + 1}a"] = int(round((ze[k] + zo[k] / 2) * FPS)); marks[f"hand{k + 1}b"] = int(round((zi[k + 1] + 0.12) * FPS))
     want = {v: n for n, v in marks.items()}
     sheet = {}
     for f in range(nfr):
@@ -110,6 +112,8 @@ def render(card):
     for i, n in enumerate(["base", "zoom1", "zoom2", "zoom3", "zoom4"]):
         cs.paste(sheet[n].resize((tw, th), Image.LANCZOS), (10 + i * (tw + 10), 10))
         sheet[n].save(f"{FR}/check_{card:02d}_{n}.png")
+    for n in sheet:
+        if n.startswith("hand"): sheet[n].save(f"{FR}/check_{card:02d}_{n}.png")
     cs.save(f"{FR}/check_{card:02d}_sheet.png")
     os.remove(f"{OUT}/card_{card:02d}_hi.png")
     return outp, dur + 0.5, [(round(zi[k], 2), round(ze[k] + zo[k], 2)) for k in range(4)]
