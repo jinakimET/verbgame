@@ -7,6 +7,7 @@
 
 | 세트 | 날짜 | 펜/정리 색 | 1 중하 | 2 중상 | 3 고하 | 4 고상 | 5 어학 |
 |---|---|---|---|---|---|---|---|
+| 001 | 2026-11-25 | 노랑/코랄 | enjoy+동명사 | 분사 수식(spoken) | 가정법 과거완료 | 종합: 부정어 도치+수일치 | although vs despite |
 
 ## 어휘 (wrong words)
 
@@ -15,3 +16,5 @@
 | 001 | 2026-11-23 | 주황/민트 | forget↔remember | rude↔polite | temporary↔permanent | scarce↔abundant | mandatory↔optional |
 
 - words-001 칩 관련쌍: lose↔find, push↔pull / honest↔dishonest, careful↔careless / common↔rare, ancient↔modern / sufficient↔deficient, plentiful↔sparse / tentative↔definite, lenient↔strict
+
+- grammar-001 칩 관련: finish doing·mind waiting·keep trying / a book written by Kim 등 / Never has she·Rarely do students / in spite of + 명사
