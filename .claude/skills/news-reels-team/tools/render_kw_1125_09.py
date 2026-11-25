@@ -247,7 +247,7 @@ def tok_idx(role, n=None): return B[role]["first_word_idx"]
 # ---- hook
 NUM_SZ = 330
 _f = font(NUM_SZ); NUM_ADV = {c: _f.getlength(c) for c in "$0123456789"}
-while NUM_ADV["$"] + 3 * max(NUM_ADV[c] for c in "0123456789") > 790:
+while NUM_ADV["$"] + 3 * max(NUM_ADV[c] for c in "0123456789") > 750:
     NUM_SZ -= 6; _f = font(NUM_SZ); NUM_ADV = {c: _f.getlength(c) for c in "$0123456789"}
 CELLW = max(NUM_ADV[c] for c in "0123456789")
 NUM_TOT = NUM_ADV["$"] + 3 * CELLW
@@ -268,7 +268,7 @@ def scene_hook(fr, t):
         m, base = tmask(c, NUM_SZ); cell = NUM_ADV[c] if k == 0 else CELLW
         place(G, m, xs[k] + (cell - NUM_ADV[c]) / 2 - P, NUM_YB - NREG[1] - base)
     A = np.zeros((NH, NW), F32)
-    slam = 1 + .30 * math.exp(-t * 8) * math.cos(t * 24)
+    slam = 1 + .13 * math.exp(-t * 8) * math.cos(t * 24)
     for k, c in enumerate(chars):
         if c == " ": continue
         m, base = tmask(c, NUM_SZ); cell = NUM_ADV[c] if k == 0 else CELLW
@@ -352,7 +352,7 @@ def en_layout(sz, y1, y2):
     return its
 EN_SZ = fit_sz([L1T, L2T], 745, 100)
 EN_BIG = en_layout(EN_SZ, 640, 640 + int(EN_SZ * 1.62))
-EN_SM_SZ = 60; EN_SM = en_layout(EN_SM_SZ, 430, 430 + int(EN_SM_SZ * 1.62))
+EN_SM_SZ = 60; EN_SM = en_layout(EN_SM_SZ, 455, 455 + int(EN_SM_SZ * 1.62))
 def box_mask(shape, items, sz, ox, oy, t, grow_t, static=False):
     """liquid orange box behind highlighted words (two lines -> merges via goo)."""
     M = np.zeros(shape, F32)
@@ -370,7 +370,7 @@ def box_mask(shape, items, sz, ox, oy, t, grow_t, static=False):
     return M
 def scene_en(fr, t, small=False):
     items = EN_SM if small else EN_BIG; sz = EN_SM_SZ if small else EN_SZ
-    if small: slab(fr, 40, 300, 872, 620, t, 4.0, 80)
+    if small: slab(fr, 40, 335, 872, 650, t, 4.0, 80)
     else: slab(fr, 40, 460, 872, 940, t, 4.0, 90)
     RX, RY, RW, RH = 30, 280, 860, 860
     grow_t = S(_ei + 1) - .08
@@ -402,7 +402,7 @@ def scene_ko(fr, t):
 _pi = B["payoff"]["first_word_idx"]        # pay something in rent. 저장해 두세요.
 P_L1, P_L2 = ["pay", "~"], ["in", "rent"]
 P_SZ = fit_sz([P_L1, P_L2], 720, 225)
-PAY_ITEMS = (line_words(P_L1, P_SZ, 640, 456, _pi, lambda i, t: "c") + line_words(P_L2, P_SZ, 640 + int(P_SZ * 1.2), 456, _pi + 2, lambda i, t: "c"))
+PAY_ITEMS = (line_words(P_L1, P_SZ, 665, 456, _pi, lambda i, t: "c") + line_words(P_L2, P_SZ, 665 + int(P_SZ * 1.2), 456, _pi + 2, lambda i, t: "c"))
 BTN_W, BTN_H = 560, 150; BTN_PM = rrect_mask(BTN_W, BTN_H, 75, 40); BTN_TXT, _bb = tmask("저장해 두기", 66)
 def bookmark_mask(w=64, h=92, pad=20):
     im = Image.new("L", (w + 2 * pad, h + 2 * pad), 0); ImageDraw.Draw(im).polygon([(pad, pad), (pad + w, pad), (pad + w, pad + h), (pad + w // 2, pad + int(h * .70)), (pad, pad + h)], fill=255)
@@ -410,7 +410,7 @@ def bookmark_mask(w=64, h=92, pad=20):
 BOOK = bookmark_mask()
 def scene_payoff(fr, t):
     t0 = BT[5]
-    slab(fr, 40, 300, 872, 960, t, 6.0, 100, orange=True, drips=((.12, .35, .62, .88), 85))
+    slab(fr, 40, 335, 872, 975, t, 6.0, 100, orange=True, drips=((.12, .35, .62, .88), 85))
     RX, RY, RW, RH = 30, 330, 860, 700
     act, gh = compose((RH, RW), PAY_ITEMS, t, RX, RY)
     draw_groups(fr, (RH, RW), RX, RY, act, gh, {"c": CH}, t, r=8, seed=5.0, wob_amp=3.0, shadow=0, ghost=.26)
