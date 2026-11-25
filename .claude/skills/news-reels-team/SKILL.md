@@ -5,6 +5,8 @@ description: "'뉴스 만들어'라고만 해도 뉴스 검색 → 벤토 카드
 
 # 뉴스 만들어 (원스톱: 카드 + 줌인 영상까지)
 
+**입력 기사에 따라 갈린다:** 영문 기사 → 아래 흐름(벤토 카드 + 줌인 영상). **한글 기사 → `kr_carousel.md`**(영어 표현 5개를 뽑아 스큐어모피즘/네오브루탈리즘 캐러셀, 에이전트 `carousel-producer`).
+
 지나쌤이 "뉴스 만들어"라고만 하면 아래를 **확인 질문 없이** 끝까지 한다. 기본값: CNN 최신 뉴스, 카드 3장(표현 12개), 줌인 영상 3편. 지나쌤이 "음성은 내가 할게"라고 하면 해당 단계에서 멈추고 mp3를 기다린다.
 
 **키워드 영상(새와 함께 하는 표현별 영상)은 2026-11-25에 지나쌤이 중단했다. 만들지 않는다.** 방식은 지나쌤이 다시 정한다. 예전 문서·스크립트·에이전트는 `_keyword_archive/`에 보관(README 참고). 지나쌤이 다시 요청하기 전에는 키워드 대본·음성·영상을 만들지 않는다.
@@ -27,7 +29,7 @@ description: "'뉴스 만들어'라고만 해도 뉴스 검색 → 벤토 카드
 - **숫자·연도는 영어로 읽는다(지나쌤 확정).** 대본 spoken에는 영어 철자로 쓴다(2008 → "twenty oh-eight"). 화면 글자는 숫자로 두되 뜻은 같게. 단, 한국어 문장 속에서 영어 철자 숫자가 한국어로 읽힌다는 지나쌤 지적이 있었다(11-25 kw_04·kw_09). 받아 적기 도구는 영어로 들었다고 나온다. 줌인 음성을 만든 뒤 숫자 부분을 지나쌤이 확인하도록 시각을 알려 준다.
 
 ## 에이전트 호출
-2단계 렌더: `sync-reel-producer`(줌인 스킬 경로 + 입력 범위 + 새 스프라이트 지정). 마지막에 `reel-qa-pusher`. 모든 스크립트는 `NEWS_ROOT=<작업 폴더>`를 받는다. 재사용 스크립트는 `tools/`(build_cards, render_zoom, bird, align_words, make_sprite).
+한글 기사 캐러셀: `carousel-producer`(렌더) → `reel-qa-pusher`(검수·푸시). 2단계 렌더: `sync-reel-producer`(줌인 스킬 경로 + 입력 범위 + 새 스프라이트 지정). 마지막에 `reel-qa-pusher`. 모든 스크립트는 `NEWS_ROOT=<작업 폴더>`를 받는다. 재사용 스크립트는 `tools/`(build_cards, render_zoom, bird, align_words, make_sprite).
 
 ## 폴더·규칙
 - `content/<날짜>-<slug>/`: 01_news, 02_bento, 03_script, audio, 04_zoom_reels. 공용 `content/assets/bird_sprite.png`.

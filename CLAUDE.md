@@ -7,12 +7,14 @@
 2. 카드별 음성 + **줌인 싱크 영상 3편** (스킬 `ig-reel-sync-zoomin`). 줌인 영상은 현재 모양이 맞고 바꾸지 않는다.
 3. 검수 → 커밋·푸시 (게시는 하지 않는다)
 
+**기사 언어로 갈린다(2026-11-25 추가):** 영문 기사 → 위 1~3 흐름. **한글 기사 → 영어 표현 5개를 뽑아 한 장씩 넘겨 보는 캐러셀**(스큐어모피즘 또는 네오브루탈리즘 + 말풍선, 왼쪽맞춤 목록 등 Claude 기본 양식 금지). 단계·디자인 규칙은 `.claude/skills/news-reels-team/kr_carousel.md`, 렌더 에이전트는 `carousel-producer`. 표현 선정·카피는 메인이 쓰고 지나쌤 검수 후 렌더한다.
+
 **키워드 영상(새와 함께 하는 표현별 voice sync 영상)은 2026-11-25에 지나쌤이 중단했다**(품이 너무 많이 듦). 자동으로 만들지 않는다. 지나쌤이 방식을 다시 정해 요청하기 전에는 키워드 대본·음성·영상을 만들지 않는다. 예전 문서·스크립트·에이전트는 `.claude/skills/news-reels-team/_keyword_archive/`에 보관(README에 되살리는 법). 이미 만든 영상·대본·음성은 `content/2026-11-23-cnn/`, `content/2026-11-25-cnn/`에 남아 있다(11-25 v4 영상 5편은 지나쌤 검토 전이라 푸시하지 않았다).
 
 자세한 단계·담당·규칙은 `.claude/skills/news-reels-team/SKILL.md`(오케스트레이터)에 있다. 진행 방식은 이 스킬을 따른다.
 
 ## 지나쌤이 정한 규칙 (바꾸지 말 것)
-- **에이전트는 영상 렌더·검수·푸시에만** 쓴다. 뉴스 검색·카드·대본·음성 생성은 메인이 직접 한다. (`.claude/agents/`의 sync-reel-producer=줌인 렌더, reel-qa-pusher=검수·푸시)
+- **에이전트는 영상 렌더·검수·푸시에만** 쓴다. 뉴스 검색·카드·대본·음성 생성은 메인이 직접 한다. (`.claude/agents/`의 sync-reel-producer=줌인 렌더, carousel-producer=한글 기사 캐러셀 렌더, reel-qa-pusher=검수·푸시)
 - 뉴스는 **WebSearch로만** 구한다. cnn.com 등 막힌 페이지는 열려고 하지 않는다(지나쌤이 일부러 열 필요 없다고 함). 검색 요약에서만 확인한 사실은 답변에 알리고 캡션에 "CNN은 ~라고 전했다"로 출처를 붙인다.
 - **숫자는 반드시 영어로 읽는다(지나쌤 확정):** 연도는 연도로(2008 → "twenty oh-eight"), 숫자는 대본에 영어 철자로 써서 음성을 만든다. 한국어 문장 속 숫자도 "2008년" 대신 "twenty oh-eight 년"처럼 쓴다. 화면 글자는 숫자(2008)로 두되 음성과 뜻이 같아야 한다. (주의: 11-25 kw_04·kw_09에서 영어 철자로 써도 한국어로 읽힌다는 지적이 있었다. 받아 적기 결과는 영어였다. 숫자가 든 음성은 지나쌤이 확인할 시각을 알려 준다.)
 - 싱크는 **단어 시각으로만** 맞춘다(추정 금지). 추정이 들어가면 알린다.
@@ -36,7 +38,7 @@
 - git: 개발 브랜치에만 푸시한다. 풀 리퀘스트는 지나쌤이 요청할 때만 만든다. 커밋 메시지 끝에는 세션이 지정한 attribution 줄을 넣는다. 훅이 계속 "커밋·푸시하라"고 알려 준다(작업 중 파일은 커밋해도 된다).
 
 ## 폴더 지도
-- `content/<날짜>-<slug>/`: 01_news, 02_bento(카드), 03_script(대본·훅), audio(음성·단어 시각), 04_zoom_reels, 06_keyword_reels(중단된 키워드 영상 보관용)
+- `content/<날짜>-<slug>/`: 01_news, 02_bento(카드), 03_script(대본·훅), audio(음성·단어 시각), 04_zoom_reels, 06_keyword_reels(중단된 키워드 영상 보관용), 07_carousel(한글 기사 캐러셀)
 - `content/assets/bird_sprite.png`, `content/palettes_used.json`, `content/reference/`(훅 목록 원본)
 - `.claude/skills/news-reels-team/`: SKILL.md, `tools/`(build_cards, render_zoom, bird, align_words), `_keyword_archive/`(중단된 키워드 영상 자료)
 - 최근 회차: `content/2026-11-25-cnn/`(YBM CNN 파리 초소형 아파트), 그 전 `content/2026-11-23-cnn/`(COP31·호르무즈·추수감사절 폭풍)
