@@ -387,10 +387,11 @@ def scene_en(fr, t, small=False):
                 ghost=.3 if boxed else .24)
 KO_TOK = B["example_ko"]["on_screen"].split(); _ki = B["example_ko"]["first_word_idx"]
 assert len(KO_TOK) == B["example_ko"]["n_words"]
-K1, K2 = KO_TOK[:4], KO_TOK[4:]
-KO_SZ = fit_sz([K1, K2], 720, 82, gap=.3)
-KO_ITEMS = (line_words(K1, KO_SZ, 840, 456, _ki, lambda i, t: "o" if i == 1 else "w", gap=.3) +
-            line_words(K2, KO_SZ, 840 + int(KO_SZ * 1.7), 456, _ki + 4, lambda i, t: "o" if i == 0 else "w", gap=.3))
+K1, K2, K3 = KO_TOK[:4], KO_TOK[4:6], KO_TOK[6:]       # 그는 월세로 한 달에 | nine hundred | dollars를 낸다.
+KO_SZ = fit_sz([K1, K2, K3], 720, 82, gap=.3)
+KO_ITEMS = (line_words(K1, KO_SZ, 800, 456, _ki, lambda i, t: "o" if i == 1 else "w", gap=.3) +
+            line_words(K2, KO_SZ, 800 + int(KO_SZ * 1.55), 456, _ki + 4, lambda i, t: "o", gap=.3) +
+            line_words(K3, KO_SZ, 800 + int(KO_SZ * 3.1), 456, _ki + 6, lambda i, t: "o" if i == 0 else "w", gap=.3))
 def scene_ko(fr, t):
     scene_en(fr, t, small=True)
     slab(fr, 40, 690, 872, 1130, t, 5.0, 90)
