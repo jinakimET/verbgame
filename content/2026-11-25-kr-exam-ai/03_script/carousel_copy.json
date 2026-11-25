@@ -4,48 +4,55 @@
  "palette": null,
  "cover": {
   "title": "AI 부정행위, 영어로는 뭐라고 할까?",
-  "sub": "이 기사에서 건진 영어 표현 5개"
+  "sub": "이 기사에서 건진 영어 표현 5개",
+  "image": "시험지와 AI 칩이 연결된 선형 일러스트, 말풍선 3개 (글자 없음)"
  },
  "cards": [
   {
    "expr": "cheat on an exam",
    "ko": "시험에서 부정행위를 하다",
-   "tip": "미국식으로는 cheat on an exam이 가장 흔하고, 영국에서는 cheat in an exam도 써요",
+   "tip": "미국식은 cheat on an exam이 가장 흔하고, 영국은 cheat in an exam도 쓴다",
    "en": "He was caught cheating on the exam.",
    "ko_ex": "그는 시험에서 부정행위를 하다 적발됐다.",
-   "link": "기사의 핵심 사건, 시험 부정행위를 말할 때 써요"
+   "link": "기사의 핵심 사건, 시험 부정행위를 말할 때 쓴다",
+   "image": "시험지 책상 위에서 시험지 가장자리에 몰래 보는 작은 카메라와 연필, 책상 옆에서 눈이 크게 뜬 감독관의 손전등 (선형 일러스트, 글자 없음)"
   },
   {
    "expr": "detect",
    "ko": "탐지하다, 알아내다",
-   "tip": "detect + 대상(cheating, a signal) / 명사는 detection, 기계는 detector",
+   "tip": "detect + 대상(cheating, a signal), 명사는 detection, 기계는 detector",
    "en": "The device can detect hidden cameras.",
    "ko_ex": "그 장치는 숨겨진 카메라를 탐지할 수 있다.",
-   "link": "기사의 전파탐지기와 AI 탐지 도구가 바로 detector예요"
+   "link": "기사의 전파탐지기와 AI 탐지 도구가 바로 detector다",
+   "image": "레이더 파동이 퍼지는 전파탐지기와 그 안에 잡힌 작은 렌즈 아이콘, 돋보기 (선형, 글자 없음)"
   },
   {
    "expr": "blind spot",
    "ko": "사각지대, 맹점",
-   "tip": "CCTV·운전뿐 아니라 '놓치기 쉬운 부분'에도 써요 (a blind spot in the system)",
+   "tip": "CCTV·운전뿐 아니라 놓치기 쉬운 부분에도 쓴다 (a blind spot in the system)",
    "en": "The cameras have a blind spot near the door.",
    "ko_ex": "그 카메라들은 문 근처에 사각지대가 있다.",
-   "link": "기사의 CCTV 사각지대 대목이에요"
+   "link": "기사의 CCTV 사각지대 대목",
+   "image": "벽 모서리에 달린 CCTV가 비추는 부채꼴 시야와 그 옆의 비어 있는 어두운 삼각 영역 (선형, 글자 없음)"
   },
   {
    "expr": "crack down on",
    "ko": "~을 강력히 단속하다",
-   "tip": "crack down on + 부정·불법 행위 / 명사는 crackdown",
+   "tip": "crack down on + 부정·불법 행위, 명사는 crackdown",
    "en": "The agency promised to crack down on exam cheating.",
    "ko_ex": "그 기관은 시험 부정행위를 강력히 단속하겠다고 약속했다.",
-   "link": "정부가 취소·응시 제한·고발을 추진한다는 대목이에요"
+   "link": "정부가 취소·응시 제한·고발을 추진한다는 대목",
+   "image": "무게추 모양의 망치(단속)가 부정 기기(작은 이어폰·카메라)를 내리치려는 장면 (선형, 글자 없음)"
   },
   {
    "expr": "erode trust",
    "ko": "신뢰를 갉아먹다",
-   "tip": "erode는 '서서히 깎아 먹는다'는 느낌이라 trust, confidence, support와 잘 어울려요",
+   "tip": "erode는 서서히 깎아 먹는 느낌이라 trust, confidence, support와 잘 어울린다",
    "en": "Cheating scandals erode public trust in exams.",
    "ko_ex": "부정행위 스캔들은 시험에 대한 대중의 신뢰를 갉아먹는다.",
-   "link": "기사의 'AI가 불러온 불신 사회' 대목이에요"
+   "link": "기사의 'AI가 불러온 불신 사회' 대목",
+   "image": "서서히 갈라져 부서지는 다리 또는 모래시계처럼 깎여 나가는 신뢰의 악수 아이콘 (선형, 글자 없음)"
   }
- ]
+ ],
+ "image_style": "선형(line art): 균일한 굵은 선(네오브루탈리즘 외곽선과 같은 near-black 선), 면 채움은 최소(팔레트 포인트색 1~2곳만), 글자 없음, 카드마다 이미지 한 개"
 }
