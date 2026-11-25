@@ -407,7 +407,7 @@ def draw_hook(img, t):
     for i in range(HK_N):
         spr = HOOK_PILLS[i]; x, y = HOOK_POS[i]; s0 = ws(HK0 + i); q = (t - s0) / .28
         by = 5 * math.sin(t * 2.6 + i * 1.1); sway = 0
-        if q <= 0:
+        if q < 0:
             put(img, fade(spr, .30), x, y + by); continue
         sc = back(q) * 1.0; r = scaled(spr, max(.4, .85 + .15 * sc) if q < 1 else 1.0, None)
         # little squash-bounce on activation
