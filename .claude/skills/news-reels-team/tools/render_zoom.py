@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Zoom-in sync reels (ig-reel-sync-zoomin): one reel per bento card, 4 boxes zoom to centre in item order.
 Usage: NEWS_ROOT=... python3 render_zoom.py [card numbers...]   (default 1 2 3)
-Sync: item boundaries = audio/words.json segments (long pauses >0.9s between items) -> exact, no estimates.
-Audio per card is cut from audio/voice_full.mp3. Bird via tools/bird.py (mouth from clip RMS).
+Data: audio/words_zoom.json["0N"] {audio, words, items:[{item,start,end}]} (Scribe times, exact). Own mp3 used whole. Bird via tools/bird.py (mouth from clip RMS).
 """
 import json, os, subprocess, sys
 from PIL import Image, ImageDraw, ImageFilter
@@ -37,21 +36,31 @@ def capture(card):
 
 
 def render(card):
-    words = {w["id"]: w for w in json.load(open(f"{ROOT}/audio/words.json"))}
-    ids = [f"{(card - 1) * 4 + k + 1:02d}" for k in range(4)]
-    items = [(words[i]["segments"][0][0], words[i]["segments"][-1][1]) for i in ids]
-    c0 = 0.0 if card == 1 else max(0.0, items[0][0] - 0.3)
-    c1 = items[-1][1] + 0.5
-    wav = f"{OUT}/_clip_{card:02d}.wav"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{c0:.3f}", "-t", f"{c1 - c0:.3f}",
-                    "-i", f"{ROOT}/audio/voice_full.mp3", wav], check=True)
-    dur = c1 - c0
+    """Data-driven: audio/words_zoom.json["0N"] = {audio, words:[{t,s,e}], items:[{item,start,end}]} (exact Scribe times, s).
+    The card's own mp3 is used whole; item k -> box A,B,C,D. Video = audio + 0.5s."""
+    cfg = json.load(open(f"{ROOT}/audio/words_zoom.json"))[f"{card:02d}"]
+    wav = f"{ROOT}/audio/{cfg['audio']}"
+    adur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", wav],
+                                capture_output=True, text=True, check=True).stdout)
+    items = sorted(cfg["items"], key=lambda i: i["item"])
+    loc = [(i["start"], min(i["end"], adur)) for i in items]
+    dur = adur
     nfr = int(round((dur + 0.5) * FPS))
     env = bird.envelope(wav, FPS, nfr)
-    loc = [(a - c0, b - c0) for a, b in items]
-    zi = [max(0.0, a - 0.05) for a, _ in loc]
-    ze = [b + 0.03 for _, b in loc]
-    zo = [min(0.35, max(0.15, (zi[k + 1] - ze[k]) if k < 3 else 0.35)) for k in range(4)]
+    zi = [max(0.0, a - 0.05) for a, _ in loc]      # zoom start
+    ze = [b + 0.03 for _, b in loc]                # return start
+    zin = [0.40] * 4                               # zoom-in duration
+    zo = [0.35] * 4                                # return duration
+    for k in range(3):                             # tight handover: return fully ends before next zoom starts
+        gap = zi[k + 1] - ze[k]
+        if gap < 0.35 + 0.0:
+            if gap >= 0.15:
+                zo[k] = gap
+            else:                                  # return starts a little early (inside the last word's tail), 0.15s
+                zo[k] = 0.15; ze[k] = zi[k + 1] - 0.15
+                if k + 1 < 4: zin[k + 1] = 0.28
+        if zi[k + 1] - ze[k] - zo[k] < -1e-6: raise SystemExit("overlap")
+    zo[3] = 0.35
     hi = capture(card)
     bg = hi.resize((W, H), Image.LANCZOS)
     black = Image.new("RGB", (W, H), (0, 0, 0))
@@ -64,7 +73,7 @@ def render(card):
 
     def prog(k, t):
         if t < zi[k] or t >= ze[k] + zo[k]: return 0.0
-        if t < ze[k]: return ease((t - zi[k]) / 0.40)
+        if t < ze[k]: return ease((t - zi[k]) / zin[k])
         return 1 - ease((t - ze[k]) / zo[k])
 
     outp = f"{OUT}/zoom_card_{card:02d}.mp4"
@@ -72,7 +81,7 @@ def render(card):
                           "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", wav, "-map", "0:v", "-map", "1:a",
                           "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
                           "-c:a", "aac", "-b:a", "192k", "-af", "apad", "-shortest", outp], stdin=subprocess.PIPE)
-    marks = {f"zoom{k + 1}": int(round((zi[k] + 0.4 + ze[k]) / 2 * FPS)) for k in range(4)}
+    marks = {f"zoom{k + 1}": int(round((zi[k] + zin[k] + ze[k]) / 2 * FPS)) for k in range(4)}
     marks["base"] = int(round((ze[3] + zo[3] + 0.15) * FPS))
     want = {v: n for n, v in marks.items()}
     sheet = {}
@@ -102,8 +111,8 @@ def render(card):
         cs.paste(sheet[n].resize((tw, th), Image.LANCZOS), (10 + i * (tw + 10), 10))
         sheet[n].save(f"{FR}/check_{card:02d}_{n}.png")
     cs.save(f"{FR}/check_{card:02d}_sheet.png")
-    os.remove(wav); os.remove(f"{OUT}/card_{card:02d}_hi.png")
-    return outp, dur + 0.5, c0, [(round(zi[k], 2), round(ze[k] + zo[k], 2)) for k in range(4)]
+    os.remove(f"{OUT}/card_{card:02d}_hi.png")
+    return outp, dur + 0.5, [(round(zi[k], 2), round(ze[k] + zo[k], 2)) for k in range(4)]
 
 
 if __name__ == "__main__":

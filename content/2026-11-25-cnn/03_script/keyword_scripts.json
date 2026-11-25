@@ -1,0 +1,292 @@
+{
+ "version": 1,
+ "episode": "2026-11-25-cnn",
+ "note": "기사: YBM CNN 뉴스 3994(파리 초소형 아파트). 사실은 지나쌤이 붙여 준 본문 기준(월세 약 800달러, 2022년 기준 9만 개 이상, '희생이 아니라 절충', 'technically 감옥이 더 넓다', '침실이 대저택처럼 보일 만큼 작은 공간'). 훅은 hook_patterns.md의 서로 다른 유형, 점수는 직접 채점. 마무리는 표현을 한 번 더 말한 뒤 '저장해 두세요'.",
+ "reels": [
+  {
+   "id": "09",
+   "term": "pay ~ in rent",
+   "hook_type": "숫자형",
+   "pattern": "[가격]원짜리 ~ / 눈에 띄는 숫자로 시작",
+   "style": "liquid motion + kinetic typography",
+   "hooks": [
+    {
+     "score": 79,
+     "spoken": "800달러. 파리 초소형 방의 한 달 월세예요.",
+     "type": "숫자형"
+    },
+    {
+     "score": 64,
+     "spoken": "파리 초소형 방, 월세는 얼마일까요?",
+     "type": "질문형"
+    },
+    {
+     "score": 55,
+     "spoken": "파리의 월세 이야기예요.",
+     "type": "평서문(기각)"
+    }
+   ],
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "800달러. 파리 초소형 방의 한 달 월세예요.",
+     "on_screen": "800달러"
+    },
+    {
+     "role": "term",
+     "spoken": "영어로는, pay something in rent.",
+     "on_screen": "pay ~ in rent"
+    },
+    {
+     "role": "meaning",
+     "spoken": "월세로 얼마를 내다, 라는 뜻이에요.",
+     "on_screen": "월세로 ~를 내다"
+    },
+    {
+     "role": "example_en",
+     "spoken": "He pays $900 a month in rent.",
+     "on_screen": "He pays $900 a month in rent."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "그는 월세로 한 달에 900달러를 낸다.",
+     "on_screen": "그는 월세로 한 달에 900달러를 낸다."
+    },
+    {
+     "role": "payoff",
+     "spoken": "pay something in rent. 저장해 두세요.",
+     "on_screen": "pay ~ in rent"
+    }
+   ],
+   "highlight": "pays $900 a month in rent"
+  },
+  {
+   "id": "10",
+   "term": "trade-off",
+   "hook_type": "질문형",
+   "pattern": "질문 다음 줄에서 바로 답",
+   "style": "paper cutout + line animation",
+   "hooks": [
+    {
+     "score": 78,
+     "spoken": "이 좁은 방에 사는 건 희생일까요?",
+     "type": "질문형"
+    },
+    {
+     "score": 66,
+     "spoken": "하녀방에 사는 학생의 한마디.",
+     "type": "상황극형"
+    },
+    {
+     "score": 52,
+     "spoken": "절충이라는 단어를 알아봐요.",
+     "type": "평서문(기각)"
+    }
+   ],
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "이 좁은 방에 사는 건 희생일까요?",
+     "on_screen": "이 좁은 방, 희생일까요?"
+    },
+    {
+     "role": "term",
+     "spoken": "학생은 아니래요. 답은, trade-off.",
+     "on_screen": "trade-off"
+    },
+    {
+     "role": "meaning",
+     "spoken": "절충, 맞교환이라는 뜻이에요.",
+     "on_screen": "절충 · 맞교환"
+    },
+    {
+     "role": "example_en",
+     "spoken": "Every choice is a trade-off.",
+     "on_screen": "Every choice is a trade-off."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "모든 선택은 절충이다.",
+     "on_screen": "모든 선택은 절충이다."
+    },
+    {
+     "role": "payoff",
+     "spoken": "trade-off. 저장해 두세요.",
+     "on_screen": "trade-off"
+    }
+   ],
+   "highlight": "trade-off"
+  },
+  {
+   "id": "04",
+   "term": "as of",
+   "hook_type": "감탄·놀람형",
+   "pattern": "아니 ~가 나왔다고요?",
+   "style": "infinite zoom + text scramble + particles",
+   "hooks": [
+    {
+     "score": 82,
+     "spoken": "아니, 파리에 이런 하녀방이 9만 개가 넘는다고요?",
+     "type": "감탄·놀람형"
+    },
+    {
+     "score": 65,
+     "spoken": "파리에 하녀방이 몇 개나 남아 있을까요?",
+     "type": "질문형"
+    },
+    {
+     "score": 53,
+     "spoken": "파리에는 작은 방이 많아요.",
+     "type": "평서문(기각)"
+    }
+   ],
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "아니, 파리에 이런 하녀방이 9만 개가 넘는다고요?",
+     "on_screen": "하녀방이 9만 개 넘는다고요?"
+    },
+    {
+     "role": "term",
+     "spoken": "2022년 기준이에요. 영어로, as of.",
+     "on_screen": "as of"
+    },
+    {
+     "role": "meaning",
+     "spoken": "기준으로, 현재라는 뜻이에요.",
+     "on_screen": "~ 기준으로, ~ 현재"
+    },
+    {
+     "role": "example_en",
+     "spoken": "As of 2025, the shop has 40 branches.",
+     "on_screen": "As of 2025, the shop has 40 branches."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "2025년 기준으로 그 가게는 지점이 40개다.",
+     "on_screen": "2025년 기준으로 그 가게는 지점이 40개다."
+    },
+    {
+     "role": "payoff",
+     "spoken": "as of. 저장해 두세요.",
+     "on_screen": "as of"
+    }
+   ],
+   "highlight": "As of 2025"
+  },
+  {
+   "id": "11",
+   "term": "technically",
+   "hook_type": "POV형",
+   "pattern": "POV: ~할 때",
+   "style": "neo-brutalism + shape morph",
+   "hooks": [
+    {
+     "score": 80,
+     "spoken": "POV: 친구가 내 방을 감옥 같다고 할 때.",
+     "type": "POV형"
+    },
+    {
+     "score": 63,
+     "spoken": "감옥보다 좁은 방이 있다고요?",
+     "type": "감탄형"
+    },
+    {
+     "score": 51,
+     "spoken": "학생이 한 재미있는 대답이에요.",
+     "type": "평서문(기각)"
+    }
+   ],
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "POV: 친구가 내 방을 감옥 같다고 할 때.",
+     "on_screen": "POV: 친구가 내 방을 감옥 같다고 할 때"
+    },
+    {
+     "role": "term",
+     "spoken": "그의 답은, technically. 감옥이 더 넓긴 하다고요.",
+     "on_screen": "technically"
+    },
+    {
+     "role": "meaning",
+     "spoken": "엄밀히 말하면, 이라는 뜻이에요.",
+     "on_screen": "엄밀히 말하면"
+    },
+    {
+     "role": "example_en",
+     "spoken": "Technically, the shop opens at nine.",
+     "on_screen": "Technically, the shop opens at nine."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "엄밀히 말하면 그 가게는 9시에 연다.",
+     "on_screen": "엄밀히 말하면 그 가게는 9시에 연다."
+    },
+    {
+     "role": "payoff",
+     "spoken": "technically. 저장해 두세요.",
+     "on_screen": "technically"
+    }
+   ],
+   "highlight": "Technically"
+  },
+  {
+   "id": "12",
+   "term": "so ~ that",
+   "hook_type": "호명형",
+   "pattern": "[대상]은 이 영상 끝까지 봐주세요",
+   "style": "isometric + claymorphism + particles",
+   "hooks": [
+    {
+     "score": 77,
+     "spoken": "내 침실이 좁다고 투덜댔던 분들, 끝까지 보세요.",
+     "type": "호명형"
+    },
+    {
+     "score": 65,
+     "spoken": "침실이 대저택처럼 보이는 방이 있다고요?",
+     "type": "감탄형"
+    },
+    {
+     "score": 50,
+     "spoken": "작은 방을 영어로 설명해 봐요.",
+     "type": "평서문(기각)"
+    }
+   ],
+   "beats": [
+    {
+     "role": "hook",
+     "spoken": "내 침실이 좁다고 투덜댔던 분들, 끝까지 보세요.",
+     "on_screen": "침실 좁다고 투덜댔던 분들, 끝까지!"
+    },
+    {
+     "role": "term",
+     "spoken": "파리엔 침실이 대저택처럼 보일 만큼 작은 방이 있어요. 그 표현이, so... that.",
+     "on_screen": "so ~ that"
+    },
+    {
+     "role": "meaning",
+     "spoken": "너무 어떠해서 어떻다, 라는 뜻이에요.",
+     "on_screen": "너무 ~해서 …하다"
+    },
+    {
+     "role": "example_en",
+     "spoken": "The room was so small that it felt cozy.",
+     "on_screen": "The room was so small that it felt cozy."
+    },
+    {
+     "role": "example_ko",
+     "spoken": "방이 너무 작아서 오히려 아늑하게 느껴졌다.",
+     "on_screen": "방이 너무 작아서 오히려 아늑하게 느껴졌다."
+    },
+    {
+     "role": "payoff",
+     "spoken": "so... that. 저장해 두세요.",
+     "on_screen": "so ~ that"
+    }
+   ],
+   "highlight": "so small that"
+  }
+ ]
+}
