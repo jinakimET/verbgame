@@ -1,7 +1,9 @@
 {
  "episode": "2026-11-25-kr-exam-ai",
  "style": "neo-brutalism",
- "palette": null,
+ "palette": [
+  11
+ ],
  "cover": {
   "title": "AI 부정행위, 영어로는 뭐라고 할까?",
   "sub": "이 기사에서 건진 영어 표현 5개",
