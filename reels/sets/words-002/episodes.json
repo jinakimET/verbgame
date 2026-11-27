@@ -44,11 +44,11 @@
       "combo": false,
       "audience": "중3·고입",
       "lines": [
-        "It is {safe>dangerous} to cross,",
-        "so the city closed it",
-        "to cars."
+        "Crossing the road is",
+        "{safe>dangerous}, so the city",
+        "closed it to cars."
       ],
-      "ko": "건너기 [[위험해서]] 시가 차를 막았다.",
+      "ko": "길 건너기 [[위험해서]] 시가 차량을 막았다.",
       "chip": {
         "title": "dangerous ↔ safe",
         "sub": "위험한 ↔ 안전한",
@@ -78,7 +78,7 @@
         "{shrink>expand} because demand",
         "for its products grew."
       ],
-      "ko": "수요가 늘어 회사는 [[확장할]] 것이다.",
+      "ko": "제품 수요가 늘어 회사는 [[확장할]] 것이다.",
       "chip": {
         "title": "expand ↔ shrink",
         "sub": "확장하다 ↔ 줄이다",
@@ -108,7 +108,7 @@
         "the volcano only",
         "woke up last month."
       ],
-      "ko": "200년 [[휴면 상태였던]] 화산 지난달 깼다.",
+      "ko": "200년 [[휴면하던]] 화산 지난달 깼다.",
       "chip": {
         "title": "dormant ↔ active",
         "sub": "휴면의 ↔ 활동하는",
@@ -138,7 +138,7 @@
         "the manager decided to",
         "{delay>expedite} the shipment."
       ],
-      "ko": "벌금 피하려고 배송을 [[앞당기기로]] 했다.",
+      "ko": "위약금 피하려 배송을 [[앞당기기로]] 했다.",
       "chip": {
         "title": "expedite ↔ delay",
         "sub": "앞당기다 ↔ 미루다",
