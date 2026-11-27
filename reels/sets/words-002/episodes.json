@@ -1,0 +1,160 @@
+{
+  "mode": "words",
+  "set": "002",
+  "colors": {
+    "pen": "FA699E",
+    "accent": "FF9FC7"
+  },
+  "episodes": [
+    {
+      "level": 1,
+      "points": [
+        "full ↔ empty"
+      ],
+      "combo": false,
+      "audience": "중1~2 내신",
+      "lines": [
+        "The box is",
+        "{empty>full} of books,",
+        "so it's really heavy."
+      ],
+      "ko": "책이 [[가득 찬]] 상자라 정말 무겁다.",
+      "chip": {
+        "title": "full ↔ empty",
+        "sub": "가득 찬 ↔ 빈",
+        "rows": [
+          [
+            "heavy ↔ light",
+            "무거운 ↔ 가벼운"
+          ],
+          [
+            "thin ↔ thick",
+            "얇은 ↔ 두꺼운"
+          ]
+        ]
+      },
+      "why_wrong": "empty of books는 문법은 맞지만 빈 상자라는 뜻이라 뒤의 'really heavy'(정말 무겁다)와 모순된다.",
+      "trap": "empty of 구문이 자연스러워 보여 뒤 단서를 무시하고 넘어가는 실수"
+    },
+    {
+      "level": 2,
+      "points": [
+        "dangerous ↔ safe"
+      ],
+      "combo": false,
+      "audience": "중3·고입",
+      "lines": [
+        "It is {safe>dangerous} to cross,",
+        "so the city closed it",
+        "to cars."
+      ],
+      "ko": "건너기 [[위험해서]] 시가 차를 막았다.",
+      "chip": {
+        "title": "dangerous ↔ safe",
+        "sub": "위험한 ↔ 안전한",
+        "rows": [
+          [
+            "clean ↔ dirty",
+            "깨끗한 ↔ 더러운"
+          ],
+          [
+            "wet ↔ dry",
+            "젖은 ↔ 마른"
+          ]
+        ]
+      },
+      "why_wrong": "safe to cross(건너기 안전하다)면 시가 차량 출입을 막을 이유가 없다. 단서와 반대되는 어휘다.",
+      "trap": "safe와 dangerous를 감정·상태 반의어로만 알고 'to cross' 구문과의 의미 관계를 따지지 않는 실수"
+    },
+    {
+      "level": 3,
+      "points": [
+        "expand ↔ shrink"
+      ],
+      "combo": false,
+      "audience": "고1 모의",
+      "lines": [
+        "The firm will",
+        "{shrink>expand} because demand",
+        "for its products grew."
+      ],
+      "ko": "수요가 늘어 회사는 [[확장할]] 것이다.",
+      "chip": {
+        "title": "expand ↔ shrink",
+        "sub": "확장하다 ↔ 줄이다",
+        "rows": [
+          [
+            "rise ↔ fall",
+            "오르다 ↔ 떨어지다"
+          ],
+          [
+            "accept ↔ reject",
+            "받아들이다 ↔ 거절하다"
+          ]
+        ]
+      },
+      "why_wrong": "수요가 늘었다는 이유(because demand grew)는 공장을 줄이는 것이 아니라 키우는 쪽과 맞는다. shrink는 방향이 반대다.",
+      "trap": "because 절을 무시하고 문장 앞부분만 보고 판단하는 실수, 증가와 감소 방향 혼동"
+    },
+    {
+      "level": 4,
+      "points": [
+        "dormant ↔ active"
+      ],
+      "combo": false,
+      "audience": "수능 어휘",
+      "lines": [
+        "{Active>Dormant} for 200 years,",
+        "the volcano only",
+        "woke up last month."
+      ],
+      "ko": "200년 [[휴면 상태였던]] 화산 지난달 깼다.",
+      "chip": {
+        "title": "dormant ↔ active",
+        "sub": "휴면의 ↔ 활동하는",
+        "rows": [
+          [
+            "optimistic ↔ pessimistic",
+            "낙관적인 ↔ 비관적인"
+          ],
+          [
+            "generous ↔ stingy",
+            "관대한·후한 ↔ 인색한"
+          ]
+        ]
+      },
+      "why_wrong": "200년 동안 활동했다면 '지난달에야 깨어났다(only woke up last month)'와 모순된다. 깨어났다는 것은 그 전에 잠들어 있었다는 뜻이다.",
+      "trap": "active를 '활발한'으로만 알고 woke up과 연결해 상태를 추론하지 못하는 실수, dormant(휴면) 어휘 부족"
+    },
+    {
+      "level": 5,
+      "points": [
+        "expedite ↔ delay"
+      ],
+      "combo": false,
+      "audience": "토익 Part 5·텝스",
+      "lines": [
+        "To avoid late penalties,",
+        "the manager decided to",
+        "{delay>expedite} the shipment."
+      ],
+      "ko": "벌금 피하려고 배송을 [[앞당기기로]] 했다.",
+      "chip": {
+        "title": "expedite ↔ delay",
+        "sub": "앞당기다 ↔ 미루다",
+        "rows": [
+          [
+            "profit ↔ loss",
+            "이익 ↔ 손실"
+          ],
+          [
+            "cheap ↔ expensive",
+            "저렴한 ↔ 비싼"
+          ]
+        ]
+      },
+      "why_wrong": "지연 배상금(late penalties)을 피하려면 배송을 미루는 것이 아니라 앞당겨야 한다. delay는 목적과 정반대다.",
+      "trap": "To avoid 목적 구문의 논리 관계를 놓치고, delay를 문장 속 동사로 그냥 받아들이는 실수"
+    }
+  ]
+}
